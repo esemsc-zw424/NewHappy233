@@ -47,3 +47,6 @@ class Spending(models.Model):
     # spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE) #this refers to the category of the spending
 
 
+class Categories(models.Model):
+    name = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,0 +1,16 @@
+{% load crispy_forms_tags %}
+<h1>Expenditure Categories</h1>
+<form method="post">
+  {% csrf_token %}
+  <input type="text" name="name" />
+  <button type="submit">Add</button>
+</form>
+<ul>
+  {% for category in categories %}
+  <li>
+    {{ category.name }}
+    <a href="{% url 'delete_category' category.pk %}">Delete</a>
+    <a href="{% url 'ammend_category' category.pk %}">Ammend</a>
+  </li>
+  {% endfor %}
+</ul>
