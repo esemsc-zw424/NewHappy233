@@ -2,14 +2,13 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from .models import User
-
-
+from pst.models import User
 
 
 
 
 class PasswordValidationForm(forms.ModelForm):
+    """Auxiliary form for password validation"""
 
     class Meta:
         model = User
@@ -43,3 +42,24 @@ class PasswordValidationForm(forms.ModelForm):
         confirm_password = self.cleaned_data.get('confirm_password')
         if new_password != confirm_password:
             self.add_error('confirm_password', 'Confirmation does not match password.')
+
+    
+class VisitorSignupForm(PasswordValidationForm):
+    """Form enabling a visitor to sign up"""
+
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name']
+
+    def save(self, commit=False):
+        """Create a new user"""
+
+        super().save(commit)
+        data = self.cleaned_data
+        user = User.objects.create_user(
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            email=data.get('email'),
+            password=data.get('password'),
+        )
+        return user

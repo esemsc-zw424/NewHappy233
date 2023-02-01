@@ -1,11 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-dark mb-3"
-     style="background: linear-gradient(120deg,  #Add8e6 60%, #FFC0CB 40%, #ffed4b 30%);">
+     style="background: linear-gradient(120deg, #Add8e6 30% , #0F4C81 60% );">
     <div class="container">
 
         {% if user.is_authenticated %}
             <a class="navbar-brand" href="{% url 'home' %}">
                 <i class="bi bi-piggy-bank-fill"></i>
-                <span class="navbar-brand mb-0 h1">&nbsp; Personal Spending Tracker</span>
+               
+                <span class="navbar-brand mb-0 h1" name = "text">&nbsp; Personal Spending Tracker</span>
             </a>
         {% else %}
             <a class="navbar-brand" href="{% url 'visitor_introduction' %}">
@@ -21,10 +22,8 @@
             <span class="navbar-toggler-icon"></span>
 
         </button>
-
-        {% if user.is_authenticated %}
-            {% include 'partials/menu.html' %}
-        {% endif %}
+           
+         {% include 'partials/menu.html' %}
         
     </div>
 </nav>
