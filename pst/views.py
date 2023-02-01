@@ -5,5 +5,6 @@ from django.contrib import messages
 # Create your views here.
 
 @login_required
-def userFeed(request):
-    return render(request, 'userFeed.html')
+def user_feed(request):
+    return render(request, 'user_feed.html')
+
