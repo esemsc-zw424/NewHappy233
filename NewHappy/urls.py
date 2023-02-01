@@ -16,13 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from pst import views
-from .views import categories, delete_category, ammend_category
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('userFeed/', views.userFeed, name = 'userFeed')
-     path('', categories, name='categories'),
-    path('delete/<int:pk>/', delete_category, name='delete_category')#这里views不读就这地方出了点问题
-    
-
+    path('user_feed/', views.userFeed, name = 'user_feed'),
+    path('', views.categories, name='categories'),
+    path('delete/<int:pk>/', views.delete_categories, name='delete_category')
 ]

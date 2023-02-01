@@ -17,6 +17,10 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+class Categories(models.Model):
+    name = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
 class Spending(models.Model):
     spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner', blank = False) #this refers to the user when create this spending
 
@@ -44,9 +48,4 @@ class Spending(models.Model):
         blank = False,
     )
 
-    # spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE) #this refers to the category of the spending
-
-
-class Categories(models.Model):
-    name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default=None) #this refers to the category of the spending

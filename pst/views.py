@@ -13,6 +13,7 @@ from .models import User ,Categories
 @login_required
 def userFeed(request):
     return render(request, 'userFeed.html')
+
 @login_required
 def categories(request):
     if request.method == 'POST':  # create category
@@ -20,11 +21,13 @@ def categories(request):
         return redirect('categories')
     categories = Categories.objects.all()
     return render(request, 'categories.html', {'categories': categories})
+
 @login_required
 def delete_categories(request, pk):
     # delete category
     Categories.objects.filter(pk=pk).delete()
     return redirect('categories')
+    
 @login_required
 def ammend_categories(request, pk):
     # ammend category
