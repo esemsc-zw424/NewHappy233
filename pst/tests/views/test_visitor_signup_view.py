@@ -7,7 +7,7 @@ from pst.models import User
 class VisitorSignupViewTestCase(TestCase):
 
     fixtures = [
-        'pst/tests/models/fixtures/users.json'
+        'pst/tests/fixtures/users.json'
     ]
 
     def setUp(self):
