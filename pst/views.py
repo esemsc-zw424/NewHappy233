@@ -3,7 +3,7 @@ from django.contrib import auth
 from django.shortcuts import render,redirect
 from django.contrib import messages
 from pst.forms import VisitorSignupForm
-from pst.helpers.auth import login_prohibited
+from pst.helpers import auth
 
 # Create your views here.
 
