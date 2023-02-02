@@ -1,0 +1,14 @@
+{% extends 'base_content.html' %}
+{% block content %}
+    <div class="container">
+    <div class ="row">
+        <div class="col-12">
+            <form action="{% url 'budget_set' %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Save Budget">
+            </form>
+        </div>
+    </div>
+    </div>
+{% endblock %}

@@ -4,6 +4,9 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from pst.forms import VisitorSignupForm
 from pst.helpers.auth import login_prohibited
+from django.shortcuts import render, redirect
+from pst.forms import BudgetForm
+from .models import Budget
 
 # Create your views here.
 
@@ -32,3 +35,13 @@ def home(request):
 
 def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
+
+def set_budget(request):
+    if request.method == 'POST':
+        form = BudgetForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('budgets')
+    else:
+        form = BudgetForm()
+    return render(request, 'budget_set.html', {'form': form})

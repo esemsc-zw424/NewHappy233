@@ -2,7 +2,7 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User
+from pst.models import User, Budget
 
 
 
@@ -63,3 +63,9 @@ class VisitorSignupForm(PasswordValidationForm):
             password=data.get('password'),
         )
         return user
+
+
+class BudgetForm(forms.ModelForm):
+    class Meta:
+        model = Budget
+        fields = ['name', 'limit', 'start_date', 'end_date']
