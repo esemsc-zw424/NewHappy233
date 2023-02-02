@@ -2,20 +2,44 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator,MaxValueValidator,MinValueValidator
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
 
-# Create your models here.
+class UserManager(BaseUserManager):
+
+    def create_user(self, first_name, last_name, email, password):
+    
+        email = self.normalize_email(email)
+        user = self.model(first_name=first_name, last_name=last_name, email=email)
+        user.set_password(password)
+        user.save()
+        return user
+
+
+
+class User(AbstractUser):
+    username = None
+    email = models.EmailField(unique=True, blank=False)
+    first_name = models.CharField(blank=False, unique=False, max_length=50)
+    last_name = models.CharField(blank=False, unique=False, max_length=50)
+    
+    objects = UserManager()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
+
+
+    def __str__(self):
+        return self.email
+
+
+
 class Spending_type(models.TextChoices):
     Expenditure = 'Expenditure'
     Income = 'Income'
 
 
 
-class User(AbstractUser):
-    email = models.EmailField(unique=True, blank=False)
-    username = models.CharField(max_length=50, unique=True)
-    
-    def __str__(self):
-        return self.username
 
 class Spending(models.Model):
     spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner', blank = False) #this refers to the user when create this spending
