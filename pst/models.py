@@ -3,6 +3,18 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator,MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
+
+class UserManager(BaseUserManager):
+
+    def create_user(self, first_name, last_name, email, password):
+    
+        email = self.normalize_email(email)
+        user = self.model(first_name=first_name, last_name=last_name, email=email)
+        user.set_password(password)
+        user.save()
+        return user
+
 
 
 class User(AbstractUser):
@@ -11,6 +23,7 @@ class User(AbstractUser):
     first_name = models.CharField(blank=False, unique=False, max_length=50)
     last_name = models.CharField(blank=False, unique=False, max_length=50)
     
+    objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
@@ -18,6 +31,9 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+
 class Spending_type(models.TextChoices):
     Expenditure = 'Expenditure'
     Income = 'Income'

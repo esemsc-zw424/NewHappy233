@@ -4,9 +4,7 @@ from django.test import TestCase
 from pst.models import User
 
 class UserModelTestCase(TestCase):
-    fixtures = [
-        "pst/tests/models/fixtures/users.json"
-    ]
+    fixtures = ['pst/tests/fixtures/users.json']
 
     def setUp(self):
         self.user = User.objects.get(email='lll@example.org')
@@ -21,46 +19,46 @@ class UserModelTestCase(TestCase):
         self._assert_user_is_invalid()
 
     def test_email_must_not_be_blank(self):
-        self.student.email = ''
+        self.user.email = ''
         self._assert_user_is_invalid()
     
     def test_email_must_contain_at_symbol(self):
-        self.student.email = 'johndoe.example.org'
+        self.user.email = 'johndoe.example.org'
         self._assert_user_is_invalid()
     
 
     def test_email_must_contain_domain_name(self):
-        self.student.email = 'johndoe@.org'
+        self.user.email = 'johndoe@.org'
         self._assert_user_is_invalid()
     
     def test_email_must_contain_domain(self):
-        self.student.email = 'johndoe@example'
+        self.user.email = 'johndoe@example'
         self._assert_user_is_invalid()
 
     def test_email_must_not_contain_more_than_one_at(self):
-        self.student.email = 'johndoe@@example.org'
+        self.user.email = 'johndoe@@example.org'
         self._assert_user_is_invalid()
 
     def test_first_name_cannot_be_blank(self):
-        self.student.first_name = ''
+        self.user.first_name = ''
         self._assert_user_is_invalid()
 
     def test_last_name_cannot_be_blank(self):
-        self.student.first_name = ''
+        self.user.first_name = ''
         self._assert_user_is_invalid()
 
     def test_last_name_need_not_be_unique(self):
-        second_user = User.objects.get(email='jane.doe@example.com')
-        self.student.last_name = second_user.last_name
+        second_user = User.objects.get(email='lll@example.org')
+        self.user.last_name = second_user.last_name
         self._assert_user_is_valid()
 
     def _assert_user_is_valid(self):
         try:
-            self.student.full_clean()
+            self.user.full_clean()
         except ValidationError:
             self.fail('Test user should be valid')
 
     def _assert_user_is_invalid(self):
-        self.student.email = ''
+        self.user.email = ''
         with self.assertRaises(ValidationError):
-            self.student.full_clean()
+            self.user.full_clean()
