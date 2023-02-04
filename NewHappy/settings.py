@@ -126,3 +126,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'pst.User'
 
+VISITOR_REDIRECT_URL_WHEN_LOGGED_IN = 'home'
+

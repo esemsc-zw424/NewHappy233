@@ -63,3 +63,7 @@ class VisitorSignupForm(PasswordValidationForm):
             password=data.get('password'),
         )
         return user
+
+class LoginForm(Form):
+    email = forms.EmailField(label='Email')
+    password = forms.CharField(label='Password', widget=forms.PasswordInput())
