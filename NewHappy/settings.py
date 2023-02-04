@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pst'
+    'pst',
 ]
 
 MIDDLEWARE = [
@@ -126,4 +126,6 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+AUTH_USER_MODEL = 'pst.User'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/users_files')

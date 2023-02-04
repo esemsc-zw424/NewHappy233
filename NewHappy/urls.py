@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('userFeed/', views.userFeed, name = 'userFeed'),
+    path('spending_creation/', views.Add_Spending, name = 'spendingCreation'),
 
 ]
 

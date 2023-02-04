@@ -1,0 +1,46 @@
+[
+    {
+        "model": "pst.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
+            "last_login": null,
+            "email": "johndoe@example.org",
+            "username": "LOL233"
+        }
+    },
+    {
+        "model": "pst.user",
+        "pk": 2,
+        "fields": {
+            "password": "pbkdf2_sha333$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
+            "last_login": null,
+            "email": "lll@example.org",
+            "username": "HIiiiiii"
+        }
+    },
+    {
+        "model": "pst.spending",
+        "pk": 3,
+        "fields": {
+            "title": "spending1",
+            "spending_owner": 1,
+            "amount": 88,
+            "descriptions": "This is test spending 1",
+            "date": "2023-01-31",
+            "spending_type": "Expenditure"
+        }
+    },
+    {
+        "model": "pst.spending",
+        "pk": 4,
+        "fields": {
+            "title": "spending2",
+            "spending_owner": 2,
+            "amount": 88,
+            "descriptions": "This is test spending 2",
+            "date": "2023-02-20",
+            "spending_type": "Expenditure"
+        }
+    }
+]
