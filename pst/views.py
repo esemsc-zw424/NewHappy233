@@ -64,21 +64,19 @@ def respond(user_input):
     }
 
     responses = {
-        "psc": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget. Is there anything specific you would like to know?", 
-                "Our PSC is designed to help manage your personal finances, including tracking expenses and setting budgets. How can I assist you?"],
-        "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses. Let me know if you need help with that!", 
-                    "Our PSC allows you to set a monthly or weekly budget to keep your spending in check. Would you like a demo on how to set a budget?"],
-        "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?", 
-                    "With the Personal Spending Tracker, you can easily keep track of all your expenses, both big and small. Let me know if you need assistance logging an expense."],
-        "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings. Let me know if you need help tracking something!", 
-                    "The PSC is a powerful tool for tracking your spending, budget, and savings. How can I assist you with tracking?"],
-        "saving": ["Our Personal Spending Tracker can help you track your savings and keep you on track to reach your financial goals. Let me know if you need help setting up a savings plan!", 
-                    "The PSC is a great tool for tracking your savings and sticking to your budget. Would you like help setting up a savings plan?"],
-        "finance": ["Our Personal Spending Tracker is a comprehensive tool for managing your personal finances. It includes features for tracking expenses, setting budgets, and monitoring savings. Let me know if you need help with anything!", 
-                    "With the PSC, you can take control of your personal finances and make informed decisions about your spending and saving. Would you like a demo on how to use it?"],
-        "hello": ["Hello! How may I help you?", "Hi there! How can I assist you today with our Personal Spending Tracker?"],
-        "bye": ["Goodbye! Have a great day!", "See you later! Take care and don't hesitate to reach out if you need help with the Personal Spending Tracker."],
+        "psc": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."], 
+        "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses."], 
+        "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"], 
+        "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."], 
+        "saving": ["Our Personal Spending Tracker can help you track your savings and keep you on track to reach your financial goals."], 
+        "finance": ["With the PSC, you can take control of your personal finances and make informed decisions about your spending and saving."],
+        "hello": ["Hello! How may I help you?"],
+        "bye": ["Goodbye! Have a great day!"],
     }
+
+    for keyword, synonyms in keywords.items():
+        if user_input.lower() in [s.lower() for s in synonyms]:
+            return random.choice(responses[keyword])
 
     tokens = word_tokenize(user_input)
     tokens = [lemmatizer.lemmatize(token.lower()) for token in tokens]
