@@ -1,0 +1,12 @@
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="user_input">
+    <input type="submit" value="Submit">
+</form>
+
+<ul id="chat">
+    {% for user_question, chatbot_answer in chat_history %}
+      <li><b>You:</b> {{ user_question }}</li>
+      <li><b>NiuHuanXi:</b> {{ chatbot_answer }}</li>
+    {% endfor %}
+</ul>
