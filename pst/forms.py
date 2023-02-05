@@ -68,4 +68,4 @@ class VisitorSignupForm(PasswordValidationForm):
 class BudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
-        fields = ['name', 'limit', 'start_date', 'end_date']
+        fields = ['name', 'limit']

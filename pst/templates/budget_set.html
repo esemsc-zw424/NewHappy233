@@ -1,3 +1,22 @@
+{#{% extends 'base_content.html' %}#}
+{#{% block content %}#}
+{#<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal3">#}
+{#  Set Budget#}
+{#</button>#}
+{##}
+{##}
+{#<!-- Modal -->#}
+{#<div class="modal fade" id="#exampleModal3" tabindex="-1" aria-labelledby="LessonRequestLabel" aria-hidden="true">#}
+{#  <div class="modal-dialog">#}
+{#    <form action="{% url 'budget_set' %}" method="post">#}
+{#        {% csrf_token %}#}
+{#        {{ form.as_p }}#}
+{#        <input type="submit" value="Save Budget">#}
+{#    </form>#}
+{#  </div>#}
+{#</div>#}
+{#{% endblock %}#}
+
 {% extends 'base_content.html' %}
 {% block content %}
     <div class="container">

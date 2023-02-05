@@ -41,7 +41,7 @@ def set_budget(request):
         form = BudgetForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('budgets')
+            return redirect('budget_set')
     else:
         form = BudgetForm()
     return render(request, 'budget_set.html', {'form': form})
