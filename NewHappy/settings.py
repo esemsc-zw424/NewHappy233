@@ -133,3 +133,5 @@ AUTH_USER_MODEL = 'pst.User'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/users_files')
 
+REDIRECT_URL_WHEN_LOGGED_IN = 'home'
+

@@ -2,11 +2,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.shortcuts import render,redirect
 from django.contrib import messages
+
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
-
 from pst.helpers.auth import login_prohibited
+from django.contrib.auth import authenticate, login, logout
+
 from django.http import HttpResponse
 import random
 import nltk
@@ -39,9 +41,34 @@ def visitor_signup(request):
 @login_required
 def home(request):
     return render(request, 'home.html')
-
+@login_prohibited
 def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
+
+@login_prohibited
+def log_in(request):
+    if request.method == 'POST':
+        next = request.POST.get('next') or ''
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=email, password=password)
+            if user is not None:
+                login(request, user)
+                redirect_url = next or 'home'
+                return redirect(redirect_url)
+       # messages.add_message(request, messages.ERROR,
+                            # "The credentials provided are invalid!")
+        else:
+            next = request.GET.get('next') or ''
+    form = LoginForm()
+    return render(request, 'log_in.html', {'form': form})
+
+
+def log_out(request):
+    logout(request)
+    return redirect('visitor_introduction')
 
 #Chatbot is a simple virtual help assistant that can answer user's question base on keywords
 def chat_bot(request):
