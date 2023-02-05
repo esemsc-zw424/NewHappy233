@@ -8,7 +8,7 @@ def login_prohibited(view_function):
     def modified_view_function(request):
         user = request.user
         if user.is_authenticated:
-            return redirect(settings.VISITOR_REDIRECT_URL_WHEN_LOGGED_IN)
+            return redirect(settings.REDIRECT_URL_WHEN_LOGGED_IN)
         else:
             return view_function(request)
 

@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pst',
     'widget_tweaks',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -126,5 +128,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'pst.User'
 
-VISITOR_REDIRECT_URL_WHEN_LOGGED_IN = 'home'
+REDIRECT_URL_WHEN_LOGGED_IN = 'home'
 

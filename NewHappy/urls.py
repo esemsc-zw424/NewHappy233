@@ -23,5 +23,8 @@ urlpatterns = [
     path('visitor_signup/', views.visitor_signup, name = 'visitor_signup'),
     path('home/', views.home, name = 'home'),
     path('visitor_introduction/', views.visitor_introduction, name = 'visitor_introduction'),
-    path('login/', views.login, name = 'login'),
+    path('log_in/', views.log_in, name = 'log_in'),
+    path('chat_bot/', views.chat_bot, name = 'chat_bot'),
+    path('log_out/', views.log_out, name = 'log_out'),
+
 ]

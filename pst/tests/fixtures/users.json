@@ -13,7 +13,8 @@
         "model": "pst.user",
         "pk": 2,
         "fields": {
-            "password": "pbkdf2_sha333$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
+            "password":"pbkdf2_sha256$390000$ZPgc9DL7tgUkTQE9WZz3Jy$pB5wi2s322YotSVGmSPEzpe/CIYT9/1fZ73pDQ5NSl8=",
+
             "email": "lll@example.org",
             "first_name": "Oreo",
             "last_name": "pic"

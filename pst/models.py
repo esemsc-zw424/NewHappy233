@@ -15,6 +15,7 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
+   
 
 
 class User(AbstractUser):
