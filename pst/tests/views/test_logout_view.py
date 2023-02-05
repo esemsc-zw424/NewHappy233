@@ -1,7 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
+from pst.tests.helpers import LogInTester
+from pst.models import User
 
-class LogOutViewTestCase(TestCase):
+class LogOutViewTestCase(TestCase, LogInTester):
     fixtures = ['pst/tests/fixtures/users.json']
 
 

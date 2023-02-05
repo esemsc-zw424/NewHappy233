@@ -45,16 +45,20 @@ def visitor_introduction(request):
 @login_prohibited
 def log_in(request):
     if request.method == 'POST':
+        next = request.POST.get('next') or ''
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
             user = authenticate(username=email, password=password)
             if user is not None:
-                login(request)
-                return redirect('home')
+                login(request, user)
+                redirect_url = next or 'home'
+                return redirect(redirect_url)
        # messages.add_message(request, messages.ERROR,
                             # "The credentials provided are invalid!")
+        else:
+            next = request.GET.get('next') or ''
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
 
