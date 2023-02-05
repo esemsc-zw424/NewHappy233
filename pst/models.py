@@ -2,17 +2,44 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator,MaxValueValidator,MinValueValidator
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
 
 
-# Create your models here.
+class UserManager(BaseUserManager):
+
+    def create_user(self, first_name, last_name, email, password):
+        email = self.normalize_email(email)
+        user = self.model(first_name=first_name, last_name=last_name, email=email)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, first_name, last_name, email, password, **extra_fields):
+        user = self.create_user(first_name, last_name, email, password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        return user
 
 
 class User(AbstractUser):
+    username = None
     email = models.EmailField(unique=True, blank=False)
-    username = models.CharField(max_length=50, unique=True)
+    first_name = models.CharField(blank=False, unique=False, max_length=50)
+    last_name = models.CharField(blank=False, unique=False, max_length=50)
     
+    objects = UserManager()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
+
+
     def __str__(self):
-        return self.username
+        return self.email
+
+
+# Create your models here.
 
 class Spending(models.Model):
 

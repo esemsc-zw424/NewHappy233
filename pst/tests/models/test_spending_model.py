@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 class SpendingModelTestCase(TestCase):
 
     # this test will test all field in Spending model
-    fixtures = ['pst/tests/fixtures/users.json'], ['pst/tests/fixtures/spending.json']
+    fixtures = ['pst/tests/fixtures/spending.json'], ['pst/tests/fixtures/users.json']
 
     def setUp(self):
         self.spending_owner = User.objects.get(email = "johndoe@example.org")

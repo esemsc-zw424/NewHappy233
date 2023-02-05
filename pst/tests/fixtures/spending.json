@@ -4,9 +4,10 @@
         "pk": 1,
         "fields": {
             "password": "pbkdf2_sha256$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
-            "last_login": null,
+            
             "email": "johndoe@example.org",
-            "username": "LOL233"
+            "first_name": "john",
+            "last_name": "doe"
         }
     },
     {
@@ -14,9 +15,10 @@
         "pk": 2,
         "fields": {
             "password": "pbkdf2_sha333$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
-            "last_login": null,
+          
             "email": "lll@example.org",
-            "username": "HIiiiiii"
+            "first_name": "Oreo",
+            "last_name": "pic"
         }
     },
     {
