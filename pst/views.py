@@ -2,10 +2,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.shortcuts import render,redirect
 from django.contrib import messages
-from pst.forms import VisitorSignupForm, LoginForm
+
+from .models import SpendingFile
+from .forms import *
+from django.views import View
+from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
 from django.contrib.auth import authenticate, login, logout
 
+import os
+from NewHappy.settings import MEDIA_ROOT
 from django.http import HttpResponse
 import random
 import nltk
@@ -14,13 +20,13 @@ nltk.download('wordnet')
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
+
 # Create your views here.
 
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
-
-
+    
 def visitor_signup(request):
     if request.method == 'POST':
         form = VisitorSignupForm(request.POST)
@@ -117,3 +123,42 @@ def respond(user_input):
 
 
 
+# @login_required
+# def add_spending(request):
+#     if request.method == 'POST':
+#         form = AddSpendingForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             spending = form.save(commit=False)
+#             spending.spending_owner = request.user
+#             for file in request.FILES.getlist('file'):
+#                 spending.file = file
+#             spending.save()
+#             return redirect('home')
+#     else:
+#         form = AddSpendingForm()
+#     return render(request, 'add_spending.html',  {'form': form})
+
+@login_required
+def add_spending(request):
+    if request.method == 'POST':
+        form = AddSpendingForm(request.POST, request.FILES)
+        if form.is_valid():
+            spending = form.save(commit=False)
+            spending.spending_owner = request.user
+            spending.save()
+            for file in request.FILES.getlist('file'):
+                SpendingFile.objects.create(
+                    spending = spending,
+                    file = file
+                )
+            return redirect('home')
+    else:
+        form = AddSpendingForm()
+    return render(request, 'add_spending.html',  {'form': form})
+
+
+@login_required
+def view_spending(request):
+    spending = Spending.objects.all()
+    spending_file = SpendingFile.objects.all()
+    return render(request, 'view_spending.html', {'spending': spending, 'spending_file': spending_file})

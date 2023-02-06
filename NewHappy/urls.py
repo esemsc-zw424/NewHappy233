@@ -16,15 +16,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from pst import views
+from django.conf import settings 
+from django.conf.urls.static import static  
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.visitor_introduction, name = 'visitor_introduction'),
+    path('add_spending/', views.add_spending, name = 'add_spending'),
     path('user_feed/', views.user_feed, name = 'user_feed'),
     path('visitor_signup/', views.visitor_signup, name = 'visitor_signup'),
     path('home/', views.home, name = 'home'),
-    path('visitor_introduction/', views.visitor_introduction, name = 'visitor_introduction'),
     path('log_in/', views.log_in, name = 'log_in'),
     path('chat_bot/', views.chat_bot, name = 'chat_bot'),
     path('log_out/', views.log_out, name = 'log_out'),
+    path('view_spending', views.view_spending, name = 'view_spending'),
 
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

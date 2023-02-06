@@ -25,6 +25,7 @@
         "model": "pst.spending",
         "pk": 3,
         "fields": {
+            "title": "spending1",
             "spending_owner": 1,
             "amount": 88,
             "descriptions": "This is test spending 1",
@@ -36,6 +37,7 @@
         "model": "pst.spending",
         "pk": 4,
         "fields": {
+            "title": "spending2",
             "spending_owner": 2,
             "amount": 88,
             "descriptions": "This is test spending 2",

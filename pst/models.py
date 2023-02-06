@@ -5,17 +5,23 @@ from django.core.validators import RegexValidator,MaxValueValidator,MinValueVali
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 
+
 class UserManager(BaseUserManager):
 
     def create_user(self, first_name, last_name, email, password):
-    
         email = self.normalize_email(email)
         user = self.model(first_name=first_name, last_name=last_name, email=email)
         user.set_password(password)
         user.save()
         return user
 
-   
+
+    def create_superuser(self, first_name, last_name, email, password, **extra_fields):
+        user = self.create_user(first_name, last_name, email, password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        return user
 
 
 class User(AbstractUser):
@@ -34,15 +40,19 @@ class User(AbstractUser):
         return self.email
 
 
-
-class Spending_type(models.TextChoices):
-    Expenditure = 'Expenditure'
-    Income = 'Income'
-
-
-
+# Create your models here.
 
 class Spending(models.Model):
+
+    class Spending_type(models.TextChoices):
+        EXPENDITURE = "Expenditure"
+        INCOME = "Income"
+
+    title = models.CharField( # title for the spending
+        max_length=30,
+        blank=False
+    ) 
+
     spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner', blank = False) #this refers to the user when create this spending
 
     amount = models.IntegerField( # this refers to the amount this user spent or gained
@@ -65,10 +75,24 @@ class Spending(models.Model):
     spending_type = models.CharField( # this refers to the spending type 
         max_length=30,
         choices=Spending_type.choices,
-        default=Spending_type.Expenditure,
+        default=Spending_type.EXPENDITURE,
         blank = False,
     )
 
     # spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE) #this refers to the category of the spending
 
+    file = models.FileField( # optional file/images could be provided to the spending
+        null=True, 
+        blank=True,
+    ) 
 
+class SpendingFile(models.Model):
+    spending = models.ForeignKey(Spending, on_delete=models.CASCADE)
+    file = models.FileField(
+        null=True,
+        blank=True,
+    )
+    
+    
+    
+ 

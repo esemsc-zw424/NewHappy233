@@ -2,10 +2,8 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User
-
-
-
+from pst.models import User, Spending
+from django.forms import ClearableFileInput
 
 class PasswordValidationForm(forms.ModelForm):
     """Auxiliary form for password validation"""
@@ -67,3 +65,11 @@ class VisitorSignupForm(PasswordValidationForm):
 class LoginForm(Form):
     email = forms.EmailField(label='Email')
     password = forms.CharField(label='Password', widget=forms.PasswordInput())
+
+
+class AddSpendingForm(forms.ModelForm):
+    class Meta:
+        model = Spending
+        fields = ['title', 'amount', 'descriptions', 'date', 'spending_type', 'file',]
+        widgets = {'file': ClearableFileInput(attrs={'multiple': True})}
+        
