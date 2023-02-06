@@ -2,6 +2,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.shortcuts import render,redirect
 from django.contrib import messages
+from .forms import  CategoriesForm
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from .models import User ,Categories
+
 
 from .models import SpendingFile
 from .forms import *

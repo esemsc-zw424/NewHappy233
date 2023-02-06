@@ -22,7 +22,7 @@
         }
     },
     {
-        "model": "pst.spending",
+        "model": "pst.categories",
         "pk": 3,
         "fields": {
             "title": "spending1",
@@ -30,19 +30,21 @@
             "amount": 88,
             "descriptions": "This is test spending 1",
             "date": "2023-01-31",
-            "spending_type": "Expenditure"
+            "spending_type": "Expenditure",
+            "spending_category": 3
         }
     },
     {
         "model": "pst.spending",
-        "pk": 4,
+        "pk": 5,
         "fields": {
             "title": "spending2",
             "spending_owner": 2,
             "amount": 88,
             "descriptions": "This is test spending 2",
             "date": "2023-02-20",
-            "spending_type": "Expenditure"
+            "spending_type": "Expenditure",
+            "spending_category": 3
         }
     }
 ]

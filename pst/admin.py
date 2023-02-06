@@ -25,4 +25,3 @@ class SpendingAdmin(admin.ModelAdmin):
         'title', 'spending_owner', 'amount', 'descriptions', 'date', 'spending_type',    
 
     ]
-

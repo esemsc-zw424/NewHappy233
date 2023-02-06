@@ -30,7 +30,6 @@ urlpatterns = [
     path('chat_bot/', views.chat_bot, name = 'chat_bot'),
     path('log_out/', views.log_out, name = 'log_out'),
     path('view_spending', views.view_spending, name = 'view_spending'),
-
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

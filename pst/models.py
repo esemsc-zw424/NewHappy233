@@ -42,6 +42,10 @@ class User(AbstractUser):
 
 # Create your models here.
 
+class Categories(models.Model):
+    name = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
 class Spending(models.Model):
 
     class Spending_type(models.TextChoices):
@@ -90,7 +94,4 @@ class SpendingFile(models.Model):
         upload_to='user_files/'
     )
     
-    
-    
-    
- 
+
