@@ -81,17 +81,15 @@ class Spending(models.Model):
 
     # spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE) #this refers to the category of the spending
 
-    file = models.FileField( # optional file/images could be provided to the spending
-        null=True, 
-        blank=True,
-    ) 
 
 class SpendingFile(models.Model):
     spending = models.ForeignKey(Spending, on_delete=models.CASCADE)
     file = models.FileField(
         null=True,
         blank=True,
+        upload_to='user_files/'
     )
+    
     
     
     
