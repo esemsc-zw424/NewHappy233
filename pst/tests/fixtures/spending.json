@@ -4,9 +4,10 @@
         "pk": 1,
         "fields": {
             "password": "pbkdf2_sha256$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
-            "last_login": null,
+            
             "email": "johndoe@example.org",
-            "username": "LOL233"
+            "first_name": "john",
+            "last_name": "doe"
         }
     },
     {
@@ -14,23 +15,17 @@
         "pk": 2,
         "fields": {
             "password": "pbkdf2_sha333$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
-            "last_login": null,
+          
             "email": "lll@example.org",
-            "username": "HIiiiiii"
+            "first_name": "Oreo",
+            "last_name": "pic"
         }
     },
     {
         "model": "pst.categories",
         "pk": 3,
         "fields": {
-            "name": "food",
-            "user": 1
-        }
-    },
-    {
-        "model": "pst.spending",
-        "pk": 4,
-        "fields": {
+            "title": "spending1",
             "spending_owner": 1,
             "amount": 88,
             "descriptions": "This is test spending 1",
@@ -43,6 +38,7 @@
         "model": "pst.spending",
         "pk": 5,
         "fields": {
+            "title": "spending2",
             "spending_owner": 2,
             "amount": 88,
             "descriptions": "This is test spending 2",

@@ -2,26 +2,61 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator,MaxValueValidator,MinValueValidator
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
 
-# Create your models here.
-class Spending_type(models.TextChoices):
-    Expenditure = 'Expenditure'
-    Income = 'Income'
 
+class UserManager(BaseUserManager):
+
+    def create_user(self, first_name, last_name, email, password):
+        email = self.normalize_email(email)
+        user = self.model(first_name=first_name, last_name=last_name, email=email)
+        user.set_password(password)
+        user.save()
+        return user
+
+
+    def create_superuser(self, first_name, last_name, email, password, **extra_fields):
+        user = self.create_user(first_name, last_name, email, password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        return user
 
 
 class User(AbstractUser):
+    username = None
     email = models.EmailField(unique=True, blank=False)
-    username = models.CharField(max_length=50, unique=True)
+    first_name = models.CharField(blank=False, unique=False, max_length=50)
+    last_name = models.CharField(blank=False, unique=False, max_length=50)
     
+    objects = UserManager()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
+
+
     def __str__(self):
-        return self.username
+        return self.email
+
+
+# Create your models here.
 
 class Categories(models.Model):
     name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Spending(models.Model):
+
+    class Spending_type(models.TextChoices):
+        EXPENDITURE = "Expenditure"
+        INCOME = "Income"
+
+    title = models.CharField( # title for the spending
+        max_length=30,
+        blank=False
+    ) 
+
     spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner', blank = False) #this refers to the user when create this spending
 
     amount = models.IntegerField( # this refers to the amount this user spent or gained
@@ -44,8 +79,19 @@ class Spending(models.Model):
     spending_type = models.CharField( # this refers to the spending type 
         max_length=30,
         choices=Spending_type.choices,
-        default=Spending_type.Expenditure,
+        default=Spending_type.EXPENDITURE,
         blank = False,
     )
 
-    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default=None) #this refers to the category of the spending
+    # spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE) #this refers to the category of the spending
+
+
+class SpendingFile(models.Model):
+    spending = models.ForeignKey(Spending, on_delete=models.CASCADE)
+    file = models.FileField(
+        null=True,
+        blank=True,
+        upload_to='user_files/'
+    )
+    
+

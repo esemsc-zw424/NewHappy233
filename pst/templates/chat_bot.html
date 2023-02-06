@@ -1,0 +1,25 @@
+<button id="open-chatbot">Open Chatbot</button>
+<div id="chatbot-section" style="display: none;">
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="user_input">
+        <input type="submit" value="Submit">
+    </form>
+
+    <ul id="chat">
+        {% for user_question, chatbot_answer in chat_history %}
+        <li><b>You:</b> {{ user_question }}</li>
+        <li><b>NiuHuanXi:</b> {{ chatbot_answer }}</li>
+        {% endfor %}
+    </ul>
+    <button id="close-chatbot">Close Chatbot</button>
+</div>
+
+<script>
+    document.getElementById("open-chatbot").addEventListener("click", function() {
+        document.getElementById("chatbot-section").style.display = "block";
+    });
+    document.getElementById("close-chatbot").addEventListener("click", function() {
+        document.getElementById("chatbot-section").style.display = "none";
+    });
+</script>
