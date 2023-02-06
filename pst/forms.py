@@ -73,6 +73,7 @@ class LoginForm(Form):
 class AddSpendingForm(forms.ModelForm):
     class Meta:
         model = Spending
+
         fields = ['title', 'amount', 'descriptions', 'date', 'spending_type']
 
     file = forms.FileField(
@@ -81,3 +82,4 @@ class AddSpendingForm(forms.ModelForm):
         required=False,
 
     )
+

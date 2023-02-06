@@ -29,15 +29,14 @@
                 <td> {{ i.amount}}</td>
                 <td> {{ i.spending_owner}}</td>
 
-                
+
+
                 {% for individual in spending_file %}
                 {% if i == individual.spending %}
                 <!-- <td> <a href="{{ i.file.url }}">View file</a> </td> -->
                 <td> <a href="{{ individual.file.url }}">{{ individual.file.url }}</a></td> 
                 {% endif %}
                 {% endfor %}
-                
-                
                 
             </tr>
             {% endfor %}
