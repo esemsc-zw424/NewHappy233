@@ -131,6 +131,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'pst.User'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static/user_files')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
 
 REDIRECT_URL_WHEN_LOGGED_IN = 'home'

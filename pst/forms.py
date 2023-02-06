@@ -5,6 +5,7 @@ from django.forms import ModelForm, Form
 from pst.models import User, Spending
 from django.forms import ClearableFileInput
 
+
 class PasswordValidationForm(forms.ModelForm):
     """Auxiliary form for password validation"""
 
@@ -39,9 +40,10 @@ class PasswordValidationForm(forms.ModelForm):
         new_password = self.cleaned_data.get('password')
         confirm_password = self.cleaned_data.get('confirm_password')
         if new_password != confirm_password:
-            self.add_error('confirm_password', 'Confirmation does not match password.')
+            self.add_error('confirm_password',
+                           'Confirmation does not match password.')
 
-    
+
 class VisitorSignupForm(PasswordValidationForm):
     """Form enabling a visitor to sign up"""
 
@@ -62,6 +64,7 @@ class VisitorSignupForm(PasswordValidationForm):
         )
         return user
 
+
 class LoginForm(Form):
     email = forms.EmailField(label='Email')
     password = forms.CharField(label='Password', widget=forms.PasswordInput())
@@ -70,6 +73,11 @@ class LoginForm(Form):
 class AddSpendingForm(forms.ModelForm):
     class Meta:
         model = Spending
-        fields = ['title', 'amount', 'descriptions', 'date', 'spending_type', 'file',]
-        widgets = {'file': ClearableFileInput(attrs={'multiple': True})}
-        
+        fields = ['title', 'amount', 'descriptions', 'date', 'spending_type']
+
+    file = forms.FileField(
+        label='file',
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        required=False,
+
+    )

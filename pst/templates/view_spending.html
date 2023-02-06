@@ -29,7 +29,7 @@
                 <td> {{ i.amount}}</td>
                 <td> {{ i.spending_owner}}</td>
 
-                {% if i.file %}
+                
                 {% for individual in spending_file %}
                 {% if i == individual.spending %}
                 <!-- <td> <a href="{{ i.file.url }}">View file</a> </td> -->
@@ -37,9 +37,8 @@
                 {% endif %}
                 {% endfor %}
                 
-                {% else %}
-                <td> no file currently</td>
-                {% endif %}
+                
+                
             </tr>
             {% endfor %}
         </tbody>
