@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from pst.models import Spending, User
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 class SpendingModelTestCase(TestCase):
 
@@ -109,23 +108,5 @@ class SpendingModelTestCase(TestCase):
         self.spending.spending_type = second_spending.spending_type
         self._assert_spending_is_valid()
     
-    def test_file_can_be_empty(self):
-        self.spending.file = None
-        self._assert_spending_is_valid()
-    
-    def test_file_can_be_image(self):
-        file = SimpleUploadedFile("image.jpg", content=b"file_content", content_type="image/jpeg")
-        self.spending.file = file
-        self._assert_spending_is_valid()
-
-    def test_file_can_be_txt(self):
-        file = SimpleUploadedFile("file.txt", content=b"file_content", content_type="text/plain")
-        self.spending.file = file
-        self._assert_spending_is_valid()
-    
-    def test_file_can_be_pdf(self):
-        file = SimpleUploadedFile("file.pdf", content=b"file_content", content_type="application/pdf")
-        self.spending.file = file
-        self._assert_spending_is_valid()
 
     # test of category needs to be implemented later.

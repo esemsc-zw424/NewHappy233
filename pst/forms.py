@@ -71,4 +71,5 @@ class AddSpendingForm(forms.ModelForm):
     class Meta:
         model = Spending
         fields = ['title', 'amount', 'descriptions', 'date', 'spending_type', 'file',]
-        widgets = {'file': ClearableFileInput(attrs={'multiple': True}) }
+        widgets = {'file': ClearableFileInput(attrs={'multiple': True})}
+        

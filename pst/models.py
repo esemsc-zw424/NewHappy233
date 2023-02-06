@@ -86,6 +86,12 @@ class Spending(models.Model):
         blank=True,
     ) 
 
+class SpendingFile(models.Model):
+    spending = models.ForeignKey(Spending, on_delete=models.CASCADE)
+    file = models.FileField(
+        null=True,
+        blank=True,
+    )
     
     
     
