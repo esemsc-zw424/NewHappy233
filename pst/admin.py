@@ -21,9 +21,7 @@ class MyUserAdmin(UserAdmin):
 @admin.register(Spending)
 class SpendingAdmin(admin.ModelAdmin):
     list_display = [
-
         'title', 'spending_owner', 'amount', 'descriptions', 'date', 'spending_type', 'spending_category',    
-
     ]
 
 @admin.register(Categories)
