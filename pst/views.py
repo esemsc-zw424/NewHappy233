@@ -184,3 +184,18 @@ def delete_spending_categories(request):
         category.delete()
         return redirect('view_spending_categories')
 
+@login_required
+def update_spending_categories(request, category_id):
+    if request.method == 'POST':
+        form = CategoriesForm(request.POST)
+        if form.is_valid():
+            category = Categories.objects.get(id=category_id)
+            form = CategoriesForm(request.POST, instance=category)
+            form.save()
+            return redirect('view_spending_categories')
+    else:
+        category = Categories.objects.get(id=category_id)
+        form = CategoriesForm(instance=category)
+
+    return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
+
