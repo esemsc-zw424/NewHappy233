@@ -129,22 +129,6 @@ def respond(user_input):
 
 
 
-
-# @login_required
-# def add_spending(request):
-#     if request.method == 'POST':
-#         form = AddSpendingForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             spending = form.save(commit=False)
-#             spending.spending_owner = request.user
-#             for file in request.FILES.getlist('file'):
-#                 spending.file = file
-#             spending.save()
-#             return redirect('home')
-#     else:
-#         form = AddSpendingForm()
-#     return render(request, 'add_spending.html',  {'form': form})
-
 @login_required
 def add_spending(request):
     if request.method == 'POST':
@@ -167,8 +151,7 @@ def add_spending(request):
 @login_required
 def view_spending(request):
     spending = Spending.objects.all()
-    spending_file = SpendingFile.objects.all()
-    return render(request, 'view_spending.html', {'spending': spending, 'spending_file': spending_file})
+    return render(request, 'view_spending.html', {'spending': spending})
 
 
 
