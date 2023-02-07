@@ -12,6 +12,7 @@
             <tr>
                 <th scope="col">Category name</th>
                 <th scope="col">Category type</th>
+                <th scope="col">Delete</th>
             </tr>
         </thead>
         <tbody>
@@ -19,6 +20,13 @@
             <tr class="align-middle">
                 <td>{{ category.name }}</td>
                 <td>{{ category.categories_type }}</td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -31,6 +39,7 @@
             <tr>
                 <th scope="col">Category name</th>
                 <th scope="col">Category type</th>
+                <th scope="col">Delete</th>
             </tr>
         </thead>
         <tbody>
@@ -38,6 +47,13 @@
             <tr class="align-middle">
                 <td>{{ category.name }}</td>
                 <td>{{ category.categories_type }}</td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

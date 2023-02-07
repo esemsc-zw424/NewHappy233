@@ -187,7 +187,17 @@ def add_spending_categories(request):
 
 @login_required
 def view_spending_categories(request):
+    if request.method == 'POST':
+        delete_spending_categories(request)
     categories_expenditure = Categories.objects.filter(categories_type = Spending_type.EXPENDITURE)
     categories_income = Categories.objects.filter(categories_type = Spending_type.INCOME)
     return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
+
+@login_required
+def delete_spending_categories(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = Categories.objects.get(id=category_id)
+        category.delete()
+        return redirect('view_spending_categories')
 
