@@ -5,6 +5,10 @@ from django.core.validators import RegexValidator,MaxValueValidator,MinValueVali
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 
+class Spending_type(models.TextChoices):
+        EXPENDITURE = "Expenditure"
+        INCOME = "Income"
+
 
 class UserManager(BaseUserManager):
 
@@ -43,14 +47,19 @@ class User(AbstractUser):
 # Create your models here.
 
 class Categories(models.Model):
-    name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100) # name of the category
+    owner = models.ForeignKey(User, on_delete=models.CASCADE) # user this category belongs to
+    categories_type = models.CharField( # the type of this category belongs to, for example expenditure or income
+        max_length=30,
+        choices=Spending_type.choices,
+        default=Spending_type.EXPENDITURE,
+        blank = False,
+    )
+
+    def __str__(self):
+        return self.name
 
 class Spending(models.Model):
-
-    class Spending_type(models.TextChoices):
-        EXPENDITURE = "Expenditure"
-        INCOME = "Income"
 
     title = models.CharField( # title for the spending
         max_length=30,
@@ -83,8 +92,7 @@ class Spending(models.Model):
         blank = False,
     )
 
-    # spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE) #this refers to the category of the spending
-
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name = 'category', blank = False) #this refers to the category of the spending
 
 class SpendingFile(models.Model):
     spending = models.ForeignKey(Spending, on_delete=models.CASCADE)

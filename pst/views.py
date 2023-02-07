@@ -50,6 +50,7 @@ def visitor_signup(request):
 @login_required
 def home(request):
     return render(request, 'home.html')
+
 @login_prohibited
 def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
@@ -147,7 +148,7 @@ def respond(user_input):
 @login_required
 def add_spending(request):
     if request.method == 'POST':
-        form = AddSpendingForm(request.POST, request.FILES)
+        form = AddSpendingForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             spending = form.save(commit=False)
             spending.spending_owner = request.user
@@ -159,7 +160,7 @@ def add_spending(request):
                 )
             return redirect('home')
     else:
-        form = AddSpendingForm()
+        form = AddSpendingForm(user=request.user)
     return render(request, 'add_spending.html',  {'form': form})
 
 
