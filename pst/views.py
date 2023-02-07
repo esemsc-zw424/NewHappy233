@@ -169,3 +169,25 @@ def view_spending(request):
     spending = Spending.objects.all()
     spending_file = SpendingFile.objects.all()
     return render(request, 'view_spending.html', {'spending': spending, 'spending_file': spending_file})
+
+
+
+@login_required
+def add_spending_categories(request):
+    if request.method == 'POST':
+        form = CategoriesForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save(commit = False)
+            category.owner = request.user
+            category.save()
+            return redirect('home')
+    else:
+        form = CategoriesForm()
+    return render(request, 'add_spending_categories.html',  {'form': form})
+
+@login_required
+def view_spending_categories(request):
+    categories_expenditure = Categories.objects.filter(categories_type = Spending_type.EXPENDITURE)
+    categories_income = Categories.objects.filter(categories_type = Spending_type.INCOME)
+    return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
+

@@ -7,7 +7,7 @@ from django.forms import ClearableFileInput
 class CategoriesForm(forms.ModelForm):
     class Meta:
         model = Categories
-        fields = ['name', 'owner', 'categories_type']
+        fields = ['name', 'categories_type']
 
 class PasswordValidationForm(forms.ModelForm):
     """Auxiliary form for password validation"""
