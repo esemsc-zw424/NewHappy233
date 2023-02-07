@@ -25,6 +25,15 @@
         "model": "pst.categories",
         "pk": 3,
         "fields": {
+            "name": "Food",
+            "owner": 1,
+            "categories_type": "Expenditure"
+        }
+    },
+    {
+        "model": "pst.spending",
+        "pk": 4,
+        "fields": {
             "title": "spending1",
             "spending_owner": 1,
             "amount": 88,

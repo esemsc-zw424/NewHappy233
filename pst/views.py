@@ -93,7 +93,7 @@ def chat_bot(request):
 def respond(user_input):
     lemmatizer = WordNetLemmatizer()
     keywords = {
-        "psc": ["personal spending tracker", "psc"],
+        "pst": ["personal spending tracker", "pst"],
         "budget": ["budget", "spending budget", "financial budget"],
         "expense": ["expense", "spending", "financial expense"],
         "track": ["track", "record", "keep track"],
@@ -104,7 +104,7 @@ def respond(user_input):
     }
 
     responses = {
-        "psc": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."], 
+        "pst": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."], 
         "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses."], 
         "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"], 
         "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."], 

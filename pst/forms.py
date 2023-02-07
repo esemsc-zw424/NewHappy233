@@ -66,21 +66,27 @@ class VisitorSignupForm(PasswordValidationForm):
             password=data.get('password'),
         )
 
-        Categories.objects.create(
-            name = 'Food',
-            owner = user,
-            categories_type = Spending_type.EXPENDITURE
-        )
-        Categories.objects.create(
-            name = 'Drink',
-            owner = user,
-            categories_type = Spending_type.EXPENDITURE
-        )
-        Categories.objects.create(
-            name = 'Salary',
-            owner = user,
-            categories_type = Spending_type.INCOME
-        )
+        categories = [
+            {'name': 'Food', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Drink', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Transport', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Sport', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Entertainment', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Clothes', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Medical', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Housing', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Salary', 'type': Spending_type.INCOME},
+            {'name': 'Investment', 'type': Spending_type.INCOME},
+            {'name': 'Part-Time', 'type': Spending_type.INCOME},
+            {'name': 'Other', 'type': Spending_type.INCOME},
+        ]
+
+        for category in categories:
+            Categories.objects.create(
+                name=category['name'],
+                owner=user,
+                categories_type=category['type'],
+            )
 
         return user
 
@@ -97,12 +103,11 @@ class AddSpendingForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super(AddSpendingForm, self).__init__(*args, **kwargs)
         if user:
-            self.fields['spending_category'].queryset = Categories.objects.filter(
-                owner = user, categories_type = self.data.get('spending_type')) # this part filter out categories that belongs to current user
+            spending_type = self.data.get('spending_type', '')
+            self.fields['spending_category'].queryset = Categories.objects.filter(owner = user) # this part filter out categories that belongs to current user
 
     class Meta:
         model = Spending
-
         fields = ['title', 'amount', 'descriptions', 'date', 'spending_type', 'spending_category']
 
     file = forms.FileField(
