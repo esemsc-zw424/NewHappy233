@@ -115,3 +115,4 @@ class AddSpendingForm(forms.ModelForm):
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
     )
+
