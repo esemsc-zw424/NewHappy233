@@ -1,13 +1,15 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories
+from pst.models import User, Spending, Categories, UserProfile
 from django.forms import ClearableFileInput
+
 
 class CategoriesForm(forms.ModelForm):
     class Meta:
         model = Categories
         fields = ['name', 'user']
+
 
 class PasswordValidationForm(forms.ModelForm):
     """Auxiliary form for password validation"""
@@ -85,3 +87,10 @@ class AddSpendingForm(forms.ModelForm):
         required=False,
 
     )
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['bio', 'location', 'birth_date',
+                  'gender', 'phone_number', ]
