@@ -184,7 +184,7 @@ def delete_spending_categories(request):
         if category.default_category == False:
             category.delete()
         else:
-            messages.add_message(request,messages.ERROR,"You can not delete default cateogry!")
+            messages.add_message(request,messages.ERROR,"You can not delete default category!")
         return redirect('view_spending_categories')
 
 @login_required
@@ -198,7 +198,7 @@ def update_spending_categories(request, category_id):
                 form.save()
                 return redirect('view_spending_categories')
         else:
-            messages.add_message(request,messages.ERROR,"You can not modify default cateogry!")
+            messages.add_message(request,messages.ERROR,"You can not modify default category!")
             return redirect('view_spending_categories')
     else:
         category = Categories.objects.get(id=category_id)
