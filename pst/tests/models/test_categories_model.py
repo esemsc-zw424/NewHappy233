@@ -60,4 +60,11 @@ class CategoriesModelTestCase(TestCase):
         self.categories.categories_type = second_categories.categories_type
         self._assert_categories_is_valid()
 
+    def test_default_category_is_false(self):
+        self.assertEqual(False, self.categories.default_category)
+
+    def test_default_category_can_be_true(self):
+        self.categories.default_category == True
+        self._assert_categories_is_valid()
+
     

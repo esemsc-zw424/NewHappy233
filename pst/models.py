@@ -45,13 +45,28 @@ class User(AbstractUser):
 # Create your models here.
 
 class Categories(models.Model):
-    name = models.CharField(max_length=100) # name of the category
-    owner = models.ForeignKey(User, on_delete=models.CASCADE) # user this category belongs to
+    
+    name = models.CharField( # name of the category
+        max_length=100
+    )
+
+    owner = models.ForeignKey(# user which this category belongs to
+        User, on_delete=models.CASCADE
+    )
+
     categories_type = models.CharField( # the type of this category belongs to, for example expenditure or income
         max_length=30,
         choices=Spending_type.choices,
         default=Spending_type.EXPENDITURE,
         blank = False,
+    )
+
+    default_category = models.BooleanField(
+        default = False,
+        help_text=(
+            'Designates this category is a default category or not'
+            'default category are not expected to be modified'
+        )
     )
 
     def __str__(self):
