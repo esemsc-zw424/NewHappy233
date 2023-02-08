@@ -172,8 +172,8 @@ def add_spending_categories(request):
 def view_spending_categories(request):
     if request.method == 'POST':
         delete_spending_categories(request)
-    categories_expenditure = Categories.objects.filter(categories_type = Spending_type.EXPENDITURE)
-    categories_income = Categories.objects.filter(categories_type = Spending_type.INCOME)
+    categories_expenditure = Categories.objects.filter(categories_type = Spending_type.EXPENDITURE, owner = request.user)
+    categories_income = Categories.objects.filter(categories_type = Spending_type.INCOME, owner = request.user)
     return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
 
 @login_required
@@ -181,21 +181,27 @@ def delete_spending_categories(request):
     if request.method == 'POST':
         category_id = request.POST.get('category_id')
         category = Categories.objects.get(id=category_id)
-        category.delete()
+        if category.default_category == False:
+            category.delete()
+        else:
+            messages.add_message(request,messages.ERROR,"You can not delete default cateogry!")
         return redirect('view_spending_categories')
 
 @login_required
 def update_spending_categories(request, category_id):
+    category = Categories.objects.get(id=category_id)
     if request.method == 'POST':
         form = CategoriesForm(request.POST)
-        if form.is_valid():
-            category = Categories.objects.get(id=category_id)
-            form = CategoriesForm(request.POST, instance=category)
-            form.save()
+        if category.default_category == False:
+            if form.is_valid():
+                form = CategoriesForm(request.POST, instance=category)
+                form.save()
+                return redirect('view_spending_categories')
+        else:
+            messages.add_message(request,messages.ERROR,"You can not modify default cateogry!")
             return redirect('view_spending_categories')
     else:
         category = Categories.objects.get(id=category_id)
         form = CategoriesForm(instance=category)
-
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
 
