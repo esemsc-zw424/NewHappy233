@@ -36,12 +36,20 @@ def home(request):
 def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
 
+def user_guideline(request):
+    return render(request, 'user_guideline.html')
+
 def set_budget(request):
     if request.method == 'POST':
         form = BudgetForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('budget_set')
+            print(Budget.objects.count())
+            return redirect('budget_show')
     else:
         form = BudgetForm()
     return render(request, 'budget_set.html', {'form': form})
+
+def show_budget(request):
+    budget = Budget.objects.last()
+    return render(request, 'budget_show.html', {'budget': budget})
