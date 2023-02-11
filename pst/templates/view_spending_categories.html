@@ -1,0 +1,66 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<h1>View Spending Categories</h1>
+
+<div class="container">
+      
+    <table class="table">
+        <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
+        <br>
+        <h3>Expnediture</h3>
+        <thead>
+            <tr>
+                <th scope="col">Category name</th>
+                <th scope="col">Category type</th>
+                <th scope="col">Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories_expenditure %}
+            <tr class="align-middle">
+                <td>{{ category.name }}</td>
+                <td>{{ category.categories_type }}</td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <a href='{% url 'update_spending_categories' category.id %}' class="btn btn btn-secondary">Update</a>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <h3>Income</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Category name</th>
+                <th scope="col">Category type</th>
+                <th scope="col">Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories_income %}
+            <tr class="align-middle">
+                <td>{{ category.name }}</td>
+                <td>{{ category.categories_type }}</td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <a href='{% url 'update_spending_categories' category.id %}' class="btn btn btn-secondary">Update</a>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}
