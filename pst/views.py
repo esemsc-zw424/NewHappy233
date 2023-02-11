@@ -52,4 +52,5 @@ def set_budget(request):
 
 def show_budget(request):
     budget = Budget.objects.last()
-    return render(request, 'budget_show.html', {'budget': budget})
+    spending_percentage = (80/budget.limit)*100
+    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})

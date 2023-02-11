@@ -1,6 +1,27 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class="row content">
-    <p>{{budget.limit}}</p>
+    <h1>Your budget is: </h1>
+    <p>{{budget.limit}}
+    </p>
 </div>
+<head>
+	<meta charset="utf-8">
+	<title>Progress Bar</title>
+{#	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">#}
+{#	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>#}
+{#	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
+</head>
+<body>
+
+<div class="container">
+  <h2>Current ratio</h2>
+  <div class="progress">
+    <div class="progress-bar" role="progressbar" aria-valuenow="{{ spending_percentage }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ spending_percentage }}%">
+      {{ spending_percentage }}%
+    </div>
+  </div>
+</div>
+
+</body>
 {% endblock %}
