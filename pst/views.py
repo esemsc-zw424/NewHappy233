@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
+from django.db.models import Sum
 from django.shortcuts import render,redirect
 from django.contrib import messages
 from pst.forms import VisitorSignupForm
@@ -225,6 +226,12 @@ def set_budget(request):
     return render(request, 'budget_set.html', {'form': form})
 
 def show_budget(request):
+    total = cal_spending()
+    #print(total)
     budget = Budget.objects.last()
-    spending_percentage = (80/budget.limit)*100
+    spending_percentage = (total/budget.limit)*100
     return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
+
+def cal_spending():
+    spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
+    return spending_total
