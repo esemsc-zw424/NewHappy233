@@ -218,8 +218,14 @@ def set_budget(request):
     if request.method == 'POST':
         form = BudgetForm(request.POST)
         if form.is_valid():
-            form.save()
-            print(Budget.objects.count())
+            print(1024)
+            # form.save()
+            # print(Budget.objects.count())
+            # return redirect('budget_show')
+            budget = form.save(commit=False)
+            budget.budget_owner = request.user
+            print(budget.budget_owner_id)
+            budget.save()
             return redirect('budget_show')
     else:
         form = BudgetForm()
@@ -229,7 +235,10 @@ def show_budget(request):
     total = cal_spending()
     #print(total)
     budget = Budget.objects.last()
-    spending_percentage = (total/budget.limit)*100
+    if total == None:
+        spending_percentage = 0
+    else:
+        spending_percentage = (total / budget.limit) * 100
     return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
 
 def cal_spending():
