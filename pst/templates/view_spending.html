@@ -1,0 +1,48 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<h1>View Spending</h1>
+
+<div class="container">
+      
+    <table class="table">
+
+        <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
+        <thead>
+            <tr>
+                <th scope="col">title</th>
+                <th scope="col">description</th>
+                <th scope="col">spending type</th>
+                <th scope="col">amount</th>
+                <th scope="col">spending owner</th>
+                <th scope="col">file</th>
+                
+            </tr>
+        </thead>
+
+
+        <tbody>
+            {% for i in spending %}
+            <tr class="align-middle">
+                <td> {{ i.title }}</td>
+                <td> {{ i.descriptions }}</td>
+                <td> {{ i.spending_type}}</td>
+                <td> {{ i.amount}}</td>
+                <td> {{ i.spending_owner}}</td>
+
+
+
+                <td>
+                    {% for individual in i.files.all %}
+                    <a href="{{ individual.file.url }}">{{ individual.file.url }}</a>
+                    {% endfor %}
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+
+</div>
+{% endblock %}

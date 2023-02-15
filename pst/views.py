@@ -2,10 +2,22 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.shortcuts import render,redirect
 from django.contrib import messages
-from pst.forms import VisitorSignupForm, LoginForm
+from .forms import  CategoriesForm
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from .models import User ,Categories
+
+
+from .models import SpendingFile
+from .forms import *
+from django.views import View
+from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
 from django.contrib.auth import authenticate, login, logout
 
+import os
+from NewHappy.settings import MEDIA_ROOT
 from django.http import HttpResponse
 import random
 import nltk
@@ -14,13 +26,13 @@ nltk.download('wordnet')
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
+
 # Create your views here.
 
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
-
-
+    
 def visitor_signup(request):
     if request.method == 'POST':
         form = VisitorSignupForm(request.POST)
@@ -38,6 +50,7 @@ def visitor_signup(request):
 @login_required
 def home(request):
     return render(request, 'home.html')
+
 @login_prohibited
 def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
@@ -80,7 +93,7 @@ def chat_bot(request):
 def respond(user_input):
     lemmatizer = WordNetLemmatizer()
     keywords = {
-        "psc": ["personal spending tracker", "psc"],
+        "pst": ["personal spending tracker", "pst"],
         "budget": ["budget", "spending budget", "financial budget"],
         "expense": ["expense", "spending", "financial expense"],
         "track": ["track", "record", "keep track"],
@@ -91,7 +104,7 @@ def respond(user_input):
     }
 
     responses = {
-        "psc": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."], 
+        "pst": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."], 
         "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses."], 
         "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"], 
         "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."], 
@@ -116,4 +129,73 @@ def respond(user_input):
 
 
 
+@login_required
+def add_spending(request):
+    if request.method == 'POST':
+        form = AddSpendingForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            spending = form.save(commit=False)
+            spending.spending_owner = request.user
+            spending.save()
+            for file in request.FILES.getlist('file'):
+                SpendingFile.objects.create(
+                    spending = spending,
+                    file = file
+                )
+            return redirect('home')
+    else:
+        form = AddSpendingForm(user=request.user)
+    return render(request, 'add_spending.html',  {'form': form})
+
+
+@login_required
+def view_spending(request):
+    spending = Spending.objects.all()
+    return render(request, 'view_spending.html', {'spending': spending})
+
+
+
+@login_required
+def add_spending_categories(request):
+    if request.method == 'POST':
+        form = CategoriesForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save(commit = False)
+            category.owner = request.user
+            category.save()
+            return redirect('home')
+    else:
+        form = CategoriesForm()
+    return render(request, 'add_spending_categories.html',  {'form': form})
+
+@login_required
+def view_spending_categories(request):
+    if request.method == 'POST':
+        delete_spending_categories(request)
+    categories_expenditure = Categories.objects.filter(categories_type = Spending_type.EXPENDITURE)
+    categories_income = Categories.objects.filter(categories_type = Spending_type.INCOME)
+    return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
+
+@login_required
+def delete_spending_categories(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = Categories.objects.get(id=category_id)
+        category.delete()
+        return redirect('view_spending_categories')
+
+@login_required
+def update_spending_categories(request, category_id):
+    if request.method == 'POST':
+        form = CategoriesForm(request.POST)
+        if form.is_valid():
+            category = Categories.objects.get(id=category_id)
+            form = CategoriesForm(request.POST, instance=category)
+            form.save()
+            return redirect('view_spending_categories')
+    else:
+        category = Categories.objects.get(id=category_id)
+        form = CategoriesForm(instance=category)
+
+    return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
 

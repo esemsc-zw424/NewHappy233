@@ -1,0 +1,11 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<h1>Update Spending Categories</h1>
+<form action="{% url 'update_spending_categories' category.id %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <input type="submit" value="Update category" class = 'btn btn-lg btn-primary'> 
+    <a href='{% url 'view_spending_categories' %}' class = 'btn btn-lg btn-primary'>Return View Categories</a>  
+</form>
+{% endblock %}

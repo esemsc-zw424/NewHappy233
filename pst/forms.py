@@ -1,11 +1,13 @@
-
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User
+from pst.models import User, Spending, Categories, Spending_type
+from django.forms import ClearableFileInput
 
-
-
+class CategoriesForm(forms.ModelForm):
+    class Meta:
+        model = Categories
+        fields = ['name', 'categories_type']
 
 class PasswordValidationForm(forms.ModelForm):
     """Auxiliary form for password validation"""
@@ -41,9 +43,10 @@ class PasswordValidationForm(forms.ModelForm):
         new_password = self.cleaned_data.get('password')
         confirm_password = self.cleaned_data.get('confirm_password')
         if new_password != confirm_password:
-            self.add_error('confirm_password', 'Confirmation does not match password.')
+            self.add_error('confirm_password',
+                           'Confirmation does not match password.')
 
-    
+
 class VisitorSignupForm(PasswordValidationForm):
     """Form enabling a visitor to sign up"""
 
@@ -62,8 +65,55 @@ class VisitorSignupForm(PasswordValidationForm):
             email=data.get('email'),
             password=data.get('password'),
         )
+
+        categories = [
+            {'name': 'Food', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Drink', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Transport', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Sport', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Entertainment', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Clothes', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Medical', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Housing', 'type': Spending_type.EXPENDITURE},
+            {'name': 'Salary', 'type': Spending_type.INCOME},
+            {'name': 'Investment', 'type': Spending_type.INCOME},
+            {'name': 'Part-Time', 'type': Spending_type.INCOME},
+            {'name': 'Other', 'type': Spending_type.INCOME},
+        ]
+
+        for category in categories:
+            Categories.objects.create(
+                name=category['name'],
+                owner=user,
+                categories_type=category['type'],
+            )
+
         return user
+
 
 class LoginForm(Form):
     email = forms.EmailField(label='Email')
     password = forms.CharField(label='Password', widget=forms.PasswordInput())
+
+
+class AddSpendingForm(forms.ModelForm):
+    spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), empty_label=None)
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(AddSpendingForm, self).__init__(*args, **kwargs)
+        if user:
+            spending_type = self.data.get('spending_type', '')
+            self.fields['spending_category'].queryset = Categories.objects.filter(owner = user) # this part filter out categories that belongs to current user
+
+    class Meta:
+        model = Spending
+        fields = ['title', 'amount', 'descriptions', 'date', 'spending_type', 'spending_category']
+
+    file = forms.FileField(
+        label='file',
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        required=False,
+    )
+
+

@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -130,9 +130,18 @@ SOCIALACCOUNT_PROVIDERS = {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
+        'SCOPE': [
+            #'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    
         'APP': {
-            'client_id': '',
-            'secret': '',
+            'client_id': '914621288374-g0l2sqmg19jqg3be86dkjnm5gecrbqlp.apps.googleusercontent.com',
+            'secret': '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',
             'key': ''
         }
     }
@@ -155,6 +164,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -164,9 +176,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'pst.User'
 
 REDIRECT_URL_WHEN_LOGGED_IN = 'home'
+LOGIN_REDIRECT_URL = 'home'
 
 SITE_ID = 1
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'email'
+
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
+
 
 
