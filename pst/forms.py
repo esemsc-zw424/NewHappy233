@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
 from pst.models import User, Spending, Categories, Spending_type
 from django.forms import ClearableFileInput
+from django.contrib import messages
 
 class CategoriesForm(forms.ModelForm):
     class Meta:
@@ -67,18 +68,18 @@ class VisitorSignupForm(PasswordValidationForm):
         )
 
         categories = [
-            {'name': 'Food', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Drink', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Transport', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Sport', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Entertainment', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Clothes', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Medical', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Housing', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Salary', 'type': Spending_type.INCOME},
-            {'name': 'Investment', 'type': Spending_type.INCOME},
-            {'name': 'Part-Time', 'type': Spending_type.INCOME},
-            {'name': 'Other', 'type': Spending_type.INCOME},
+            {'name': 'Food', 'type': Spending_type.EXPENDITURE, 'default_category':True},
+            {'name': 'Drink', 'type': Spending_type.EXPENDITURE, 'default_category':True},
+            {'name': 'Transport', 'type': Spending_type.EXPENDITURE, 'default_category':True},
+            {'name': 'Sport', 'type': Spending_type.EXPENDITURE, 'default_category':True},
+            {'name': 'Entertainment', 'type': Spending_type.EXPENDITURE, 'default_category':True},
+            {'name': 'Clothes', 'type': Spending_type.EXPENDITURE, 'default_category':True},
+            {'name': 'Medical', 'type': Spending_type.EXPENDITURE, 'default_category':True},
+            {'name': 'Housing', 'type': Spending_type.EXPENDITURE, 'default_category':True},
+            {'name': 'Salary', 'type': Spending_type.INCOME, 'default_category':True},
+            {'name': 'Investment', 'type': Spending_type.INCOME, 'default_category':True},
+            {'name': 'Part-Time', 'type': Spending_type.INCOME, 'default_category':True},
+            {'name': 'Other', 'type': Spending_type.INCOME, 'default_category':True},
         ]
 
         for category in categories:
@@ -86,6 +87,7 @@ class VisitorSignupForm(PasswordValidationForm):
                 name=category['name'],
                 owner=user,
                 categories_type=category['type'],
+                default_category = category['default_category']
             )
 
         return user

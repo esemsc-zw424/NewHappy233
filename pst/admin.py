@@ -27,5 +27,5 @@ class SpendingAdmin(admin.ModelAdmin):
 @admin.register(Categories)
 class CategoriesAdmin(admin.ModelAdmin):
     list_display = [
-        'name', 'owner', 'categories_type',
+        'name', 'owner', 'categories_type', 'default_category',
     ]
