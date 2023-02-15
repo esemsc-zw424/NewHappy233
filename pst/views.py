@@ -218,7 +218,7 @@ def set_budget(request):
     if request.method == 'POST':
         form = BudgetForm(request.POST)
         if form.is_valid():
-            print(1024)
+            #print(1024)
             # form.save()
             # print(Budget.objects.count())
             # return redirect('budget_show')
@@ -234,11 +234,18 @@ def set_budget(request):
 def show_budget(request):
     total = cal_spending()
     #print(total)
-    budget = Budget.objects.last()
-    if total == None:
+    budget = Budget.objects.filter(budget_owner=request.user).last()
+    #budget = Budget.objects.last()
+    if budget == None:
+        #messages.add_message(request, messages.INFO, 'you have not set budget yet')
+        spending_percentage = 0
+    elif total == None:
+        messages.add_message(request, messages.INFO, 'you have not spent yet')
         spending_percentage = 0
     else:
-        spending_percentage = (total / budget.limit) * 100
+        spending_percentage = int((total / budget.limit) * 100)
+        if spending_percentage >= 100:
+            messages.add_message(request, messages.INFO, 'you have exceeded the limit')
     return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
 
 def cal_spending():
