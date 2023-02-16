@@ -45,7 +45,7 @@ class User(AbstractUser):
 # Create your models here.
 
 class Categories(models.Model):
-    
+
     name = models.CharField( # name of the category
         max_length=100
     )
@@ -114,5 +114,63 @@ class SpendingFile(models.Model):
         blank=True,
         upload_to='user_files/'
     )
+
+# this model is for posts in the forum
+class Post(models.Model):
+
+    # this field store the user when sent this post
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
+
+    content = models.TextField( # for stroing the content of the post
+        blank = True,
+    )
+
+    # this field store the number of likes other user gave
+    likes = models.IntegerField( # this store the number of likes other user gave
+        default=0,
+        blank = False,
+        validators=[
+            MinValueValidator(0),
+        ]
+    )
+
+    # this field store the date and time when this post sent
+    post_date = models.DateTimeField(auto_now_add=True)
+
+# this model is for replies under a post
+class Reply(models.Model):
+    
+    # this field store the user when sent this reply
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reply', blank = False)
+
+    # this field store the post where this reply belongs to
+    parent_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reply', blank = False)
+
+    # if this reply is the reply for another reply under the same post, then this field will be use to mark the parent reply
+    parent_reply = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+
+    # for stroing the content of the post
+    # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
+    content = models.CharField( 
+        blank = True,
+        max_length = 2000,
+    )
+
+    # this field store the number of likes other user gave
+    likes = models.IntegerField(
+        default=0,
+        blank = False,
+        validators=[
+            MinValueValidator(0),
+        ]
+    )
+
+    # this field store the date and time when this reply sent
+    reply_date = models.DateTimeField(auto_now_add=True)
+
+
+
+
+
     
 
