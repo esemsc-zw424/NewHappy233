@@ -30,10 +30,12 @@ urlpatterns = [
     path('chat_bot/', views.chat_bot, name = 'chat_bot'),
     path('log_out/', views.log_out, name = 'log_out'),
     path('accounts/', include('allauth.urls')),
-    path('view_spending', views.view_spending, name = 'view_spending'),
+    path('view_spendings', views.view_spendings, name = 'view_spendings'),
     path('add_spending_categories/', views.add_spending_categories, name = 'add_spending_categories'),
     path('view_spending_categories', views.view_spending_categories, name = 'view_spending_categories'),
     path('update_spending_categories/<int:category_id>/', views.update_spending_categories, name = 'update_spending_categories'),
+    path('edit_spending/<int:spending_id>/', views.edit_spending, name = 'edit_spending'),
+    path('delete_spending/<int:spending_id>/', views.delete_spending,name = 'delete_spending'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

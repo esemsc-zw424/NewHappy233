@@ -1,0 +1,28 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+
+
+<div class="container">
+    <div class="row">
+        <div class= "form_check">
+            <div class="mt-5 col-xl-12">
+                <div class="mb-4">
+                    <h1>Edit Spending</h1>
+                    <h1>{{ spending.title }}</h1>
+                </div>
+                <form action='' method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-primary">Update</button>
+                </form>
+                <form action="{% url 'delete_spending' spending.id %}" method="post" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="spending_id" value="{{ spending.id }}">
+                    <input type="submit" value="Delete spending" class="btn btn-danger">
+                  </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

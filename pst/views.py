@@ -1,6 +1,7 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib import messages
 from .forms import  CategoriesForm
 from django.http import HttpResponse
@@ -33,12 +34,13 @@ from nltk.stem import WordNetLemmatizer
 def user_feed(request):
     return render(request, 'user_feed.html')
     
+@login_prohibited
 def visitor_signup(request):
     if request.method == 'POST':
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth.login(request, user)
+            auth.login(request, user,backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
         else:
             return render(request, 'visitor_signup.html', {'form': form})
@@ -149,10 +151,42 @@ def add_spending(request):
 
 
 @login_required
-def view_spending(request):
+def view_spendings(request):
     spending = Spending.objects.all()
-    return render(request, 'view_spending.html', {'spending': spending})
+    return render(request, 'view_spendings.html', {'spending': spending})
 
+
+@login_required
+def edit_spending(request, spending_id):
+    # if request.method == 'POST':
+    #     form = EditSpendingForm(request.POST)
+    #     if form.is_valid():
+    try:
+        spending = Spending.objects.get(id = spending_id)
+    except ObjectDoesNotExist:
+        return render(request, 'view_spendings.html')
+    
+
+    if request.method == 'POST':
+        form = EditSpendingForm(request.POST, instance=spending)
+        if form.is_valid():
+            form.save()
+            request.spending.save()
+            messages.success(request, 'success')
+            return redirect('view_spendings') 
+    else:
+        form = EditSpendingForm(instance=spending)
+    return render(request, "edit_spending.html", {'form': form})
+
+
+@login_required
+def delete_spending(request, spending_id):
+
+        delete_spending = get_object_or_404(Spending, id = spending_id)
+        delete_spending.delete()
+        messages.warning("spending has been deleted")
+        return redirect('view_spendings') 
+   
 
 
 @login_required

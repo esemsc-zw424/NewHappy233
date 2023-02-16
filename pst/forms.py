@@ -114,8 +114,13 @@ class AddSpendingForm(forms.ModelForm):
 
     file = forms.FileField(
         label='file',
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        # allows multiple files to be uploaded
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),    
         required=False,
     )
 
+class EditSpendingForm(AddSpendingForm):   
 
+   class Meta:
+        model = Spending
+        fields = ['title', 'amount', 'descriptions', 'date', 'spending_type', 'spending_category']

@@ -136,7 +136,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'email',
         ],
         'AUTH_PARAMS': {
-            'access_type': 'online',
+            'access_type': 'offline',
         },
         'OAUTH_PKCE_ENABLED': True,
     
@@ -177,6 +177,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'pst.User'
 
 REDIRECT_URL_WHEN_LOGGED_IN = 'home'
+
 LOGIN_REDIRECT_URL = 'home'
 
 SITE_ID = 1

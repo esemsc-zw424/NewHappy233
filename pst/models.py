@@ -102,7 +102,7 @@ class Spending(models.Model):
         max_length=500,
     )
 
-    date = models.DateField( # data of the spending
+    date = models.DateField( # date of the spending
         blank = False,
     )
 
