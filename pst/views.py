@@ -177,7 +177,7 @@ def edit_spending(request, spending_id):
             return redirect('view_spendings') 
     else:
         form = EditSpendingForm(instance=spending)
-    return render(request, "edit_spending.html", {'form': form})
+    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
 
 
 @login_required
@@ -185,7 +185,7 @@ def delete_spending(request, spending_id):
 
         delete_spending = get_object_or_404(Spending, id = spending_id)
         delete_spending.delete()
-        messages.warning("spending has been deleted")
+        messages.warning(request, "spending has been deleted")
         return redirect('view_spendings') 
    
 
