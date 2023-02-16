@@ -1,0 +1,33 @@
+[
+    {
+        "model": "pst.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
+            
+            "email": "johndoe@example.org",
+            "first_name": "john",
+            "last_name": "doe"
+        }
+    },
+    {
+        "model": "pst.post",
+        "pk": 2,
+        "fields": {
+            "user": 1,
+            "content": "This is example post 1",
+            "likes": 670,
+            "post_date": "2023-01-31"
+        }
+    },
+    {
+        "model": "pst.post",
+        "pk": 3,
+        "fields": {
+            "user": 1,
+            "content": "This is example post 2",
+            "likes": 70,
+            "post_date": "2023-02-01"
+        }
+    }
+]

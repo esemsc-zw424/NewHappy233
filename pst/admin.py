@@ -33,7 +33,7 @@ class CategoriesAdmin(admin.ModelAdmin):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = [
-        'user', 'content', 'likes', 'post_date',
+        'user', 'title', 'content', 'likes', 'post_date',
     ]
 
 @admin.register(Reply)

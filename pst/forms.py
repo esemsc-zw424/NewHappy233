@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type
+from pst.models import User, Spending, Categories, Spending_type, Post, Reply
 from django.forms import ClearableFileInput
 from django.contrib import messages
 
@@ -117,4 +117,14 @@ class AddSpendingForm(forms.ModelForm):
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
     )
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
+
+class ReplyForm(forms.ModelForm):
+    class Meta:
+        model = Reply
+        fields = ['content']
 

@@ -1,0 +1,47 @@
+[
+    {
+        "model": "pst.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
+            
+            "email": "johndoe@example.org",
+            "first_name": "john",
+            "last_name": "doe"
+        }
+    },
+    {
+        "model": "pst.post",
+        "pk": 2,
+        "fields": {
+            "user": 1,
+            "content": "This is example post 1",
+            "likes": 670,
+            "post_date": "2023-01-31"
+        }
+    },
+    {
+        "model": "pst.reply",
+        "pk": 3,
+        "field": {
+            "user": 1,
+            "parent_post": 2,
+            "parent_reply": null,
+            "content": "This is example reply 1",
+            "likes": 67,
+            "reply_date": "2023-01-31"
+        }
+    },
+    {
+        "model": "pst.reply",
+        "pk": 4,
+        "field": {
+            "user": 1,
+            "parent_post": 2,
+            "parent_reply": 3,
+            "content": "This is example reply 2",
+            "likes": 98,
+            "reply_date": "2023-02-01"
+        }
+    }
+]

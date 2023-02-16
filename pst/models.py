@@ -121,8 +121,16 @@ class Post(models.Model):
     # this field store the user when sent this post
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
 
-    content = models.TextField( # for stroing the content of the post
+    # this field store the title of the post
+    # the title are not expected to be very long and can be empty if user don't want to have a title
+    title = models.CharField(
         blank = True,
+        max_length= 150,
+    )
+
+    # this field store the content of the post
+    content = models.TextField( # for stroing the content of the post
+        blank = False,
     )
 
     # this field store the number of likes other user gave
@@ -149,7 +157,7 @@ class Reply(models.Model):
     # if this reply is the reply for another reply under the same post, then this field will be use to mark the parent reply
     parent_reply = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
-    # for stroing the content of the post
+    # this field store the content of the post
     # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
     content = models.CharField( 
         blank = True,
@@ -166,7 +174,7 @@ class Reply(models.Model):
     )
 
     # this field store the date and time when this reply sent
-    reply_date = models.DateTimeField(auto_now_add=True)
+    reply_date = models.DateTimeField(auto_now_add=True, blank = False)
 
 
 
