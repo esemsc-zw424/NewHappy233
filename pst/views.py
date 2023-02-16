@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
-from .forms import  CategoriesForm
-from django.http import HttpResponse
+from .forms import  CategoriesForm, PostForm, ReplyForm
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .models import User ,Categories
@@ -204,4 +204,56 @@ def update_spending_categories(request, category_id):
         category = Categories.objects.get(id=category_id)
         form = CategoriesForm(instance=category)
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
+
+def forum(request):
+    posts = Post.objects.all().order_by('-post_date')
+    for post in posts:
+        post.replies = Reply.objects.filter(parent_post=post)
+    return render(request, 'forum.html', {'posts': posts})
+
+@login_required
+def add_post(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit = False)
+            post.user = request.user
+            post.save()
+            return redirect('forum')
+    else:
+        form = PostForm()
+    return render(request, 'add_post.html',  {'form': form})
+
+@login_required
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    context = {'post': post}
+    return render(request, 'post_detail.html', context)
+
+@login_required
+def like_post(request):
+    post_id = request.POST.get('post_id')
+    post = get_object_or_404(Post, id=post_id)
+    post.likes += 1
+    post.save()
+    return JsonResponse({'likes': post.likes})
+
+@login_required
+def add_reply_to_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.method == 'POST':
+        form = ReplyForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.user = request.user
+            reply.parent_post = post
+            reply.save()
+            return redirect('post_detail', post_id=post.id)
+    else:
+        form = ReplyForm()
+
+    context = {'form': form, 'post': post}
+    return render(request, 'add_reply_to_post.html', context)
+
 

@@ -1,0 +1,26 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <title>Post detail</title>
+    <!-- add the Bootstrap CSS file -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Forum</h1>
+        <hr>
+        <a href="{% url 'add_reply_to_post' post.id %}" class="btn btn-primary mb-3">Add reply to the post</a>
+        <a href='{% url 'forum' %}' class = "btn btn-primary mb-3">Return Forum</a>
+
+        <h1>{{ post.title }}</h1>
+        <p>Author: {{ post.user.get_full_name }}</p>
+        <p>{{ post.content }}</p>
+        <p>{{ post.replies.count }} replies | {{ post.likes }} likes</p>
+    </div>
+    <!-- add the Bootstrap JavaScript file -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</body>
+{% endblock %}

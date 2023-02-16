@@ -145,6 +145,9 @@ class Post(models.Model):
     # this field store the date and time when this post sent
     post_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.content
+
 # this model is for replies under a post
 class Reply(models.Model):
     
@@ -175,6 +178,9 @@ class Reply(models.Model):
 
     # this field store the date and time when this reply sent
     reply_date = models.DateTimeField(auto_now_add=True, blank = False)
+
+    def __str__(self):
+        return self.content
 
 
 

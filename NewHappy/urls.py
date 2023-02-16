@@ -33,6 +33,12 @@ urlpatterns = [
     path('add_spending_categories/', views.add_spending_categories, name = 'add_spending_categories'),
     path('view_spending_categories', views.view_spending_categories, name = 'view_spending_categories'),
     path('update_spending_categories/<int:category_id>/', views.update_spending_categories, name = 'update_spending_categories'),
+
+    path('forum/', views.forum, name = 'forum'),
+    path('add_post/', views.add_post, name = 'add_post'),
+    path('post_detail/<int:post_id>/', views.post_detail, name='post_detail'),
+    path('like_post/', views.like_post, name='like_post'),
+    path('add_reply_to_post/<int:post_id>/', views.add_reply_to_post, name='add_reply_to_post'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
