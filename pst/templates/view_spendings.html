@@ -23,7 +23,7 @@
         <tbody>
             {% for i in spending %}
             <tr class="align-middle">
-                <td> {{ i.title }}</td>
+                <td><a href = "{% url 'edit_spending' i.id %}">{{ i.title }}</a></td>
                 <td> {{ i.descriptions }}</td>
                 <td> {{ i.spending_type}}</td>
                 <td> {{ i.amount}}</td>

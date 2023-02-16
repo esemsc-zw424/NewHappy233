@@ -16,11 +16,7 @@
                     {{ form.as_p }}
                     <button class="btn btn-primary">Update</button>
                 </form>
-                <form action="{% url 'delete_spending' spending.id %}" method="post" style="display:inline">
-                    {% csrf_token %}
-                    <input type="hidden" name="spending_id" value="{{ spending.id }}">
-                    <input type="submit" value="Delete spending" class="btn btn-danger">
-                  </form>
+                
             </div>
         </div>
     </div>
