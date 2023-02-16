@@ -62,6 +62,7 @@ def log_in(request):
     if request.method == 'POST':
         next = request.POST.get('next') or ''
         form = LoginForm(request.POST)
+        messages.add_message(request, messages.ERROR,"The credentials provided are invalid!")
         if form.is_valid():
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
@@ -70,9 +71,9 @@ def log_in(request):
                 login(request, user)
                 redirect_url = next or 'home'
                 return redirect(redirect_url)
-       # messages.add_message(request, messages.ERROR,
-                            # "The credentials provided are invalid!")
+        
         else:
+            
             next = request.GET.get('next') or ''
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
