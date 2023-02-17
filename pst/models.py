@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator,MaxValueValidator,MinValueValidator
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
+from django.core.exceptions import ValidationError
+import os
 
 class Spending_type(models.TextChoices):
         EXPENDITURE = "Expenditure"
@@ -147,6 +149,22 @@ class Post(models.Model):
 
     def __str__(self):
         return self.content
+
+
+def validate_file_extension(value):
+        ext = os.path.splitext(value.name)[1]  # [0] returns path+filename
+        valid_extensions = ['.jpg', '.jpeg', '.png']
+        if not ext.lower() in valid_extensions:
+            raise ValidationError('File format not supported.')
+
+class PostImage(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(
+        null=True,
+        blank=True,
+        upload_to='post_images/',
+        validators=[validate_file_extension],
+    )
 
 # this model is for replies under a post
 class Reply(models.Model):

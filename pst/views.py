@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from .models import User ,Categories
 
 
-from .models import SpendingFile
+from .models import SpendingFile, PostImage
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -214,11 +214,16 @@ def forum(request):
 @login_required
 def add_post(request):
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit = False)
             post.user = request.user
             post.save()
+            for file in request.FILES.getlist('image'):
+                PostImage.objects.create(
+                    post = post,
+                    image = file
+                )
             return redirect('forum')
     else:
         form = PostForm()

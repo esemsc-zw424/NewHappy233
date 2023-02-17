@@ -16,7 +16,24 @@
         <h1>{{ post.title }}</h1>
         <p>Author: {{ post.user.get_full_name }}</p>
         <p>{{ post.content }}</p>
-        <p>{{ post.replies.count }} replies | {{ post.likes }} likes</p>
+        <p>
+            {% for i in post.images.all %}
+            <img src="{{ i.image.url }}" width="200" height="200"></a>
+            {% endfor %}                        
+        </p>
+        <p>{{ post.post_date|date:'d M Y, H:i'}}</p>
+        <p>{{ post.reply.count }} replies | {{ post.likes }} likes</p>
+
+        {% if post.reply.exists %}
+            <div>Replies:</div>
+            {% for r in post.reply.all %}
+            <div>{{ r.user.get_full_name }}: {{ r.content }} - in {{ r.reply_date|date:'d M Y, H:i' }}</div>
+            {% endfor%}
+            
+        {% endif %}
+
+
+        
     </div>
     <!-- add the Bootstrap JavaScript file -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

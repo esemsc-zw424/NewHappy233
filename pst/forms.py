@@ -123,6 +123,12 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ['title', 'content']
 
+    image = forms.ImageField(
+        label='image',
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        required=False,
+    )   
+
 class ReplyForm(forms.ModelForm):
     class Meta:
         model = Reply
