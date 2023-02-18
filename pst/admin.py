@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Spending, UserProfile
+from .models import User, Spending, UserProfile, Categories
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 
@@ -26,6 +26,13 @@ class SpendingAdmin(admin.ModelAdmin):
 
         'title', 'spending_owner', 'amount', 'descriptions', 'date', 'spending_type',
 
+    ]
+
+
+@admin.register(Categories)
+class CategoriesAdmin(admin.ModelAdmin):
+    list_display = [
+        'name', 'owner', 'categories_type',
     ]
 
 

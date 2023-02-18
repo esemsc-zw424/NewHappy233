@@ -6,6 +6,11 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 
 
+class Spending_type(models.TextChoices):
+    EXPENDITURE = "Expenditure"
+    INCOME = "Income"
+
+
 class UserManager(BaseUserManager):
 
     def create_user(self, first_name, last_name, email, password):
@@ -46,7 +51,7 @@ class UserProfile(models.Model):  # Create User Profile
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     bio = models.TextField(max_length=500, blank=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    gender = models.CharField(max_length=4, choices=GENDER_CHOICES, blank=True)
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     phone_number = models.CharField(max_length=15, blank=True)
@@ -58,8 +63,18 @@ class UserProfile(models.Model):  # Create User Profile
 
 
 class Categories(models.Model):
-    name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)  # name of the category
+    # user this category belongs to
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    categories_type = models.CharField(  # the type of this category belongs to, for example expenditure or income
+        max_length=30,
+        choices=Spending_type.choices,
+        default=Spending_type.EXPENDITURE,
+        blank=False,
+    )
+
+    def __str__(self):
+        return self.name
 
 
 class Spending(models.Model):

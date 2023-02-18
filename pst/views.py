@@ -83,18 +83,6 @@ def log_out(request):
     logout(request)
     return redirect('visitor_introduction')
 
-
-@login_required
-def edit_profile(request):
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=request.user.profile)
-        if form.is_valid():
-            form.save()
-            return redirect('profile')
-    else:
-        form = UserProfileForm(instance=request.user.profile)
-    return render(request, 'edit_profile.html', {'form': form})
-
 # Chatbot is a simple virtual help assistant that can answer user's question base on keywords
 
 
@@ -111,7 +99,7 @@ def chat_bot(request):
 def respond(user_input):
     lemmatizer = WordNetLemmatizer()
     keywords = {
-        "psc": ["personal spending tracker", "psc"],
+        "pst": ["personal spending tracker", "pst"],
         "budget": ["budget", "spending budget", "financial budget"],
         "expense": ["expense", "spending", "financial expense"],
         "track": ["track", "record", "keep track"],
@@ -122,7 +110,7 @@ def respond(user_input):
     }
 
     responses = {
-        "psc": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."],
+        "pst": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."],
         "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses."],
         "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"],
         "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."],
@@ -164,7 +152,7 @@ def respond(user_input):
 @login_required
 def add_spending(request):
     if request.method == 'POST':
-        form = AddSpendingForm(request.POST, request.FILES)
+        form = AddSpendingForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             spending = form.save(commit=False)
             spending.spending_owner = request.user
@@ -176,7 +164,7 @@ def add_spending(request):
                 )
             return redirect('home')
     else:
-        form = AddSpendingForm()
+        form = AddSpendingForm(user=request.user)
     return render(request, 'add_spending.html',  {'form': form})
 
 
@@ -185,3 +173,37 @@ def view_spending(request):
     spending = Spending.objects.all()
     spending_file = SpendingFile.objects.all()
     return render(request, 'view_spending.html', {'spending': spending, 'spending_file': spending_file})
+
+
+@login_required
+def add_spending_categories(request):
+    if request.method == 'POST':
+        form = CategoriesForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save(commit=False)
+            category.owner = request.user
+            category.save()
+            return redirect('home')
+    else:
+        form = CategoriesForm()
+    return render(request, 'add_spending_categories.html',  {'form': form})
+
+
+@login_required
+def view_spending_categories(request):
+    if request.method == 'POST':
+        delete_spending_categories(request)
+    categories_expenditure = Categories.objects.filter(
+        categories_type=Spending_type.EXPENDITURE)
+    categories_income = Categories.objects.filter(
+        categories_type=Spending_type.INCOME)
+    return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
+
+
+@login_required
+def delete_spending_categories(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = Categories.objects.get(id=category_id)
+        category.delete()
+        return redirect('view_spending_categories')
