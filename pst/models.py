@@ -28,19 +28,14 @@ class UserManager(BaseUserManager):
 
    
 
-    def create_superuser(self, first_name, last_name, email, password, **extra_fields):
-        user = self.create_user(first_name, last_name, email, password)
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
-        return user
-
 
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True, blank=False)
     first_name = models.CharField(blank=False, unique=False, max_length=50)
     last_name = models.CharField(blank=False, unique=False, max_length=50)
+    reward_points = models.IntegerField()
+    consecutive_login_days = models.IntegerField()
     
     objects = UserManager()
     USERNAME_FIELD = 'email'
@@ -123,4 +118,6 @@ class SpendingFile(models.Model):
         upload_to='user_files/'
     )
     
+
+
 

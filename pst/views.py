@@ -8,6 +8,8 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .models import User ,Categories
+from datetime import timedelta
+from django.utils import timezone
 
 
 from .models import SpendingFile
@@ -51,11 +53,45 @@ def visitor_signup(request):
 
 @login_required
 def home(request):
+    user = request.user
+    if user.is_authenticated & user.login_daily == True:
+        show_calendar(request)
     return render(request, 'home.html')
 
 @login_prohibited
 def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
+
+
+def show_calendar(request):
+    #show calendar only once after login
+    if request.session.get('modal_shown', False):
+        user = request.user
+        current_datetime = timezone.now()
+        if current_datetime - user.last_login_date < timedelta(hours=24):
+            user.consecutive_login_days += 1 
+            # give user extra reward  user has login consecutive for a week
+            if user.consecutive_login_days > 7:
+                user.reward_points += 3
+            else:
+                user.reward_points += 1
+        # user has not log in consecutively        
+        else:
+            user.consecutive_login_days = 1
+            user.reward_points += 1
+
+        request.session['modal_shown'] = True
+        messages.info(request, 'Congratulations! You have been awarded  reward points for logging in today.')   
+            
+        user.save()
+
+def check_already_logged_in_once_daily(request):
+    current_datetime = timezone.now()
+    user = request.user
+    if current_datetime - user.last_login_date > timedelta(hours=24) & :
+        user.logged_in_once_daily = False
+
+
 
 @login_prohibited
 def log_in(request):
@@ -70,6 +106,9 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 redirect_url = next or 'home'
+                user.last_login_date = timezone.now()
+                
+                user.save()
                 return redirect(redirect_url)
         
         else:
@@ -77,6 +116,7 @@ def log_in(request):
             next = request.GET.get('next') or ''
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
+
 
 
 def log_out(request):
