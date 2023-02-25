@@ -25,9 +25,20 @@ nltk.download('punkt')
 nltk.download('wordnet')
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-
+from social_django.utils import load_backend, load_strategy
+from allauth.account.views import get_login_redirect_url as base_get_login_redirect_url
 
 # Create your views here.
+
+from allauth.socialaccount.models import SocialToken
+
+def get_login_redirect_url(request):
+    social_tokens = SocialToken.objects.filter(account__user=request.user)
+    for social_token in social_tokens:
+        social_token.token_secret = ''
+        social_token.save()
+    return base_get_login_redirect_url(request)
+
 
 @login_required
 def user_feed(request):
@@ -75,7 +86,21 @@ def log_in(request):
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
 
-
+# @login_prohibited
+# def google_login(request):
+#     backend = load_backend(strategy=load_strategy(request), name='google-oauth2', redirect_uri='/')
+#     try:
+#         user = backend.do_auth(request=request)
+#     except Exception as e:
+#         # handle authentication error
+#         messages.add_message(request, messages.ERROR,
+#                              "The credentials provided are invalid!")
+#     else:
+#         login(request, user)
+#         # redirect to success page
+#         #redirect_url = next or 'home'
+#         return redirect('home')
+        
 def log_out(request):
     logout(request)
     return redirect('visitor_introduction')

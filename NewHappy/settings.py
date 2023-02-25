@@ -47,9 +47,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    #'allauth.socialaccount.providers.apple',
     'allauth.socialaccount.providers.google',
-    #'allauth.socialaccount.providers.weixin',
 ]
 
 
@@ -68,7 +66,7 @@ ROOT_URLCONF = 'NewHappy.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,8 +119,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 
     # `allauth` specific authentication methods, such as login by e-mail
-    'allauth.account.auth_backends.AuthenticationBackend',
-   
+    'allauth.account.auth_backends.AuthenticationBackend'
+    
 ]
 
 # Provider specific settings
@@ -137,6 +135,7 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
+            
         },
         'OAUTH_PKCE_ENABLED': True,
     
@@ -147,6 +146,9 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+LOGIN_REDIRECT_URL = 'pst.views.get_login_redirect_url'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'pst.views.get_login_redirect_url'
 
 
 # Internationalization
