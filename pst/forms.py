@@ -118,3 +118,4 @@ class AddSpendingForm(forms.ModelForm):
         required=False,
     )
 
+

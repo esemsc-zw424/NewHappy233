@@ -42,7 +42,14 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'crispy_forms',
     'crispy_bootstrap5',
+   
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,7 +66,7 @@ ROOT_URLCONF = 'NewHappy.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -67,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
         },
     },
@@ -105,6 +113,43 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+AUTHENTICATION_BACKENDS = [
+   
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend'
+    
+]
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'SCOPE': [
+            #'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+            
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    
+        'APP': {
+            'client_id': '914621288374-g0l2sqmg19jqg3be86dkjnm5gecrbqlp.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        }
+    }
+}
+
+
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS= False
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -132,6 +177,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'pst.User'
 
+REDIRECT_URL_WHEN_LOGGED_IN = 'home'
+LOGIN_REDIRECT_URL = 'home'
+
+SITE_ID = 1
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'email'
+
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static')
 
 MESSAGE_TAGS = {
@@ -140,5 +193,4 @@ MESSAGE_TAGS = {
 }
 
 
-REDIRECT_URL_WHEN_LOGGED_IN = 'home'
 

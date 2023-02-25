@@ -29,6 +29,7 @@ from nltk.stem import WordNetLemmatizer
 
 # Create your views here.
 
+
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
@@ -38,7 +39,7 @@ def visitor_signup(request):
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth.login(request, user)
+            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
         else:
             return render(request, 'visitor_signup.html', {'form': form})
@@ -75,7 +76,7 @@ def log_in(request):
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
 
-
+        
 def log_out(request):
     logout(request)
     return redirect('visitor_introduction')
