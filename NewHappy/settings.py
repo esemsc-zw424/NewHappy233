@@ -147,9 +147,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-LOGIN_REDIRECT_URL = 'pst.views.get_login_redirect_url'
-ACCOUNT_LOGOUT_REDIRECT_URL = 'pst.views.get_login_redirect_url'
 
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS= False
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
