@@ -30,6 +30,7 @@ from nltk.stem import WordNetLemmatizer
 
 # Create your views here.
 
+
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
@@ -40,7 +41,7 @@ def visitor_signup(request):
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth.login(request, user,backend='django.contrib.auth.backends.ModelBackend')
+            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
         else:
             return render(request, 'visitor_signup.html', {'form': form})
@@ -78,7 +79,7 @@ def log_in(request):
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
 
-
+        
 def log_out(request):
     logout(request)
     return redirect('visitor_introduction')
@@ -135,6 +136,7 @@ def respond(user_input):
 @login_required
 def add_spending(request):
     if request.method == 'POST':
+        
         form = AddSpendingForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             spending = form.save(commit=False)
@@ -153,8 +155,21 @@ def add_spending(request):
 
 @login_required
 def view_spendings(request):
-    spending = Spending.objects.all()
-    return render(request, 'view_spendings.html', {'spending': spending})
+    print(str(request))
+    spendings = Spending.objects.filter(spending_owner=request.user)
+    if request.method == 'POST':
+        spending = request.GET.get(Spending)
+        print("2")
+        form = EditSpendingForm(request.POST, instance=spending)
+        
+        if form.is_valid():
+            form.save()
+            print("save form form view")
+            messages.success(request, 'success')
+            return redirect('view_spendings') 
+    else:
+        form = EditSpendingForm(user=request.user)
+    return render(request, 'view_spendings.html', {'form': form, 'spending': spendings})
 
 
 @login_required
