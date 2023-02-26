@@ -36,6 +36,8 @@ class User(AbstractUser):
     last_name = models.CharField(blank=False, unique=False, max_length=50)
     reward_points = models.IntegerField()
     consecutive_login_days = models.IntegerField()
+    last_login_date = models.DateTimeField(auto_now_add=True)
+    logged_in_once_daily = models.BooleanField(default = False)
     
     objects = UserManager()
     USERNAME_FIELD = 'email'

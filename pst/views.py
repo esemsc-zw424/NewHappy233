@@ -65,31 +65,76 @@ def visitor_introduction(request):
 
 def show_calendar(request):
     #show calendar only once after login
-    if request.session.get('modal_shown', False):
-        user = request.user
-        current_datetime = timezone.now()
-        if current_datetime - user.last_login_date < timedelta(hours=24):
-            user.consecutive_login_days += 1 
-            # give user extra reward  user has login consecutive for a week
-            if user.consecutive_login_days > 7:
-                user.reward_points += 3
-            else:
-                user.reward_points += 1
-        # user has not log in consecutively        
-        else:
-            user.consecutive_login_days = 1
-            user.reward_points += 1
+    #if request.session.get('modal_shown', False):
+    if :
+        #show calendar only once after login
+        
 
-        request.session['modal_shown'] = True
-        messages.info(request, 'Congratulations! You have been awarded  reward points for logging in today.')   
+        #request.session['modal_shown'] = True
+        #messages.info(request, 'Congratulations! You have been awarded  reward points for logging in today.')   
+
+
+def add_consecutive_login_days(request):
+    user = request.user
+    current_datetime = timezone.now()
+    if current_datetime - user.last_login_date < timedelta(hours=24):
+        user.consecutive_login_days += 1 
+        get_reward_points(request)
             
-        user.save()
+        # user has not log in consecutively        
+    else:
+        user.consecutive_login_days = 1
+        user.reward_points += 1
+
+
+def get_reward_points(request):
+    user = request.user
+    # give user extra reward  user has login consecutive for a week
+    if user.consecutive_login_days > 7:
+        user.reward_points += 3
+    else:
+        user.reward_points += 1
 
 def check_already_logged_in_once_daily(request):
     current_datetime = timezone.now()
     user = request.user
-    if current_datetime - user.last_login_date > timedelta(hours=24) & :
-        user.logged_in_once_daily = False
+    # if over a day since last login
+    if current_datetime - user.last_login_date > timedelta(hours=24) :
+        user.logged_in_once_daily = False 
+        user.save()
+    else:
+        user.logged_in_once_daily = True 
+        user.save()
+@login_required
+def home(request):
+    user = request.user
+    if user.is_authenticated & user.login_daily == True:
+        show_calendar(request)
+    return render(request, 'home.html')
+@login_required
+def edit_spending(request, spending_id):
+    # if request.method == 'POST':
+    #     form = EditSpendingForm(request.POST)
+    #     if form.is_valid():
+    try:
+        spending = Spending.objects.get(id = spending_id)
+    except ObjectDoesNotExist:
+        return render(request, 'view_spendings.html')
+    
+
+    if request.method == 'POST':
+        form = EditSpendingForm(request.POST, instance=spending)
+        if form.is_valid():
+            form.save()
+            request.spending.save()
+            messages.success(request, 'success')
+            return redirect('view_spendings') 
+    else:
+        form = EditSpendingForm(instance=spending)
+    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
+
+
+
 
 
 
