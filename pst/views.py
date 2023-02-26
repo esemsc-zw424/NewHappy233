@@ -158,6 +158,7 @@ def view_spendings(request):
     print(str(request))
     spendings = Spending.objects.filter(spending_owner=request.user)
     if request.method == 'POST':
+        print(request.POST.get(Spending.id))
         spending = request.GET.get(Spending)
         print("2")
         form = EditSpendingForm(request.POST, instance=spending)
