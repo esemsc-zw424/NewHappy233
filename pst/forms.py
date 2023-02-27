@@ -122,9 +122,6 @@ class AddSpendingForm(forms.ModelForm):
 class EditSpendingForm(forms.ModelForm):   
 
     #spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), empty_label=None)
-    
-    
-
     class Meta:
         model = Spending
         fields = ['title', 'amount', 'descriptions', 'date', 'spending_type', 'spending_category']
@@ -132,7 +129,7 @@ class EditSpendingForm(forms.ModelForm):
     file = forms.FileField(
         label='file',
         # allows multiple files to be uploaded
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),    
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
     )
     def __init__(self, user, *args, **kwargs):
@@ -140,21 +137,22 @@ class EditSpendingForm(forms.ModelForm):
         super(EditSpendingForm, self).__init__(*args, **kwargs)
         if user:
             spending_type = self.data.get('spending_type', '')
-            #self.fields['spending_category'].queryset = Categories.objects.filter(owner = user) # this part filter out categories that belongs to current user
+            self.fields['spending_category'].queryset = Categories.objects.filter(owner = user) # this part filter out categories that belongs to current user
 
     def save(self):
         print("save")
         if self.is_valid():
-            spending = Spending.objects.update(
+            print("save2")
+            spending = Spending.objects.update_or_create(
                 id=self.instance.id,
                 defaults={
                     'spending_owner': self.user,
+                    'title':self.cleaned_data.get('title'),
                     'amount': self.cleaned_data.get('amount'),
                     'descriptions': self.cleaned_data.get('descriptions'),
                     'date': self.cleaned_data.get('date'),
                     'spending_type': self.cleaned_data.get('spending_type'),
                     'spending_category': self.cleaned_data.get('spending_category'),
-                    
                 }
             )
 

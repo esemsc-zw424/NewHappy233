@@ -155,20 +155,22 @@ def add_spending(request):
 
 @login_required
 def view_spendings(request):
-    print(str(request))
+    # print(str(request))
     spendings = Spending.objects.filter(spending_owner=request.user)
-    if request.method == 'POST':
-        spending = request.GET.get(Spending)
-        print("2")
-        form = EditSpendingForm(request.POST, instance=spending)
-        
-        if form.is_valid():
-            form.save()
-            print("save form form view")
-            messages.success(request, 'success')
-            return redirect('view_spendings') 
-    else:
-        form = EditSpendingForm(user=request.user)
+    # if request.method == 'POST':
+    #     #spending = request.GET.get(Spending)
+    #     print("2")
+    #     print(request.GET)
+    #     print(request.POST)
+    #     form = AddSpendingForm(request.user, request.POST)
+    #
+    #     if form.is_valid():
+    #         form.save()
+    #         print("save form form view")
+    #         messages.success(request, 'success')
+    #         return redirect('view_spendings')
+    # else:
+    form = EditSpendingForm(user=request.user)
     return render(request, 'view_spendings.html', {'form': form, 'spending': spendings})
 
 
@@ -181,17 +183,21 @@ def edit_spending(request, spending_id):
         spending = Spending.objects.get(id = spending_id)
     except ObjectDoesNotExist:
         return render(request, 'view_spendings.html')
-    
 
     if request.method == 'POST':
-        form = EditSpendingForm(request.POST, instance=spending)
+        # spending = request.GET.get(Spending)
+        # print("2")
+        # print(request.GET)
+        # print(request.POST)
+        form = EditSpendingForm(request.user, request.POST, instance=spending)
+
         if form.is_valid():
             form.save()
-            request.spending.save()
+            print("save form form view")
             messages.success(request, 'success')
-            return redirect('view_spendings') 
+            return redirect('view_spendings')
     else:
-        form = EditSpendingForm(instance=spending)
+        form = EditSpendingForm(user=request.user)
     return render(request, "edit_spending.html", {'form': form, 'spending': spending})
 
 

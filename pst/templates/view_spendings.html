@@ -50,7 +50,7 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            <form id="editSpendingForm{{ i.id }}" method="post">
+                            <form method="post" action="{%url 'edit_spending' i.id %}">
                                 {% csrf_token %}
                                 {{ form.as_p }}
                                 <button class="btn btn-primary">{{ i.id }}</button>
