@@ -1,25 +1,3 @@
-{% extends 'base_content.html' %}
-{% block content %}
-<h1>View Spending</h1>
-
-<script>
-    function filterSpending(){
-        const start_date = document.getElementById('start_date').value;
-        const end_date = document.getElementById('end_date').value;
-
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function(){
-            if(this.readyState == 4 && this.status == 200){
-                document.getElementById('spending-table').innerHTML = this.responseText;
-            }
-        };
-        xhttp.open('GET', `/spending?start_date=${startDate}&end_date=${endDate}`, true);
-        xhttp.send();
-        return false;
-    }
-
-</script>
-
 <div class="container">
       
     <table class="table" id="spending-table">
@@ -28,9 +6,9 @@
         <p>
             <form method="GET" action="{% url 'view_spending' %}">
                 <label for="start_date">Start date:</label>
-                <input type="date" name="start_date" id="start_date">
+                <input type="date" name="start_date" id="start_date" value="2022-02-01">
                 <label for="end_date">End date:</label>
-                <input type="date" name="end_date" id="end_date">
+                <input type="date" name="end_date" id="end_date" value="2022-02-01">
                 <button type="submit" id="find-button">Find</button>
             </form>
         </p>
@@ -41,8 +19,8 @@
                 <th scope="col">spending type</th>
                 <th scope="col">amount</th>
                 <th scope="col">spending owner</th>
-                <th scope="col">date</th>
                 <th scope="col">file</th>
+                <th scope="col">date</th>
             </tr>
         </thead>
 
@@ -54,7 +32,7 @@
                 <td> {{ i.spending_type}} </td>
                 <td> {{ i.amount}} </td>
                 <td> {{ i.spending_owner}} </td>
-                <td>{{ i.date|date:"m/d/Y" }} </td>
+                <td> {{ i.date|date:"m/d/Y" }} </td>
 
                 <td>
                     {% for individual in i.files.all %}
@@ -67,7 +45,3 @@
         </tbody>
 
     </table>
-
-
-</div>
-{% endblock %}
