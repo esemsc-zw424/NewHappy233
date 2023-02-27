@@ -1,4 +1,5 @@
 {% extends 'base_content.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
 <h1>View All Spending</h1>
 
@@ -40,30 +41,45 @@
                 </td>
                 
             </tr>
+
+            <!-- Modal -->
             <div class="modal fade" id="editSpendingModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editSpendingModalLabel">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="editSpendingModalLabel">Edit Spending</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
                             </button>
                         </div>
                         <div class="modal-body">
                             <form method="post" action="{%url 'edit_spending' i.id %}">
                                 {% csrf_token %}
                                 {{ form.as_p }}
-                                <button class="btn btn-primary">{{ i.id }}</button>
+                                <button class="btn btn-primary">Update</button>
                             </form>
-                           
                         </div>
                         <div class="modal-footer">
-                           
                         </div>
-                    
                     </div>
                 </div>
             </div>
+{#            <div class="modal fade" id="editSpendingModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editSpendingModalLabel">#}
+{#                <div class="modal-dialog">#}
+{#                    <form method="post" action="{%url 'edit_spending' i.id %}">#}
+{#                        <div class="modal-content">#}
+{#                            <div class="modal-header">#}
+{#                                <h5 class="modal-title" id="editSpendingModalLabel">Edit Spending</h5>#}
+{#                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>#}
+{#                            </div>#}
+{#                            <div class="modal-body">#}
+{#                                {% csrf_token %}#}
+{#                                {% crispy form %}#}
+{#                            </div>#}
+{#<button class="btn btn-primary">{{ i.id }}</button>#}
+{#                        </div>#}
+{#                    </form>#}
+{#                </div>#}
+{#            </div>#}
             {% endfor %}
         </tbody>
 
