@@ -26,14 +26,28 @@
 
         <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
         <p>
-            <form method="GET" action="{% url 'view_spending' %}">
-                <label for="start_date">Start date:</label>
-                <input type="date" name="start_date" id="start_date">
-                <label for="end_date">End date:</label>
-                <input type="date" name="end_date" id="end_date">
-                <button type="submit" id="find-button">Find</button>
-            </form>
+            <div class="row align-items-center g-2">
+                <form method="GET" action="{% url 'view_spending' %}">
+                    <div class="col">
+                    <div class="form-floating">
+                        <input type="date" class="form-control" id="floatingInputGrid">
+                        <label for="floatingInputGrid">Start date:</label>
+                    </div>
+                    </div>
+                    <div class="col">
+                    <div class="form-floating">
+                        <input type="date" class="form-control" id="floatingInputGrid">
+                        <label for="floatingInputGrid">End date:</label>
+                    </div>
+                    </div>
+                    <div class="col">
+                        <button type="submit" id="find-button" class="btn btn btn-primary btn-lg">Find</button>
+                    </div>
+                </form>
+            </div>
+
         </p>
+
         <thead>
             <tr>
                 <th scope="col">title</th>
