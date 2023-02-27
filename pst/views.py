@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .models import User ,Categories
-
+from django.core.paginator import Paginator
 
 from .models import SpendingFile, PostImage
 from .forms import *
@@ -205,11 +205,19 @@ def update_spending_categories(request, category_id):
         form = CategoriesForm(instance=category)
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
 
+@login_required
 def forum(request):
     posts = Post.objects.all().order_by('-post_date')
     for post in posts:
         post.replies = Reply.objects.filter(parent_post=post)
     return render(request, 'forum.html', {'posts': posts})
+
+@login_required
+def personal_forum(request):
+    posts = Post.objects.filter(user=request.user).order_by('-post_date')
+    for post in posts:
+        post.replies = Reply.objects.filter(parent_post=post)
+    return render(request, 'personal_forum.html', {'posts': posts})
 
 @login_required
 def add_post(request):

@@ -8,12 +8,9 @@
 </head>
 <body>   
     <div class="container">
-        <h1>Forum</h1>
+        <h1>Personal Forum</h1>
         <hr>
-        <a href="{% url 'add_post' %}" class="btn btn-primary mb-3">Add Post</a>
-        <a href="{% url 'personal_forum'%}" class = "btn btn-primary mb-3">Personal Forum</a>
-        <a href="{% url 'home' %}" class = "btn btn-primary mb-3">Return Home</a>
-
+        <a href='{% url 'forum' %}' class = 'btn btn-primary mb-3'>Return Forum</a>
         {% for post in posts %}
             <div class="card mb-3">
                 <a href="{% url 'post_detail' post.id %}" class="text-dark text-decoration-none">

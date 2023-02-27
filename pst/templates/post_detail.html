@@ -5,34 +5,76 @@
     <title>Post detail</title>
     <!-- add the Bootstrap CSS file -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+    <style>
+        .post {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .post h1 {
+            margin-bottom: 10px;
+        }
+        .post img {
+            margin-right: 10px;
+        }
+        .post .author {
+            margin-bottom: 10px;
+        }
+        .post .info {
+            color: #666;
+            font-size: 14px;
+        }
+        .post .content {
+            color: #666;
+            font-size: 20px;
+        }
+        
+        .reply {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .reply .author {
+            margin-bottom: 10px;
+        }
+        .reply .info {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Forum</h1>
+        <h1>Post details</h1>
         <hr>
         <a href="{% url 'add_reply_to_post' post.id %}" class="btn btn-primary mb-3">Add reply to the post</a>
         <a href='{% url 'forum' %}' class = "btn btn-primary mb-3">Return Forum</a>
 
-        <h1>{{ post.title }}</h1>
-        <p>Author: {{ post.user.get_full_name }}</p>
-        <p>{{ post.content }}</p>
-        <p>
-            {% for i in post.images.all %}
-            <img src="{{ i.image.url }}" width="200" height="200"></a>
-            {% endfor %}                        
-        </p>
-        <p>{{ post.post_date|date:'d M Y, H:i'}}</p>
-        <p>{{ post.reply.count }} replies | {{ post.likes }} likes</p>
+        <div class="post">
+            <h1>{{ post.title }}</h1>
+            <div class="author">Author: {{ post.user.get_full_name }}</div>
+            <div class="content">{{ post.content }}</div>
+            <div class="images">
+                {% for i in post.images.all %}
+                <img src="{{ i.image.url }}" width="200" height="200">
+                {% endfor %}
+            </div>
+            <div class="info">{{ post.post_date|date:'d M Y, H:i'}}</div>
+            <div class="info">{{ post.reply.count }} replies | {{ post.likes }} likes</div>
+        </div>
 
         {% if post.reply.exists %}
             <div>Replies:</div>
             {% for r in post.reply.all %}
-            <div>{{ r.user.get_full_name }}: {{ r.content }} - in {{ r.reply_date|date:'d M Y, H:i' }}</div>
+            <div class="reply">
+                <div class="author">{{ r.user.get_full_name }}</div>
+                <div class="content">{{ r.content }}</div>
+                <div class="info">in {{ r.reply_date|date:'d M Y, H:i' }}</div>
+            </div>
             {% endfor%}
-            
         {% endif %}
-
-
         
     </div>
     <!-- add the Bootstrap JavaScript file -->
