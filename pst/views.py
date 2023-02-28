@@ -6,7 +6,9 @@ from .forms import  CategoriesForm
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from .models import User ,Categories
+from .models import User, Categories
+from django.core.paginator import Paginator
+import datetime
 
 
 from .models import SpendingFile
@@ -151,12 +153,21 @@ def add_spending(request):
 
 @login_required
 def view_spending(request):
-    spending = Spending.objects.all().order_by('date')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+
     if start_date and end_date:
-        spending = spending.filter(date__range=[start_date, end_date])
-    context = {'spending': spending}
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        spending = Spending.objects.filter(date__range=[start_date, end_date]).order_by('date')
+    else:
+        spending = Spending.objects.all().order_by('date')
+
+    paginator = Paginator(spending, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {'spending': spending, 'page_obj': page_obj}
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'spending_table.html', context)
     else:

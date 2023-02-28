@@ -1,9 +1,9 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<h1>View Spending</h1>
+
 
 <script>
-    function filterSpending(){
+    function filterSpending() {
         const start_date = document.getElementById('start_date').value;
         const end_date = document.getElementById('end_date').value;
 
@@ -13,7 +13,7 @@
                 document.getElementById('spending-table').innerHTML = this.responseText;
             }
         };
-        xhttp.open('GET', `/spending?start_date=${startDate}&end_date=${endDate}`, true);
+        xhttp.open('GET', `/spending?start_date=${start_date}&end_date=${end_date}`, true);
         xhttp.send();
         return false;
     }
@@ -21,33 +21,32 @@
 </script>
 
 <div class="container">
-      
     <table class="table" id="spending-table">
-
+        <h1>View Spending</h1>
         <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
         <p>
             <div class="row align-items-center g-2">
                 <form method="GET" action="{% url 'view_spending' %}">
                     <div class="col">
                     <div class="form-floating">
-                        <input type="date" class="form-control" id="floatingInputGrid">
+                        <input type="date" class="form-control" id="start_date" name="start_date">
                         <label for="floatingInputGrid">Start date:</label>
                     </div>
                     </div>
                     <div class="col">
                     <div class="form-floating">
-                        <input type="date" class="form-control" id="floatingInputGrid">
+                        <input type="date" class="form-control" id="end_date" name="end_date">
                         <label for="floatingInputGrid">End date:</label>
                     </div>
                     </div>
                     <div class="col">
-                        <button type="submit" id="find-button" class="btn btn btn-primary btn-lg">Find</button>
+                        <button type="submit" id="find-button" class="btn btn btn-primary btn-lg" onclick="filterSpending">Find</button>
                     </div>
                 </form>
             </div>
 
         </p>
-
+        
         <thead>
             <tr>
                 <th scope="col">title</th>
@@ -61,7 +60,7 @@
         </thead>
 
         <tbody>
-            {% for i in spending %}
+            {% for i in page_obj %}
             <tr class="align-middle">
                 <td> {{ i.title }} </td>
                 <td> {{ i.descriptions }} </td>
@@ -79,9 +78,25 @@
             </tr>
             {% endfor %}
         </tbody>
-
     </table>
 
+    <div class="pagination">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+              <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+              </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            {% endif %}
+            </ul>
+          </nav>
+    </div>
 
 </div>
 {% endblock %}
