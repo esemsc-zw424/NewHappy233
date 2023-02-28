@@ -112,6 +112,10 @@ class AddSpendingForm(forms.ModelForm):
         model = Spending
         fields = ['title', 'amount', 'descriptions', 'date', 'spending_type', 'spending_category']
 
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
     file = forms.FileField(
         label='file',
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
