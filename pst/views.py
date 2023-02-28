@@ -4,11 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from pst.forms import CategoriesForm, UserProfileForm
+from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .models import User, Categories
+from django.core.exceptions import ObjectDoesNotExist
 
 
 from .models import SpendingFile
@@ -149,6 +150,7 @@ def respond(user_input):
 #         form = AddSpendingForm()
 #     return render(request, 'add_spending.html',  {'form': form})
 
+
 @login_required
 def add_spending(request):
     if request.method == 'POST':
@@ -171,8 +173,7 @@ def add_spending(request):
 @login_required
 def view_spending(request):
     spending = Spending.objects.all()
-    spending_file = SpendingFile.objects.all()
-    return render(request, 'view_spending.html', {'spending': spending, 'spending_file': spending_file})
+    return render(request, 'view_spending.html', {'spending': spending})
 
 
 @login_required
@@ -191,12 +192,13 @@ def add_spending_categories(request):
 
 @login_required
 def view_spending_categories(request):
+
     if request.method == 'POST':
         delete_spending_categories(request)
     categories_expenditure = Categories.objects.filter(
-        categories_type=Spending_type.EXPENDITURE)
+        categories_type=Spending_type.EXPENDITURE, owner=request.user)
     categories_income = Categories.objects.filter(
-        categories_type=Spending_type.INCOME)
+        categories_type=Spending_type.INCOME, owner=request.user)
     return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
 
 
@@ -205,5 +207,54 @@ def delete_spending_categories(request):
     if request.method == 'POST':
         category_id = request.POST.get('category_id')
         category = Categories.objects.get(id=category_id)
-        category.delete()
+        if category.default_category == False:
+            category.delete()
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 "You can not delete default category!")
         return redirect('view_spending_categories')
+
+
+@login_required
+def update_spending_categories(request, category_id):
+    category = Categories.objects.get(id=category_id)
+    if request.method == 'POST':
+        form = CategoriesForm(request.POST)
+        if category.default_category == False:
+            if form.is_valid():
+                form = CategoriesForm(request.POST, instance=category)
+                form.save()
+                return redirect('view_spending_categories')
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 "You can not modify default category!")
+            return redirect('view_spending_categories')
+    else:
+        category = Categories.objects.get(id=category_id)
+        form = CategoriesForm(instance=category)
+    return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
+
+
+@login_required
+def user_profile(request):
+    user = request.user
+    return render(request, 'user_profile.html', {'user': user})
+
+
+@login_required
+def edit_profile(request):
+    try:
+        user = request.user
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, "User does not exist.")
+        return redirect('show_user')
+
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            user.save()
+            return redirect('user_profile')
+    else:
+        form = EditProfileForm(instance=user)
+    return render(request, 'edit_profile.html', {'form': form})

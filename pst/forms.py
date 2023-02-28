@@ -1,8 +1,9 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type, UserProfile
+from pst.models import User, Spending, Categories, Spending_type
 from django.forms import ClearableFileInput
+from django.contrib import messages
 
 
 class CategoriesForm(forms.ModelForm):
@@ -54,7 +55,8 @@ class VisitorSignupForm(PasswordValidationForm):
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name']
+        fields = ['email', 'first_name', 'last_name', 'bio', 'gender']
+        widgets = {'bio': forms.Textarea()}
 
     def save(self, commit=False):
         """Create a new user"""
@@ -66,21 +68,33 @@ class VisitorSignupForm(PasswordValidationForm):
             last_name=data.get('last_name'),
             email=data.get('email'),
             password=data.get('password'),
+            bio=data.get('bio'),
+            gender=data.get('gender'),
         )
 
         categories = [
-            {'name': 'Food', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Drink', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Transport', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Sport', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Entertainment', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Clothes', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Medical', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Housing', 'type': Spending_type.EXPENDITURE},
-            {'name': 'Salary', 'type': Spending_type.INCOME},
-            {'name': 'Investment', 'type': Spending_type.INCOME},
-            {'name': 'Part-Time', 'type': Spending_type.INCOME},
-            {'name': 'Other', 'type': Spending_type.INCOME},
+            {'name': 'Food', 'type': Spending_type.EXPENDITURE,
+                'default_category': True},
+            {'name': 'Drink', 'type': Spending_type.EXPENDITURE,
+                'default_category': True},
+            {'name': 'Transport', 'type': Spending_type.EXPENDITURE,
+                'default_category': True},
+            {'name': 'Sport', 'type': Spending_type.EXPENDITURE,
+                'default_category': True},
+            {'name': 'Entertainment', 'type': Spending_type.EXPENDITURE,
+                'default_category': True},
+            {'name': 'Clothes', 'type': Spending_type.EXPENDITURE,
+                'default_category': True},
+            {'name': 'Medical', 'type': Spending_type.EXPENDITURE,
+                'default_category': True},
+            {'name': 'Housing', 'type': Spending_type.EXPENDITURE,
+                'default_category': True},
+            {'name': 'Salary', 'type': Spending_type.INCOME, 'default_category': True},
+            {'name': 'Investment', 'type': Spending_type.INCOME,
+                'default_category': True},
+            {'name': 'Part-Time', 'type': Spending_type.INCOME,
+                'default_category': True},
+            {'name': 'Other', 'type': Spending_type.INCOME, 'default_category': True},
         ]
 
         for category in categories:
@@ -88,8 +102,18 @@ class VisitorSignupForm(PasswordValidationForm):
                 name=category['name'],
                 owner=user,
                 categories_type=category['type'],
+                default_category=category['default_category']
             )
+
         return user
+
+
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'bio',
+                  'gender', 'phone_number', 'address']
+        widgets = {'bio': forms.Textarea()}
 
 
 class LoginForm(Form):
@@ -98,7 +122,6 @@ class LoginForm(Form):
 
 
 class AddSpendingForm(forms.ModelForm):
-
     spending_category = forms.ModelChoiceField(
         queryset=Categories.objects.none(), empty_label=None)
 
@@ -112,7 +135,6 @@ class AddSpendingForm(forms.ModelForm):
 
     class Meta:
         model = Spending
-
         fields = ['title', 'amount', 'descriptions',
                   'date', 'spending_type', 'spending_category']
 
@@ -120,12 +142,11 @@ class AddSpendingForm(forms.ModelForm):
         label='file',
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
-
     )
 
 
-class UserProfileForm(forms.ModelForm):
-    class Meta:
-        model = UserProfile
-        fields = ['bio', 'location', 'birth_date',
-                  'gender', 'phone_number', ]
+# class UserProfileForm(forms.ModelForm):
+#     class Meta:
+#         model = UserProfile
+#         fields = ['bio', 'location', 'birth_date',
+#                   'gender', 'phone_number', ]

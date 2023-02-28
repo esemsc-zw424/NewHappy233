@@ -1,5 +1,6 @@
 {% extends 'base_content.html' %}
 {% block content %}
+
 <h1>View Spending Categories</h1>
 
 <div class="container">
@@ -25,6 +26,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="category_id" value="{{ category.id }}">
                         <button type="submit" class="btn btn-danger">Delete</button>
+                        <a href='{% url 'update_spending_categories' category.id %}' class="btn btn btn-secondary">Update</a>
                     </form>
                 </td>
             </tr>
@@ -52,6 +54,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="category_id" value="{{ category.id }}">
                         <button type="submit" class="btn btn-danger">Delete</button>
+                        <a href='{% url 'update_spending_categories' category.id %}' class="btn btn btn-secondary">Update</a>
                     </form>
                 </td>
             </tr>
