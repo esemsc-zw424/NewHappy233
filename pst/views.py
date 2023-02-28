@@ -151,10 +151,16 @@ def add_spending(request):
 
 @login_required
 def view_spending(request):
-    spending = Spending.objects.all()
-    return render(request, 'view_spending.html', {'spending': spending})
-
-
+    spending = Spending.objects.all().order_by('date')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    if start_date and end_date:
+        spending = spending.filter(date__range=[start_date, end_date])
+    context = {'spending': spending}
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'spending_table.html', context)
+    else:
+        return render(request, 'view_spending.html', context)
 
 @login_required
 def add_spending_categories(request):
