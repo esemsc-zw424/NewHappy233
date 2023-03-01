@@ -1,30 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="90c59b73-9444-4360-ad21-5660aaa0dbbb" name="Changes" comment="add a button in the show budget page to set budget when user have not set that">
+    <list default="true" id="486c1d4b-4622-4ab1-a013-f6c8174e2c87" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/testPull.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NewHappy/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/NewHappy/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pst/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pst/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pst/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pst/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/migrations/0002_rename_budget1_budget.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/migrations/0003_reward_rewardpoint.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/templates/budget_show.html" beforeDir="false" afterPath="$PROJECT_DIR$/pst/templates/budget_show.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/templates/visitor_introduction.html" beforeDir="false" afterPath="$PROJECT_DIR$/pst/templates/visitor_introduction.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="CodeStyleSettingsInfer">
-    <option name="done" value="true" />
-  </component>
-  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
-    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
-  </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-        <option value="HTML File" />
-      </list>
-    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -32,164 +24,28 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectCodeStyleSettingsMigration">
-    <option name="version" value="2" />
-  </component>
-  <component name="ProjectId" id="2LC0JCDpmlNXKV17nd2s91l5OgU" />
+  <component name="ProjectId" id="2MPwLddDkoZCrnDG6n4yDzi1O2w" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Git.Branch.Popup.ShowAllRemotes&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/15870/NewHappy233/pst/templates&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.django.DjangoModulesConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false"
   }
-}</component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\15870\NewHappy233\pst\templates" />
-    </key>
-  </component>
-  <component name="RunManager" selected="Django Server.NewHappy233">
-    <configuration name="Test: pst.tests.models.test_budget_model.BudgetModelTestCase" type="DjangoTestsConfigurationType" temporary="true">
-      <module name="NewHappy233" />
+}]]></component>
+  <component name="RunManager">
+    <configuration name="testPull" type="Python.DjangoServer" factoryName="Django server">
+      <module name="testPull" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="TARGET" value="pst.tests.models.test_budget_model.BudgetModelTestCase" />
-      <option name="SETTINGS_FILE" value="" />
-      <option name="CUSTOM_SETTINGS" value="false" />
-      <option name="USE_OPTIONS" value="false" />
-      <option name="OPTIONS" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_deleted_with_user" type="DjangoTestsConfigurationType" temporary="true">
-      <module name="NewHappy233" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="TARGET" value="pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_deleted_with_user" />
-      <option name="SETTINGS_FILE" value="" />
-      <option name="CUSTOM_SETTINGS" value="false" />
-      <option name="USE_OPTIONS" value="false" />
-      <option name="OPTIONS" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_limit_can_not_exceed_ten_digits" type="DjangoTestsConfigurationType" temporary="true">
-      <module name="NewHappy233" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="TARGET" value="pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_limit_can_not_exceed_ten_digits" />
-      <option name="SETTINGS_FILE" value="" />
-      <option name="CUSTOM_SETTINGS" value="false" />
-      <option name="USE_OPTIONS" value="false" />
-      <option name="OPTIONS" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_name_can_not_exceed_hundred_chars" type="DjangoTestsConfigurationType" temporary="true">
-      <module name="NewHappy233" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="TARGET" value="pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_name_can_not_exceed_hundred_chars" />
-      <option name="SETTINGS_FILE" value="" />
-      <option name="CUSTOM_SETTINGS" value="false" />
-      <option name="USE_OPTIONS" value="false" />
-      <option name="OPTIONS" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_created_buget_is_valid" type="DjangoTestsConfigurationType" temporary="true">
-      <module name="NewHappy233" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="TARGET" value="pst.tests.models.test_budget_model.BudgetModelTestCase.test_created_buget_is_valid" />
-      <option name="SETTINGS_FILE" value="" />
-      <option name="CUSTOM_SETTINGS" value="false" />
-      <option name="USE_OPTIONS" value="false" />
-      <option name="OPTIONS" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="NewHappy233" type="Python.DjangoServer" factoryName="Django server">
-      <module name="NewHappy233" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="launchJavascriptDebuger" value="false" />
-      <option name="port" value="8000" />
-      <option name="host" value="" />
-      <option name="additionalOptions" value="" />
-      <option name="browserUrl" value="" />
-      <option name="runTestServer" value="false" />
-      <option name="runNoReload" value="false" />
-      <option name="useCustomRunCommand" value="false" />
-      <option name="customRunCommand" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unnamed" type="Python.DjangoServer" factoryName="Django server" nameIsGenerated="true">
-      <module name="NewHappy233" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-        <env name="DJANGO_SETTINGS_MODULE" value="" />
-      </envs>
-      <option name="SDK_HOME" value="C:\Users\15870\Desktop\SEG-Small_Group_Project-main\NewHappy233\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -209,117 +65,13 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="90c59b73-9444-4360-ad21-5660aaa0dbbb" name="Changes" comment="" />
-      <created>1675359683763</created>
+      <changelist id="486c1d4b-4622-4ab1-a013-f6c8174e2c87" name="Changes" comment="" />
+      <created>1677682470555</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1675359683763</updated>
-      <workItem from="1675359685034" duration="1021000" />
-      <workItem from="1675360720899" duration="45000" />
-      <workItem from="1675360771518" duration="167000" />
-      <workItem from="1675360949318" duration="3248000" />
-      <workItem from="1675366040306" duration="646000" />
-      <workItem from="1675628631418" duration="2984000" />
-      <workItem from="1675634090179" duration="53000" />
-      <workItem from="1675634150285" duration="772000" />
-      <workItem from="1675634936348" duration="284000" />
-      <workItem from="1675635229529" duration="713000" />
-      <workItem from="1675635954917" duration="2323000" />
-      <workItem from="1675862254180" duration="2695000" />
-      <workItem from="1675872623258" duration="4435000" />
-      <workItem from="1676023973727" duration="2783000" />
-      <workItem from="1676026802411" duration="744000" />
-      <workItem from="1676027693142" duration="188000" />
-      <workItem from="1676081955833" duration="1411000" />
-      <workItem from="1676225961690" duration="4000" />
-      <workItem from="1676225978752" duration="969000" />
-      <workItem from="1676226977161" duration="246000" />
-      <workItem from="1676227233841" duration="100000" />
-      <workItem from="1676227358361" duration="155000" />
-      <workItem from="1676227594190" duration="2923000" />
-      <workItem from="1676398020385" duration="935000" />
-      <workItem from="1676398973875" duration="535000" />
-      <workItem from="1676399529345" duration="232000" />
-      <workItem from="1676399812329" duration="1402000" />
-      <workItem from="1676401233795" duration="288000" />
-      <workItem from="1676401531878" duration="83000" />
-      <workItem from="1676401623325" duration="273000" />
-      <workItem from="1676401946473" duration="438000" />
-      <workItem from="1676402398466" duration="2514000" />
-      <workItem from="1676477432388" duration="7258000" />
-      <workItem from="1676761742543" duration="6000" />
-      <workItem from="1677093912759" duration="1198000" />
-      <workItem from="1677394583139" duration="2147000" />
-      <workItem from="1677402129612" duration="1125000" />
-      <workItem from="1677406355487" duration="74000" />
-      <workItem from="1677627670392" duration="230000" />
-      <workItem from="1677627932152" duration="1817000" />
-      <workItem from="1677631339874" duration="941000" />
+      <updated>1677682470555</updated>
+      <workItem from="1677682471719" duration="1500000" />
     </task>
-    <task id="LOCAL-00001" summary="&quot;Fix bugs when saving budget&quot;">
-      <created>1675634467175</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1675634467175</updated>
-    </task>
-    <task id="LOCAL-00002" summary="add visitor introduction page">
-      <created>1675635826409</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1675635826409</updated>
-    </task>
-    <task id="LOCAL-00003" summary="add user guideline page">
-      <created>1676024257198</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1676024257198</updated>
-    </task>
-    <task id="LOCAL-00004" summary="add a page to show budget">
-      <created>1676024586365</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1676024586365</updated>
-    </task>
-    <task id="LOCAL-00005" summary="add a progress bar">
-      <created>1676082377114</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1676082377114</updated>
-    </task>
-    <task id="LOCAL-00006" summary="add a function to calculate total spending">
-      <created>1676229956918</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1676229956918</updated>
-    </task>
-    <task id="LOCAL-00007" summary="add a test for budget model">
-      <created>1676407275648</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1676407275648</updated>
-    </task>
-    <task id="LOCAL-00008" summary="add tests for budget model">
-      <created>1676407351270</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1676407351270</updated>
-    </task>
-    <task id="LOCAL-00009" summary="add a button in the show budget page to set budget when user have not set that">
-      <created>1676485934657</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1676485934657</updated>
-    </task>
-    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -335,18 +87,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix bugs when saving budget" />
-    <MESSAGE value="add visitor introduction page" />
-    <MESSAGE value="Implement set budget fuction" />
-    <MESSAGE value="add user guideline page" />
-    <MESSAGE value="add a page to show budget" />
-    <MESSAGE value="add a progress bar" />
-    <MESSAGE value="add a function to calculate total spending" />
-    <MESSAGE value="add a test for budget model" />
-    <MESSAGE value="add tests for budget model" />
-    <MESSAGE value="add a button in the show budget page to set budget when user have not set that" />
-    <option name="LAST_COMMIT_MESSAGE" value="add a button in the show budget page to set budget when user have not set that" />
   </component>
 </project>
