@@ -1,0 +1,15 @@
+{% if reward_points %}
+<p>You have {{ reward_points.points }} reward points.</p>
+{% else %}
+<p>You don't have any reward points yet.</p>
+{% endif %}
+
+<ul>
+{% for reward in rewards %}
+  <li>{{ reward.name }} - {{ reward.points_required }} points</li>
+  <form action="{% url 'redeem' reward.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Redeem</button>
+  </form>
+{% endfor %}
+</ul>

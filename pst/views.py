@@ -1,30 +1,11 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.db.models import Sum
-from django.shortcuts import render,redirect
-from django.contrib import messages
-from pst.forms import VisitorSignupForm
-from pst.helpers.auth import login_prohibited
 from django.shortcuts import render, redirect
-from pst.forms import BudgetForm
-from .models import Budget
-from .forms import  CategoriesForm
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from .models import User ,Categories
-
-
-from .models import SpendingFile
+from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint
 from .forms import *
-from django.views import View
-from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
 from django.contrib.auth import authenticate, login, logout
-
-import os
-from NewHappy.settings import MEDIA_ROOT
-from django.http import HttpResponse
 import random
 import nltk
 nltk.download('punkt')
@@ -42,6 +23,9 @@ def visitor_signup(request):
     if request.method == 'POST':
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
+            Reward.objects.create(name='Discount coupon', points_required=10)
+            Reward.objects.create(name='Free T-shirt', points_required=20)
+            Reward.objects.create(name='Gift card', points_required=50)
             user = form.save()
             auth.login(request, user)
             return redirect('home')
@@ -216,6 +200,8 @@ def user_guideline(request):
 
 def set_budget(request):
     if request.method == 'POST':
+        request.GET.get(Budget)
+        print(request.GET.get(Budget))
         form = BudgetForm(request.POST)
         if form.is_valid():
             #print(1024)
@@ -251,3 +237,34 @@ def show_budget(request):
 def cal_spending():
     spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
     return spending_total
+
+def index(request):
+    rewards = Reward.objects.all()
+    rewards_points = RewardPoint.objects.filter(user=request.user).filter()
+    context = {
+        'rewards': rewards,
+        'reward_points': rewards_points,
+    }
+    return render(request, 'index.html', context)
+
+def redeem(request, reward_id):
+    reward = Reward.objects.get(id=reward_id)
+    reward_points = RewardPoint.objects.filter(user=request.user).first()
+
+    error_message = "You don't have enough reward points to redeem this reward."
+    context = {
+        'error_message': error_message, }
+
+    if reward_points is None:
+        error_message = "You don't have enough reward points to redeem this reward."
+        return render(request, 'error.html', context)
+    elif reward_points.points >= reward.points_required:
+            reward_points.points -= reward.points_required
+            reward_points.save()
+            return redirect('index')
+    else:
+        error_message = "You don't have enough reward points to redeem this reward."
+        context = {
+            'error_message': error_message,}
+
+        return render(request, 'error.html', context)

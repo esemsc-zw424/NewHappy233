@@ -128,3 +128,17 @@ class Budget(models.Model):
     budget_owner = models.ForeignKey(  # user which this budget belongs to
         User, on_delete=models.CASCADE
     )
+
+class RewardPoint(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username}: {self.points} points"
+
+class Reward(models.Model):
+    name = models.CharField(max_length=50)
+    points_required = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.name} ({self.points_required} points)"

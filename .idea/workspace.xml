@@ -3,12 +3,17 @@
   <component name="ChangeListManager">
     <list default="true" id="90c59b73-9444-4360-ad21-5660aaa0dbbb" name="Changes" comment="add a button in the show budget page to set budget when user have not set that">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pst/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/pst/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NewHappy/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/NewHappy/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pst/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pst/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeStyleSettingsInfer">
+    <option name="done" value="true" />
   </component>
   <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
     <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
@@ -16,8 +21,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -27,6 +32,9 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
   <component name="ProjectId" id="2LC0JCDpmlNXKV17nd2s91l5OgU" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -35,15 +43,21 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Git.Branch.Popup.ShowAllRemotes&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/15870/NewHappy233/manage.py&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/15870/NewHappy233/pst/templates&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.django.DjangoModulesConfigurable&quot;
   }
 }</component>
-  <component name="RunManager" selected="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\15870\NewHappy233\pst\templates" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Django Server.NewHappy233">
     <configuration name="Test: pst.tests.models.test_budget_model.BudgetModelTestCase" type="DjangoTestsConfigurationType" temporary="true">
       <module name="NewHappy233" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -191,24 +205,6 @@
       <option name="customRunCommand" value="" />
       <method v="2" />
     </configuration>
-    <list>
-      <item itemvalue="Django Server.NewHappy233" />
-      <item itemvalue="Django Server.Unnamed" />
-      <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase" />
-      <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_deleted_with_user" />
-      <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_limit_can_not_exceed_ten_digits" />
-      <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_name_can_not_exceed_hundred_chars" />
-      <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_created_buget_is_valid" />
-    </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase" />
-        <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_name_can_not_exceed_hundred_chars" />
-        <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_deleted_with_user" />
-        <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_created_buget_is_valid" />
-        <item itemvalue="Django tests.Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_limit_can_not_exceed_ten_digits" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -251,6 +247,14 @@
       <workItem from="1676401946473" duration="438000" />
       <workItem from="1676402398466" duration="2514000" />
       <workItem from="1676477432388" duration="7258000" />
+      <workItem from="1676761742543" duration="6000" />
+      <workItem from="1677093912759" duration="1198000" />
+      <workItem from="1677394583139" duration="2147000" />
+      <workItem from="1677402129612" duration="1125000" />
+      <workItem from="1677406355487" duration="74000" />
+      <workItem from="1677627670392" duration="230000" />
+      <workItem from="1677627932152" duration="1817000" />
+      <workItem from="1677631339874" duration="941000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;Fix bugs when saving budget&quot;">
       <created>1675634467175</created>
@@ -344,21 +348,5 @@
     <MESSAGE value="add tests for budget model" />
     <MESSAGE value="add a button in the show budget page to set budget when user have not set that" />
     <option name="LAST_COMMIT_MESSAGE" value="add a button in the show budget page to set budget when user have not set that" />
-  </component>
-  <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_categories_model_CategoriesModelTestCase.coverage" NAME="Test: pst.tests.models.test_categories_model.CategoriesModelTestCase Coverage Results" MODIFIED="1676405936668" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_budget_model_BudgetModelTestCase_test_budget_created.coverage" NAME="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_created Coverage Results" MODIFIED="1676406271335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_user_model_UserModelTestCase.coverage" NAME="Test: pst.tests.models.test_user_model.UserModelTestCase Coverage Results" MODIFIED="1676406810604" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_budget_model_BudgetModelTestCase.coverage" NAME="Test: pst.tests.models.test_budget_model.BudgetModelTestCase Coverage Results" MODIFIED="1676407203739" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$views.coverage" NAME="views Coverage Results" MODIFIED="1675359944730" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pst" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_budget_model_BudgetModelTestCase_test_categories_is_valid.coverage" NAME="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_categories_is_valid Coverage Results" MODIFIED="1676406363259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$.coverage" NAME=" Coverage Results" MODIFIED="1675361164598" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pst/tests/views" />
-    <SUITE FILE_PATH="coverage/NewHappy233$0001_initial.coverage" NAME="0001_initial Coverage Results" MODIFIED="1675360870785" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pst/migrations" />
-    <SUITE FILE_PATH="coverage/NewHappy233$models.coverage" NAME="models Coverage Results" MODIFIED="1675360844462" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pst" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_budget_model_BudgetModelTestCase_test_budget_deleted_with_user.coverage" NAME="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_deleted_with_user Coverage Results" MODIFIED="1676406981977" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_budget_model_BudgetModelTestCase_test_budget_limit_can_not_exceed_ten_digits.coverage" NAME="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_limit_can_not_exceed_ten_digits Coverage Results" MODIFIED="1676406893919" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_budget_model_BudgetModelTestCase_test_budget_owner_cannot_be_blank.coverage" NAME="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_owner_cannot_be_blank Coverage Results" MODIFIED="1676406506374" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_budget_model_BudgetModelTestCase_test_created_buget_is_valid.coverage" NAME="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_created_buget_is_valid Coverage Results" MODIFIED="1676406944737" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/NewHappy233$Test__pst_tests_models_test_budget_model_BudgetModelTestCase_test_budget_name_can_not_exceed_hundred_chars.coverage" NAME="Test: pst.tests.models.test_budget_model.BudgetModelTestCase.test_budget_name_can_not_exceed_hundred_chars Coverage Results" MODIFIED="1676407118357" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>
