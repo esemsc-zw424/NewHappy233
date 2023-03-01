@@ -39,8 +39,12 @@ class CategoriesAdmin(admin.ModelAdmin):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = [
-        'user', 'title', 'content', 'likes', 'post_date',
+        'user', 'title', 'content', 'get_num_likes', 'post_date',
     ]
+    
+    def get_num_likes(self, obj):
+        return obj.likes.count()
+    get_num_likes.short_description = 'Number of Likes'
 
 @admin.register(PostImage)
 class PostImageAdmin(admin.ModelAdmin):
@@ -51,6 +55,10 @@ class PostImageAdmin(admin.ModelAdmin):
 @admin.register(Reply)
 class ReplyAdmin(admin.ModelAdmin):
     list_display = [
-        'user', 'parent_post', 'parent_reply', 'content', 'likes',
+        'user', 'parent_post', 'parent_reply', 'content', 'get_num_likes',
     ]
+
+    def get_num_likes(self, obj):
+        return obj.likes.count()
+    get_num_likes.short_description = 'Number of Likes'
 

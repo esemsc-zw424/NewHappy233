@@ -37,7 +37,7 @@ urlpatterns = [
     path('forum/', views.forum, name = 'forum'),
     path('add_post/', views.add_post, name = 'add_post'),
     path('post_detail/<int:post_id>/', views.post_detail, name='post_detail'),
-    path('like_post/', views.like_post, name='like_post'),
+    path('like_post/<int:post_id>/', views.like_post, name='like_post'),
     path('add_reply_to_post/<int:post_id>/', views.add_reply_to_post, name='add_reply_to_post'),
     path('personal_forum/', views.personal_forum, name ='personal_forum'),
 ]

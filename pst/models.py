@@ -5,6 +5,8 @@ from django.core.validators import RegexValidator,MaxValueValidator,MinValueVali
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 import os
 
 class Spending_type(models.TextChoices):
@@ -136,13 +138,14 @@ class Post(models.Model):
     )
 
     # this field store the number of likes other user gave
-    likes = models.IntegerField( # this store the number of likes other user gave
-        default=0,
-        blank = False,
-        validators=[
-            MinValueValidator(0),
-        ]
-    )
+    # likes = models.IntegerField( # this store the number of likes other user gave
+    #     default=0,
+    #     blank = False,
+    #     validators=[
+    #         MinValueValidator(0),
+    #     ]
+    # )
+    likes = GenericRelation('Like')
 
     # this field store the date and time when this post sent
     post_date = models.DateTimeField(auto_now_add=True)
@@ -180,25 +183,46 @@ class Reply(models.Model):
 
     # this field store the content of the post
     # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
-    content = models.CharField( 
+    content = models.TextField( 
         blank = True,
         max_length = 2000,
     )
 
     # this field store the number of likes other user gave
-    likes = models.IntegerField(
-        default=0,
-        blank = False,
-        validators=[
-            MinValueValidator(0),
-        ]
-    )
+    # likes = models.IntegerField(
+    #     default=0,
+    #     blank = False,
+    #     validators=[
+    #         MinValueValidator(0),
+    #     ]
+    # )
+    likes = GenericRelation('Like')
 
     # this field store the date and time when this reply sent
     reply_date = models.DateTimeField(auto_now_add=True, blank = False)
 
     def __str__(self):
         return self.content
+    
+class Like(models.Model):
+    # used GenericForeignKey so like can be applied on both reply and post model 
+    
+    # user who gaves this like
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # this refers to what type of model this object this is 
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+
+    # this refers to a specific object under this model
+    object_id = models.PositiveIntegerField()
+
+    # shortcut property that combines content_type and object_id to return the actual object being liked
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        unique_together = [['user', 'content_type', 'object_id']]
+
+
 
 
 

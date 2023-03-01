@@ -55,14 +55,14 @@
         <div class="post">
             <h1>{{ post.title }}</h1>
             <div class="author">Author: {{ post.user.get_full_name }}</div>
-            <div class="content">{{ post.content }}</div>
+            <div class="content">Content: {{ post.content }}</div>
             <div class="images">
                 {% for i in post.images.all %}
                 <img src="{{ i.image.url }}" width="200" height="200">
                 {% endfor %}
             </div>
             <div class="info">{{ post.post_date|date:'d M Y, H:i'}}</div>
-            <div class="info">{{ post.reply.count }} replies | {{ post.likes }} likes</div>
+            <div class="info">{{ post.reply.count }} replies | {{ post.likes.count}} likes</div>
         </div>
 
         {% if post.reply.exists %}

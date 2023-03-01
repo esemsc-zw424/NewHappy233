@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.shortcuts import render,redirect, get_object_or_404
+from django.http import HttpResponseBadRequest
 from django.contrib import messages
 from .forms import  CategoriesForm, PostForm, ReplyForm
 from django.http import HttpResponse, JsonResponse
@@ -8,8 +9,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .models import User ,Categories
 from django.core.paginator import Paginator
+from django.contrib.contenttypes.models import ContentType
 
-from .models import SpendingFile, PostImage
+from .models import SpendingFile, PostImage, Like
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -244,12 +246,27 @@ def post_detail(request, post_id):
     return render(request, 'post_detail.html', context)
 
 @login_required
-def like_post(request):
-    post_id = request.POST.get('post_id')
+def like_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    post.likes += 1
-    post.save()
-    return JsonResponse({'likes': post.likes})
+    user = request.user
+    content_type = ContentType.objects.get_for_model(Post)
+    try:
+        like = Like.objects.get(
+            content_type=content_type,
+            object_id=post_id,
+            user=user,
+        )
+        like.delete()
+        created = False
+    except Like.DoesNotExist:
+        like = Like.objects.create(
+            content_type=content_type,
+            object_id=post_id,
+            user=user,
+        )
+        created = True
+    like_count = post.likes.count()
+    return redirect('forum')
 
 @login_required
 def add_reply_to_post(request, post_id):
