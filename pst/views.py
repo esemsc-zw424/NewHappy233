@@ -1,14 +1,18 @@
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import  CategoriesForm
+from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .models import User, Categories
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 import datetime
+
 
 
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint
@@ -29,13 +33,15 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from django.db.models import Sum
 
+
 # Create your views here.
 
 
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
-    
+
+
 def visitor_signup(request):
     if request.method == 'POST':
         form = VisitorSignupForm(request.POST)
@@ -54,9 +60,11 @@ def visitor_signup(request):
 def home(request):
     return render(request, 'home.html')
 
+
 @login_prohibited
 def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
+
 
 @login_prohibited
 def log_in(request):
@@ -72,7 +80,7 @@ def log_in(request):
                 redirect_url = next or 'home'
                 return redirect(redirect_url)
        # messages.add_message(request, messages.ERROR,
-                            # "The credentials provided are invalid!")
+                # "The credentials provided are invalid!")
         else:
             next = request.GET.get('next') or ''
     form = LoginForm()
@@ -83,15 +91,18 @@ def log_out(request):
     logout(request)
     return redirect('visitor_introduction')
 
-#Chatbot is a simple virtual help assistant that can answer user's question base on keywords
+# Chatbot is a simple virtual help assistant that can answer user's question base on keywords
+
+
 def chat_bot(request):
-    chat_history = [] # this is use to store all the chat history between user and chatbot
+    chat_history = []  # this is use to store all the chat history between user and chatbot
     if request.method == 'POST':
         user_input = request.POST['user_input']
         chat_bot_response = respond(user_input)
         chat_history.append((user_input, chat_bot_response))
         return render(request, 'chat_bot.html', {'chat_history': chat_history})
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
+
 
 def respond(user_input):
     lemmatizer = WordNetLemmatizer()
@@ -107,11 +118,11 @@ def respond(user_input):
     }
 
     responses = {
-        "pst": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."], 
-        "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses."], 
-        "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"], 
-        "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."], 
-        "saving": ["Our Personal Spending Tracker can help you track your savings and keep you on track to reach your financial goals."], 
+        "pst": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."],
+        "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses."],
+        "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"],
+        "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."],
+        "saving": ["Our Personal Spending Tracker can help you track your savings and keep you on track to reach your financial goals."],
         "finance": ["With the PSC, you can take control of your personal finances and make informed decisions about your spending and saving."],
         "hello": ["Hello! How may I help you?"],
         "bye": ["Goodbye! Have a great day!"],
@@ -131,6 +142,21 @@ def respond(user_input):
     return "Sorry, I do not understand what you mean."
 
 
+# @login_required
+# def add_spending(request):
+#     if request.method == 'POST':
+#         form = AddSpendingForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             spending = form.save(commit=False)
+#             spending.spending_owner = request.user
+#             for file in request.FILES.getlist('file'):
+#                 spending.file = file
+#             spending.save()
+#             return redirect('home')
+#     else:
+#         form = AddSpendingForm()
+#     return render(request, 'add_spending.html',  {'form': form})
+
 
 @login_required
 def add_spending(request):
@@ -142,8 +168,8 @@ def add_spending(request):
             spending.save()
             for file in request.FILES.getlist('file'):
                 SpendingFile.objects.create(
-                    spending = spending,
-                    file = file
+                    spending=spending,
+                    file=file
                 )
             return redirect('home')
     else:
@@ -173,12 +199,13 @@ def view_spending(request):
     else:
         return render(request, 'view_spending.html', context)
 
+
 @login_required
 def add_spending_categories(request):
     if request.method == 'POST':
         form = CategoriesForm(request.POST, request.FILES)
         if form.is_valid():
-            category = form.save(commit = False)
+            category = form.save(commit=False)
             category.owner = request.user
             category.save()
             return redirect('home')
@@ -186,13 +213,18 @@ def add_spending_categories(request):
         form = CategoriesForm()
     return render(request, 'add_spending_categories.html',  {'form': form})
 
+
 @login_required
 def view_spending_categories(request):
+
     if request.method == 'POST':
         delete_spending_categories(request)
-    categories_expenditure = Categories.objects.filter(categories_type = Spending_type.EXPENDITURE, owner = request.user)
-    categories_income = Categories.objects.filter(categories_type = Spending_type.INCOME, owner = request.user)
+    categories_expenditure = Categories.objects.filter(
+        categories_type=Spending_type.EXPENDITURE, owner=request.user)
+    categories_income = Categories.objects.filter(
+        categories_type=Spending_type.INCOME, owner=request.user)
     return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
+
 
 @login_required
 def delete_spending_categories(request):
@@ -202,8 +234,10 @@ def delete_spending_categories(request):
         if category.default_category == False:
             category.delete()
         else:
-            messages.add_message(request,messages.ERROR,"You can not delete default category!")
+            messages.add_message(request, messages.ERROR,
+                                 "You can not delete default category!")
         return redirect('view_spending_categories')
+
 
 @login_required
 def update_spending_categories(request, category_id):
@@ -216,12 +250,39 @@ def update_spending_categories(request, category_id):
                 form.save()
                 return redirect('view_spending_categories')
         else:
-            messages.add_message(request,messages.ERROR,"You can not modify default category!")
+            messages.add_message(request, messages.ERROR,
+                                 "You can not modify default category!")
             return redirect('view_spending_categories')
     else:
         category = Categories.objects.get(id=category_id)
         form = CategoriesForm(instance=category)
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
+
+
+
+@login_required
+def user_profile(request):
+    user = request.user
+    return render(request, 'user_profile.html', {'user': user})
+
+
+@login_required
+def edit_profile(request):
+    try:
+        user = request.user
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, "User does not exist.")
+        return redirect('show_user')
+
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            user.save()
+            return redirect('user_profile')
+    else:
+        form = EditProfileForm(instance=user)
+    return render(request, 'edit_profile.html', {'form': form})
 
 @login_required
 def user_guideline(request):

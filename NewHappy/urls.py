@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     path('', views.visitor_introduction, name = 'visitor_introduction'),
     path('add_spending/', views.add_spending, name = 'add_spending'),
     path('user_feed/', views.user_feed, name = 'user_feed'),
@@ -40,6 +41,8 @@ urlpatterns = [
     path('update_spending_categories/<int:category_id>/', views.update_spending_categories, name = 'update_spending_categories'),
     path('shopping_mall/index/', views.index, name = 'index'),
     path('redeem/<int:reward_id>/', views.redeem, name='redeem'),
+    path('user_profile/', views.user_profile, name='user_profile'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
