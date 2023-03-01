@@ -40,9 +40,6 @@ def visitor_signup(request):
     if request.method == 'POST':
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
-            Reward.objects.create(name='Discount coupon', points_required=10)
-            Reward.objects.create(name='Free T-shirt', points_required=20)
-            Reward.objects.create(name='Gift card', points_required=50)
             user = form.save()
             auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
@@ -226,19 +223,15 @@ def update_spending_categories(request, category_id):
         form = CategoriesForm(instance=category)
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
 
+@login_required
 def user_guideline(request):
     return render(request, 'user_guideline.html')
 
+@login_required
 def set_budget(request):
     if request.method == 'POST':
-        request.GET.get(Budget)
-        print(request.GET.get(Budget))
         form = BudgetForm(request.POST)
         if form.is_valid():
-            #print(1024)
-            # form.save()
-            # print(Budget.objects.count())
-            # return redirect('budget_show')
             budget = form.save(commit=False)
             budget.budget_owner = request.user
             print(budget.budget_owner_id)
@@ -248,13 +241,11 @@ def set_budget(request):
         form = BudgetForm()
     return render(request, 'budget_set.html', {'form': form})
 
+@login_required
 def show_budget(request):
-    total = cal_spending()
-    #print(total)
+    total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
     budget = Budget.objects.filter(budget_owner=request.user).last()
-    #budget = Budget.objects.last()
     if budget == None:
-        #messages.add_message(request, messages.INFO, 'you have not set budget yet')
         spending_percentage = 0
     elif total == None:
         messages.add_message(request, messages.INFO, 'you have not spent yet')
@@ -265,11 +256,18 @@ def show_budget(request):
             messages.add_message(request, messages.INFO, 'you have exceeded the limit')
     return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
 
-def cal_spending():
-    spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
-    return spending_total
+# @login_required
+# def cal_spending():
+#      spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
+#      return spending_total
 
+@login_required
 def index(request):
+    if Reward.objects.count() == 0:
+        Reward.objects.create(name='Discount coupon', points_required=10)
+        Reward.objects.create(name='Free T-shirt', points_required=20)
+        Reward.objects.create(name='Gift card', points_required=50)
+
     rewards = Reward.objects.all()
     rewards_points = RewardPoint.objects.filter(user=request.user).filter()
     context = {
@@ -278,6 +276,7 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
+@login_required
 def redeem(request, reward_id):
     reward = Reward.objects.get(id=reward_id)
     reward_points = RewardPoint.objects.filter(user=request.user).first()

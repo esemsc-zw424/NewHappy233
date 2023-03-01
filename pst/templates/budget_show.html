@@ -1,5 +1,6 @@
 {% extends 'base_content.html' %}
 {% block content %}
+    <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
 <div class="row content">
     <h1>Your budget is: </h1>
     <p>{{budget.limit}}

@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="486c1d4b-4622-4ab1-a013-f6c8174e2c87" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/testPull.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="486c1d4b-4622-4ab1-a013-f6c8174e2c87" name="Changes" comment="fix a bug when show budget">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pst/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pst/migrations/0002_rename_budget1_budget.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pst/migrations/0003_reward_rewardpoint.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/pst/templates/budget_show.html" beforeDir="false" afterPath="$PROJECT_DIR$/pst/templates/budget_show.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pst/templates/visitor_introduction.html" beforeDir="false" afterPath="$PROJECT_DIR$/pst/templates/visitor_introduction.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/pst/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/pst/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/templates/shopping_mail/error.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/templates/shopping_mail/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pst/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pst/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +41,7 @@
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="NewHappy.settings" />
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="" />
@@ -70,8 +68,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1677682470555</updated>
-      <workItem from="1677682471719" duration="1500000" />
+      <workItem from="1677682471719" duration="2749000" />
     </task>
+    <task id="LOCAL-00001" summary="fix a bug when show budget">
+      <created>1677691736322</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1677691736322</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -87,5 +93,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fix a bug when show budget" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix a bug when show budget" />
   </component>
 </project>
