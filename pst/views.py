@@ -269,6 +269,53 @@ def like_post(request, post_id):
     return redirect('forum')
 
 @login_required
+def like_post_details(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    content_type = ContentType.objects.get_for_model(Post)
+    try:
+        like = Like.objects.get(
+            content_type=content_type,
+            object_id=post_id,
+            user=user,
+        )
+        like.delete()
+        created = False
+    except Like.DoesNotExist:
+        like = Like.objects.create(
+            content_type=content_type,
+            object_id=post_id,
+            user=user,
+        )
+        created = True
+    like_count = post.likes.count()
+    return redirect('post_detail', post_id=post.id)
+
+@login_required
+def like_reply(request, reply_id, post_id):
+    reply = get_object_or_404(Reply, id=reply_id)
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    content_type = ContentType.objects.get_for_model(Reply)
+    try:
+        like = Like.objects.get(
+            content_type=content_type,
+            object_id=reply_id,
+            user=user,
+        )
+        like.delete()
+        created = False
+    except Like.DoesNotExist:
+        like = Like.objects.create(
+            content_type=content_type,
+            object_id=reply_id,
+            user=user,
+        )
+        created = True
+    like_count = reply.likes.count()
+    return redirect('post_detail', post_id=post.id)
+
+@login_required
 def add_reply_to_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 

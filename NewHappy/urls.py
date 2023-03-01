@@ -38,8 +38,11 @@ urlpatterns = [
     path('add_post/', views.add_post, name = 'add_post'),
     path('post_detail/<int:post_id>/', views.post_detail, name='post_detail'),
     path('like_post/<int:post_id>/', views.like_post, name='like_post'),
+    path('like_post_details/<int:post_id>/', views.like_post_details, name='like_post_details'),
+    path('like_reply/<int:reply_id>/<int:post_id>/', views.like_reply, name='like_reply'),
     path('add_reply_to_post/<int:post_id>/', views.add_reply_to_post, name='add_reply_to_post'),
     path('personal_forum/', views.personal_forum, name ='personal_forum'),
+    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

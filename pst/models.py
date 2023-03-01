@@ -184,8 +184,7 @@ class Reply(models.Model):
     # this field store the content of the post
     # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
     content = models.TextField( 
-        blank = True,
-        max_length = 2000,
+        blank = False,
     )
 
     # this field store the number of likes other user gave

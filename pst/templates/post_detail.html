@@ -63,6 +63,23 @@
             </div>
             <div class="info">{{ post.post_date|date:'d M Y, H:i'}}</div>
             <div class="info">{{ post.reply.count }} replies | {{ post.likes.count}} likes</div>
+            <div>
+                {% if request.user.is_authenticated %}
+                    {% if request.user in post.likes.all %}
+                        <form method="post" action="{% url 'like_post_details' post.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-primary btn-sm" name="like_action" value="unlike"><i class="far fa-thumbs-up"></i> {{ post.likes.count }} Unlike</button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'like_post_details' post.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm" name="like_action" value="like"><i class="far fa-thumbs-up"></i> {{ post.likes.count }} Like</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm"><i class="far fa-thumbs-up"></i> {{ post.likes.count }} Like</a>
+                {% endif %}
+            </div>
         </div>
 
         {% if post.reply.exists %}
@@ -72,6 +89,23 @@
                 <div class="author">{{ r.user.get_full_name }}</div>
                 <div class="content">{{ r.content }}</div>
                 <div class="info">in {{ r.reply_date|date:'d M Y, H:i' }}</div>
+                <div>
+                    {% if request.user.is_authenticated %}
+                        {% if request.user in r.likes.all %}
+                            <form method="post" action="{% url 'like_reply' r.id post.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary btn-sm" name="like_action" value="unlike"><i class="far fa-thumbs-up"></i> {{ r.likes.count }} Unlike</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'like_reply' r.id post.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm" name="like_action" value="like"><i class="far fa-thumbs-up"></i> {{ r.likes.count }} Like</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm"><i class="far fa-thumbs-up"></i> {{ r.likes.count }} Like</a>
+                    {% endif %}
+                </div>
             </div>
             {% endfor%}
         {% endif %}

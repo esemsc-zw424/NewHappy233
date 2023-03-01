@@ -16,7 +16,6 @@
         "fields": {
             "user": 1,
             "content": "This is example post 1",
-            "likes": 670,
             "post_date": "2023-01-31"
         }
     },
@@ -26,7 +25,6 @@
         "fields": {
             "user": 1,
             "content": "This is example post 2",
-            "likes": 70,
             "post_date": "2023-02-01"
         }
     }

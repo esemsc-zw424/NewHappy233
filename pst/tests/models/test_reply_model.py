@@ -44,25 +44,22 @@ class ReplyModelTestCase(TestCase):
         self.reply.parent_reply = self.parent_reply
         self._assert_reply_is_valid()
 
-    def test_content_can_be_blank(self):
+    def test_content_cannot_be_blank(self):
         self.reply.content = ""
-        self._assert_reply_is_valid()
-
-    def test_content_cannot_exceed_2000_characters(self):
-        self.reply.content = "x" * 2001
         self._assert_reply_is_invalid()
 
-    def test_likes_can_be_zero(self):
-        self.reply.likes = 0
-        self._assert_reply_is_valid()
 
-    def test_likes_can_be_positive_integer(self):
-        self.reply.likes = 10
-        self._assert_reply_is_valid()
+    # def test_likes_can_be_zero(self):
+    #     self.reply.likes = 0
+    #     self._assert_reply_is_valid()
 
-    def test_likes_cannot_be_negative_integer(self):
-        self.reply.likes = -1
-        self._assert_reply_is_invalid()
+    # def test_likes_can_be_positive_integer(self):
+    #     self.reply.likes = 10
+    #     self._assert_reply_is_valid()
+
+    # def test_likes_cannot_be_negative_integer(self):
+    #     self.reply.likes = -1
+    #     self._assert_reply_is_invalid()
 
     def test_reply_date_can_be_blank(self):
         self.reply.reply_date = None
