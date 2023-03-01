@@ -10,9 +10,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .models import User, Categories
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
+import datetime
 
 
-from .models import SpendingFile
+
+from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -26,9 +29,13 @@ import random
 import nltk
 nltk.download('punkt')
 nltk.download('wordnet')
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from django.db.models import Sum
 
 
 # Create your views here.
+
 
 @login_required
 def user_feed(request):
@@ -40,7 +47,7 @@ def visitor_signup(request):
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth.login(request, user)
+            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
         else:
             return render(request, 'visitor_signup.html', {'form': form})
@@ -172,8 +179,25 @@ def add_spending(request):
 
 @login_required
 def view_spending(request):
-    spending = Spending.objects.all()
-    return render(request, 'view_spending.html', {'spending': spending})
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if start_date and end_date:
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        spending = Spending.objects.filter(date__range=[start_date, end_date]).order_by('date')
+    else:
+        spending = Spending.objects.all().order_by('date')
+
+    paginator = Paginator(spending, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {'spending': spending, 'page_obj': page_obj}
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'spending_table.html', context)
+    else:
+        return render(request, 'view_spending.html', context)
 
 
 @login_required
@@ -235,6 +259,7 @@ def update_spending_categories(request, category_id):
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
 
 
+
 @login_required
 def user_profile(request):
     user = request.user
@@ -258,3 +283,79 @@ def edit_profile(request):
     else:
         form = EditProfileForm(instance=user)
     return render(request, 'edit_profile.html', {'form': form})
+
+@login_required
+def user_guideline(request):
+    return render(request, 'user_guideline.html')
+
+@login_required
+def set_budget(request):
+    if request.method == 'POST':
+        form = BudgetForm(request.POST)
+        if form.is_valid():
+            budget = form.save(commit=False)
+            budget.budget_owner = request.user
+            print(budget.budget_owner_id)
+            budget.save()
+            return redirect('budget_show')
+    else:
+        form = BudgetForm()
+    return render(request, 'budget_set.html', {'form': form})
+
+@login_required
+def show_budget(request):
+    total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
+    budget = Budget.objects.filter(budget_owner=request.user).last()
+    if budget == None:
+        spending_percentage = 0
+    elif total == None:
+        messages.add_message(request, messages.INFO, 'you have not spent yet')
+        spending_percentage = 0
+    else:
+        spending_percentage = int((total / budget.limit) * 100)
+        if spending_percentage >= 100:
+            messages.add_message(request, messages.INFO, 'you have exceeded the limit')
+    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
+
+# @login_required
+# def cal_spending():
+#      spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
+#      return spending_total
+
+@login_required
+def index(request):
+    if Reward.objects.count() == 0:
+        Reward.objects.create(name='Discount coupon', points_required=10)
+        Reward.objects.create(name='Free T-shirt', points_required=20)
+        Reward.objects.create(name='Gift card', points_required=50)
+
+    rewards = Reward.objects.all()
+    rewards_points = RewardPoint.objects.filter(user=request.user).filter()
+    context = {
+        'rewards': rewards,
+        'reward_points': rewards_points,
+    }
+    return render(request, 'index.html', context)
+
+@login_required
+def redeem(request, reward_id):
+    reward = Reward.objects.get(id=reward_id)
+    reward_points = RewardPoint.objects.filter(user=request.user).first()
+
+    error_message = "You don't have enough reward points to redeem this reward."
+    context = {
+        'error_message': error_message, }
+
+    if reward_points is None:
+        error_message = "You don't have enough reward points to redeem this reward."
+        return render(request, 'error.html', context)
+    elif reward_points.points >= reward.points_required:
+            reward_points.points -= reward.points_required
+            reward_points.save()
+            return redirect('index')
+    else:
+        error_message = "You don't have enough reward points to redeem this reward."
+        context = {
+            'error_message': error_message,}
+
+        return render(request, 'error.html', context)

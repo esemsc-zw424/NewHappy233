@@ -1,12 +1,14 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<h1>Add Spending</h1>
-<form action="{% url 'add_spending' %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
 
-    <input type="submit" value="Submit values" class = 'btn btn-lg btn-primary'> 
-    <a href='{% url 'home' %}' class = 'btn btn-lg btn-primary'>Return</a>
-      
+<form action="{% url 'add_spending' %}" method="post" enctype="multipart/form-data">
+    <div class="col-sm-12 col-md-6 offset-md-3 my-auto">
+        <h1>Add Spending</h1>
+        {% csrf_token %}
+        {% include 'partials/bootstrap_form.html' with form=form %}
+        <input type="submit" value="Submit values" class = 'btn btn-lg btn-primary'> 
+        <a href='{% url 'home' %}' class = 'btn btn-lg btn-primary'>Return</a>
+    </div>
 </form>
+
 {% endblock %}

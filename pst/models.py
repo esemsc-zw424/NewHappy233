@@ -14,13 +14,25 @@ class Spending_type(models.TextChoices):
 
 class UserManager(BaseUserManager):
 
+
     def create_user(self, first_name, last_name, email, password, **extra_fields):
+
         email = self.normalize_email(email)
         user = self.model(first_name=first_name,
                           last_name=last_name, email=email)
         user.set_password(password)
         user.save()
         return user
+
+
+    def create_superuser(self, first_name, last_name, email, password, **extra_fields):
+        user = self.create_user(first_name, last_name, email, password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        return user
+
+   
 
     def create_superuser(self, first_name, last_name, email, password, **extra_fields):
         user = self.create_user(first_name, last_name, email, password)
@@ -46,6 +58,7 @@ class User(AbstractUser):
         max_length=20, choices=GENDER_CHOICES, blank=True)
     phone_number = models.CharField(max_length=15, blank=True)
     address = models.CharField(max_length=50, blank=True)
+
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
@@ -109,6 +122,7 @@ class Categories(models.Model):
         return self.name
 
 
+
 class Spending(models.Model):
 
     title = models.CharField(  # title for the spending
@@ -116,9 +130,10 @@ class Spending(models.Model):
         blank=False
     )
 
-    # this refers to the user when create this spending
-    spending_owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='spendingOwner', blank=False)
+
+    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner',
+                                       blank=False)  # this refers to the user when create this spending
+
 
     amount = models.IntegerField(  # this refers to the amount this user spent or gained
         blank=False,
@@ -144,8 +159,10 @@ class Spending(models.Model):
         blank=False,
     )
 
-    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='',
-                                          related_name='category', blank=False)  # this refers to the category of the spending
+
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category',
+                                          blank=False)  # this refers to the category of the spending
+
 
 
 class SpendingFile(models.Model):
@@ -156,3 +173,29 @@ class SpendingFile(models.Model):
         blank=True,
         upload_to='user_files/'
     )
+
+class Budget(models.Model):
+    name = models.CharField(max_length=100)
+    limit = models.DecimalField(max_digits=10, decimal_places=2)
+    # start_date = models.DateField()
+    # end_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    budget_owner = models.ForeignKey(  # user which this budget belongs to
+        User, on_delete=models.CASCADE
+    )
+
+class RewardPoint(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username}: {self.points} points"
+
+class Reward(models.Model):
+    name = models.CharField(max_length=50)
+    points_required = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.name} ({self.points_required} points)"
+
