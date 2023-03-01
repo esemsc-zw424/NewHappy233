@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type
+from pst.models import User, Spending, Categories, Spending_type, Budget
 from django.forms import ClearableFileInput
 from django.contrib import messages
 
@@ -100,13 +100,14 @@ class LoginForm(Form):
 
 class AddSpendingForm(forms.ModelForm):
     spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), empty_label=None)
-    
+
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(AddSpendingForm, self).__init__(*args, **kwargs)
         if user:
             spending_type = self.data.get('spending_type', '')
-            self.fields['spending_category'].queryset = Categories.objects.filter(owner = user) # this part filter out categories that belongs to current user
+            self.fields['spending_category'].queryset = Categories.objects.filter(
+                owner=user)  # this part filter out categories that belongs to current user
 
     class Meta:
         model = Spending
@@ -123,3 +124,7 @@ class AddSpendingForm(forms.ModelForm):
     )
 
 
+class BudgetForm(forms.ModelForm):
+    class Meta:
+        model = Budget
+        fields = ['name', 'limit']

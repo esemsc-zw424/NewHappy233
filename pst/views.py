@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 import datetime
 
 
-from .models import SpendingFile
+from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -27,7 +27,7 @@ nltk.download('punkt')
 nltk.download('wordnet')
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-
+from django.db.models import Sum
 
 # Create your views here.
 
@@ -40,6 +40,9 @@ def visitor_signup(request):
     if request.method == 'POST':
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
+            Reward.objects.create(name='Discount coupon', points_required=10)
+            Reward.objects.create(name='Free T-shirt', points_required=20)
+            Reward.objects.create(name='Gift card', points_required=50)
             user = form.save()
             auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
@@ -78,7 +81,7 @@ def log_in(request):
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
 
-        
+
 def log_out(request):
     logout(request)
     return redirect('visitor_introduction')
@@ -223,3 +226,76 @@ def update_spending_categories(request, category_id):
         form = CategoriesForm(instance=category)
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
 
+def user_guideline(request):
+    return render(request, 'user_guideline.html')
+
+def set_budget(request):
+    if request.method == 'POST':
+        request.GET.get(Budget)
+        print(request.GET.get(Budget))
+        form = BudgetForm(request.POST)
+        if form.is_valid():
+            #print(1024)
+            # form.save()
+            # print(Budget.objects.count())
+            # return redirect('budget_show')
+            budget = form.save(commit=False)
+            budget.budget_owner = request.user
+            print(budget.budget_owner_id)
+            budget.save()
+            return redirect('budget_show')
+    else:
+        form = BudgetForm()
+    return render(request, 'budget_set.html', {'form': form})
+
+def show_budget(request):
+    total = cal_spending()
+    #print(total)
+    budget = Budget.objects.filter(budget_owner=request.user).last()
+    #budget = Budget.objects.last()
+    if budget == None:
+        #messages.add_message(request, messages.INFO, 'you have not set budget yet')
+        spending_percentage = 0
+    elif total == None:
+        messages.add_message(request, messages.INFO, 'you have not spent yet')
+        spending_percentage = 0
+    else:
+        spending_percentage = int((total / budget.limit) * 100)
+        if spending_percentage >= 100:
+            messages.add_message(request, messages.INFO, 'you have exceeded the limit')
+    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
+
+def cal_spending():
+    spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
+    return spending_total
+
+def index(request):
+    rewards = Reward.objects.all()
+    rewards_points = RewardPoint.objects.filter(user=request.user).filter()
+    context = {
+        'rewards': rewards,
+        'reward_points': rewards_points,
+    }
+    return render(request, 'index.html', context)
+
+def redeem(request, reward_id):
+    reward = Reward.objects.get(id=reward_id)
+    reward_points = RewardPoint.objects.filter(user=request.user).first()
+
+    error_message = "You don't have enough reward points to redeem this reward."
+    context = {
+        'error_message': error_message, }
+
+    if reward_points is None:
+        error_message = "You don't have enough reward points to redeem this reward."
+        return render(request, 'error.html', context)
+    elif reward_points.points >= reward.points_required:
+            reward_points.points -= reward.points_required
+            reward_points.save()
+            return redirect('index')
+    else:
+        error_message = "You don't have enough reward points to redeem this reward."
+        context = {
+            'error_message': error_message,}
+
+        return render(request, 'error.html', context)
