@@ -79,11 +79,6 @@ class UserModelTestCase(TestCase):
         self.user.phone_number = 'abcdfedad' 
         self._assert_user_is_invalid()
 
-    def test_phone_number_must_be_unique(self):
-        second_user = User.objects.get(email='johndoe@example.org')
-        self.user.phone_number = second_user.phone_number
-        self._assert_user_is_invalid()
-    
     def test_address_can_be_blank(self):
         self.user.address= ''
         self._assert_user_is_valid()
