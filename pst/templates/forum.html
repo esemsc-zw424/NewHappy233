@@ -28,7 +28,6 @@
                             {% if post.content|length > 50 %}
                                 {{ post.content|slice:":50"|add:" ..." }}
                                 <br>
-                                <a href="{% url 'post_detail' post.id %}" class="text-dark text-underline " >show more</a>
                             {% else %}
                                 {{ post.content|slice:":50"}}                                                    
                             {% endif %}
@@ -67,9 +66,13 @@
                         </div>
                     </div>
                     {% if post.replies.exists %}
-                        <div class="card-footer text-muted d-flex justify-content-between">
-                            <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content }}</div>
-                        </div>
+                    <div class="card-footer text-muted d-flex justify-content-between">
+                        {% if post.replies.first.content|length > 50 %}
+                            <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content|slice:":50"|add:" ..." }}</div>
+                        {% else %}
+                            <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content|slice:":50" }}</div>
+                        {% endif %}
+                    </div>
                     {% endif %}
                 </a>
             </div>

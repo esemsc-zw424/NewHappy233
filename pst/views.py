@@ -488,3 +488,24 @@ def add_reply_to_post(request, post_id):
     context = {'form': form, 'post': post}
     return render(request, 'add_reply_to_post.html', context)
 
+@login_required
+def add_reply_to_reply(request, post_id, parent_reply_id):
+    post = get_object_or_404(Post, id=post_id)
+    parent_reply = get_object_or_404(Reply, id=parent_reply_id)
+    if request.method == 'POST':
+        form = ReplyForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.user = request.user
+            reply.parent_post = post
+            reply.parent_reply = parent_reply
+            reply.save()
+            return redirect('post_detail', post_id=post.id)
+    else:
+        form = ReplyForm()
+
+    context = {'form': form, 'post': post, 'parent_reply': parent_reply}
+    return render(request, 'add_reply_to_reply.html', context)
+
+
+

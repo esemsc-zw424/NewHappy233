@@ -16,8 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from pst import views
-from django.conf import settings
-from django.conf.urls.static import static
+from django.conf import settings 
+from django.conf.urls.static import static  
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -52,8 +53,8 @@ urlpatterns = [
     path('like_post_details/<int:post_id>/', views.like_post_details, name='like_post_details'),
     path('like_reply/<int:reply_id>/<int:post_id>/', views.like_reply, name='like_reply'),
     path('add_reply_to_post/<int:post_id>/', views.add_reply_to_post, name='add_reply_to_post'),
+    path('add_reply_to_reply/<int:post_id>/<int:parent_reply_id>/', views.add_reply_to_reply, name='add_reply_to_reply'),
     path('personal_forum/', views.personal_forum, name ='personal_forum'),
-    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
