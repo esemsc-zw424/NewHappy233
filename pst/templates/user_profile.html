@@ -1,3 +1,5 @@
+{% extends 'base_content.html' %}
+{% block content %}
 <div class="row content">
   <div class="col-12">
     <img src="{{ user.gravatar }}" class="rounded-circle profile-image" />
@@ -12,7 +14,9 @@
 
        
       <p><a href='{% url 'edit_profile' %}'class="btn btn-primary">Edit</a></p>
+      <a href='{% url 'home' %}' class = 'btn btn-primary mb-3'>Return</a>
             
     </div>
   </div>
 </div>
+{% endblock %}

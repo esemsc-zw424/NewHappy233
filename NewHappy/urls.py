@@ -55,6 +55,10 @@ urlpatterns = [
     path('add_reply_to_post/<int:post_id>/', views.add_reply_to_post, name='add_reply_to_post'),
     path('add_reply_to_reply/<int:post_id>/<int:parent_reply_id>/', views.add_reply_to_reply, name='add_reply_to_reply'),
     path('personal_forum/', views.personal_forum, name ='personal_forum'),
+    path('view_post_user/<user_id>/<post_id>/', views.view_post_user, name='view_post_user'),
+
+    
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
