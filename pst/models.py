@@ -59,8 +59,9 @@ class User(AbstractUser):
     ]
     gender = models.CharField(
         max_length=20, choices=GENDER_CHOICES, blank=True)
-    phone_number = models.CharField(max_length=15, blank=True)
-    address = models.CharField(max_length=50, blank=True)
+    phone_regex = RegexValidator(regex=r'^\d{10,15}$', message="Phone number must be entered in the format: '9999999999' and maximum 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], max_length=15, unique=True, blank=True)
+    address = models.CharField(max_length=100, blank=True)
 
 
     objects = UserManager()
