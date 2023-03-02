@@ -173,5 +173,6 @@ class PostForm(forms.ModelForm):
 class ReplyForm(forms.ModelForm):
     class Meta:
         model = Reply
-        fields = ['content']
+        fields = ['content', 'parent_reply']
+        widgets = {'parent_reply': forms.HiddenInput()}
 
