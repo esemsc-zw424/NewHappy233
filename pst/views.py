@@ -515,5 +515,10 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
     context = {'form': form, 'post': post, 'parent_reply': parent_reply}
     return render(request, 'add_reply_to_reply.html', context)
 
-
-
+@login_required
+def view_post_user(request, user_id, post_id):
+    user = User.objects.get(id=user_id)
+    post = Post.objects.get(id=post_id)
+    context = {'user': user, 'post': post}
+    return render(request, 'view_post_user.html', context)
+    
