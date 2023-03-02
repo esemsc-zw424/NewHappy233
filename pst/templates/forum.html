@@ -1,44 +1,5 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script>
-    $(function() {
-        // Handle like button clicks
-        $('.like-btn').click(function(event) {
-            event.preventDefault(); // prevent browser from showing response
-            var post_id = $(this).data('post-id');
-            var likes_count = $(this).data('likes');
-            var csrftoken = $('meta[name=csrf-token]').attr('content');
-    
-            $.ajax({
-                type: "POST",
-                url: "{% url 'like_post' 0 %}".replace('0', post_id),
-                data: {
-                    csrfmiddlewaretoken: csrftoken,
-                },
-                success: function(response) {
-                    // Update like count and button text
-                    var likes_element = $('.like-btn[data-post-id="' + post_id + '"] .like-count');
-                    likes_element.text(response.like_count);
-    
-                    var like_button = $('.like-btn[data-post-id="' + post_id + '"] button');
-                    if (response.created) {
-                        like_button.addClass('text-danger');
-                        like_button.text('Unlike');
-                        likes_element.text(likes_count + 1);
-                    } else {
-                        like_button.removeClass('text-danger');
-                        like_button.text('Like');
-                        likes_element.text(likes_count - 1);
-                    }
-                },
-                error: function(xhr, textStatus, errorThrown) {
-                    console.log('Error:', errorThrown);
-                }
-            });
-        });
-    });
-</script>
 
 <head>
     <meta charset="utf-8">
@@ -105,12 +66,12 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% if post.replies.exists %}
+                        <div class="card-footer text-muted d-flex justify-content-between">
+                            <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content }}</div>
+                        </div>
+                    {% endif %}
                 </a>
-                {% if post.replies.exists %}
-                <div class="card-footer text-muted d-flex justify-content-between">
-                    <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content }}</div>
-                </div>
-                {% endif %}
             </div>
         {% empty %}
             <p>No posts found.</p>

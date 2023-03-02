@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Spending, SpendingFile, Categories, Post, PostImage, Reply
+from .models import User, Spending, SpendingFile, Categories, Post, PostImage, Reply, Like
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 
@@ -61,4 +61,10 @@ class ReplyAdmin(admin.ModelAdmin):
     def get_num_likes(self, obj):
         return obj.likes.count()
     get_num_likes.short_description = 'Number of Likes'
+
+@admin.register(Like)
+class LikeAdmin(admin.ModelAdmin):
+    list_display = [
+        'user', 'content_type', 'object_id'
+    ]
 

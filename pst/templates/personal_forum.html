@@ -44,7 +44,7 @@
 
                     <div class="card-footer text-muted d-flex justify-content-between">        
                         <div>{{ post.replies.count  }} Replies</div>
-                        <div>{{ post.likes }} Likes</div>
+                        <div>{{ post.likes.count }} Likes</div>
                     </div>
                 </a>
                 {% if post.replies.exists %}
