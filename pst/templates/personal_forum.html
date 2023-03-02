@@ -11,7 +11,7 @@
         <h1>Personal Forum</h1>
         <hr>
         <a href='{% url 'forum' %}' class = 'btn btn-primary mb-3'>Return Forum</a>
-        {% for post in posts %}
+        {% for post in page_obj %}
             <div class="card mb-3">
                 <a href="{% url 'post_detail' post.id %}" class="text-dark text-decoration-none">
                     <div class="card-header">
@@ -52,12 +52,14 @@
                     <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content }}</div>
                 </div>
                 {% endif %}
+            
             </div>
         {% empty %}
             <p>No posts found.</p>
         {% endfor %}
+        {% include 'pagination.html' %}
     </div>
-
+    
 
     <!-- add the Bootstrap JavaScript file -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

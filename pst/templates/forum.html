@@ -12,10 +12,10 @@
         <h1>Forum</h1>
         <hr>
         <a href="{% url 'add_post' %}" class="btn btn-primary mb-3">Add Post</a>
-        <a href="{% url 'personal_forum'%}" class = "btn btn-primary mb-3">Personal Forum</a>
+        <a href="{% url 'personal_forum' %}" class = "btn btn-primary mb-3">Personal Forum</a>
         <a href="{% url 'home' %}" class = "btn btn-primary mb-3">Return Home</a>
 
-        {% for post in posts %}
+        {% for post in page_obj %}
             <div class="card mb-3">
                 <a href="{% url 'post_detail' post.id %}" class="text-dark text-decoration-none">
                     <div class="card-header">
@@ -79,7 +79,9 @@
         {% empty %}
             <p>No posts found.</p>
         {% endfor %}
+        {% include 'pagination.html' %}
     </div>
+    
 
     <!-- add the Bootstrap JavaScript file -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
