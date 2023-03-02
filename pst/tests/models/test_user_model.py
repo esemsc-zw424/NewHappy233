@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from pst.models import User
 
+
 class UserModelTestCase(TestCase):
     fixtures = ['pst/tests/fixtures/users.json']
 
@@ -12,7 +13,6 @@ class UserModelTestCase(TestCase):
     def test_valid_user(self):
         self._assert_user_is_valid()
 
-
     def test_email_must_be_unique(self):
         second_user = User.objects.get(email='johndoe@example.org')
         self.user.email = second_user.email
@@ -21,16 +21,15 @@ class UserModelTestCase(TestCase):
     def test_email_must_not_be_blank(self):
         self.user.email = ''
         self._assert_user_is_invalid()
-    
+
     def test_email_must_contain_at_symbol(self):
         self.user.email = 'johndoe.example.org'
         self._assert_user_is_invalid()
-    
 
     def test_email_must_contain_domain_name(self):
         self.user.email = 'johndoe@.org'
         self._assert_user_is_invalid()
-    
+
     def test_email_must_contain_domain(self):
         self.user.email = 'johndoe@example'
         self._assert_user_is_invalid()
