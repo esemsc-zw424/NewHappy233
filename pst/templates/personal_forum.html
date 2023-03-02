@@ -1,0 +1,67 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <title>Forum</title>
+    <!-- add the Bootstrap CSS file -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+</head>
+<body>   
+    <div class="container">
+        <h1>Personal Forum</h1>
+        <hr>
+        <a href='{% url 'forum' %}' class = 'btn btn-primary mb-3'>Return Forum</a>
+        {% for post in posts %}
+            <div class="card mb-3">
+                <a href="{% url 'post_detail' post.id %}" class="text-dark text-decoration-none">
+                    <div class="card-header">
+                        {{ post.user.get_full_name }} 
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+
+                        <div class="post-content">
+                            {% if post.content|length > 50 %}
+                                {{ post.content|slice:":50"|add:" ..." }}
+                                <br>
+                                <a href="{% url 'post_detail' post.id %}" class="text-dark text-underline " >show more</a>
+                            {% else %}
+                                {{ post.content|slice:":50"}}                                                    
+                            {% endif %}
+                            
+                        </div>
+
+                        <div class="images">
+                            {% for i in post.images.all %}
+                            <img src="{{ i.image.url }}" width="200" height="200"></a>
+                            {% endfor %}                        
+                        </div>
+
+                        <div>
+                            {{ post.post_date|date:'d M Y, H:i'}}
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-muted d-flex justify-content-between">        
+                        <div>{{ post.replies.count  }} Replies</div>
+                        <div>{{ post.likes.count }} Likes</div>
+                    </div>
+                </a>
+                {% if post.replies.exists %}
+                <div class="card-footer text-muted d-flex justify-content-between">
+                    <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content }}</div>
+                </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>No posts found.</p>
+        {% endfor %}
+    </div>
+
+
+    <!-- add the Bootstrap JavaScript file -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</body>
+{% endblock %}

@@ -2,20 +2,24 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from django.shortcuts import render, redirect
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseBadRequest
 from django.contrib import messages
-from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm
-from django.http import HttpResponse
+from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .models import User, Categories
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.contrib.contenttypes.models import ContentType
 import datetime
 
 
 
-from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint
+from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
+
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -258,8 +262,6 @@ def update_spending_categories(request, category_id):
         form = CategoriesForm(instance=category)
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
 
-
-
 @login_required
 def user_profile(request):
     user = request.user
@@ -359,3 +361,130 @@ def redeem(request, reward_id):
             'error_message': error_message,}
 
         return render(request, 'error.html', context)
+
+@login_required
+def forum(request):
+    posts = Post.objects.all().order_by('-post_date')
+    for post in posts:
+        post.replies = Reply.objects.filter(parent_post=post)
+    return render(request, 'forum.html', {'posts': posts})
+
+@login_required
+def personal_forum(request):
+    posts = Post.objects.filter(user=request.user).order_by('-post_date')
+    for post in posts:
+        post.replies = Reply.objects.filter(parent_post=post)
+    return render(request, 'personal_forum.html', {'posts': posts})
+
+@login_required
+def add_post(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit = False)
+            post.user = request.user
+            post.save()
+            for file in request.FILES.getlist('image'):
+                PostImage.objects.create(
+                    post = post,
+                    image = file
+                )
+            return redirect('forum')
+    else:
+        form = PostForm()
+    return render(request, 'add_post.html',  {'form': form})
+
+@login_required
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    context = {'post': post}
+    return render(request, 'post_detail.html', context)
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    content_type = ContentType.objects.get_for_model(Post)
+    try:
+        like = Like.objects.get(
+            content_type=content_type,
+            object_id=post_id,
+            user=user,
+        )
+        like.delete()
+        created = False
+    except Like.DoesNotExist:
+        like = Like.objects.create(
+            content_type=content_type,
+            object_id=post_id,
+            user=user,
+        )
+        created = True
+    like_count = post.likes.count()
+    return redirect('forum')
+
+@login_required
+def like_post_details(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    content_type = ContentType.objects.get_for_model(Post)
+    try:
+        like = Like.objects.get(
+            content_type=content_type,
+            object_id=post_id,
+            user=user,
+        )
+        like.delete()
+        created = False
+    except Like.DoesNotExist:
+        like = Like.objects.create(
+            content_type=content_type,
+            object_id=post_id,
+            user=user,
+        )
+        created = True
+    like_count = post.likes.count()
+    return redirect('post_detail', post_id=post.id)
+
+@login_required
+def like_reply(request, reply_id, post_id):
+    reply = get_object_or_404(Reply, id=reply_id)
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    content_type = ContentType.objects.get_for_model(Reply)
+    try:
+        like = Like.objects.get(
+            content_type=content_type,
+            object_id=reply_id,
+            user=user,
+        )
+        like.delete()
+        created = False
+    except Like.DoesNotExist:
+        like = Like.objects.create(
+            content_type=content_type,
+            object_id=reply_id,
+            user=user,
+        )
+        created = True
+    like_count = reply.likes.count()
+    return redirect('post_detail', post_id=post.id)
+
+@login_required
+def add_reply_to_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.method == 'POST':
+        form = ReplyForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.user = request.user
+            reply.parent_post = post
+            reply.save()
+            return redirect('post_detail', post_id=post.id)
+    else:
+        form = ReplyForm()
+
+    context = {'form': form, 'post': post}
+    return render(request, 'add_reply_to_post.html', context)
+

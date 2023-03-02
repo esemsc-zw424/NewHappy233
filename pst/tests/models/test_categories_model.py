@@ -14,7 +14,7 @@ class CategoriesModelTestCase(TestCase):
         try:
             self.categories.full_clean()
         except(ValidationError):
-            self.fail('Test spending should be valid')
+            self.fail('Test category should be valid')
 
     def _assert_categories_is_invalid(self):
         with self.assertRaises(ValidationError):

@@ -39,10 +39,21 @@ urlpatterns = [
     path('add_spending_categories/', views.add_spending_categories, name = 'add_spending_categories'),
     path('view_spending_categories', views.view_spending_categories, name = 'view_spending_categories'),
     path('update_spending_categories/<int:category_id>/', views.update_spending_categories, name = 'update_spending_categories'),
+
     path('shopping_mall/index/', views.index, name = 'index'),
     path('redeem/<int:reward_id>/', views.redeem, name='redeem'),
     path('user_profile/', views.user_profile, name='user_profile'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
+
+    path('forum/', views.forum, name = 'forum'),
+    path('add_post/', views.add_post, name = 'add_post'),
+    path('post_detail/<int:post_id>/', views.post_detail, name='post_detail'),
+    path('like_post/<int:post_id>/', views.like_post, name='like_post'),
+    path('like_post_details/<int:post_id>/', views.like_post_details, name='like_post_details'),
+    path('like_reply/<int:reply_id>/<int:post_id>/', views.like_reply, name='like_reply'),
+    path('add_reply_to_post/<int:post_id>/', views.add_reply_to_post, name='add_reply_to_post'),
+    path('personal_forum/', views.personal_forum, name ='personal_forum'),
+    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -44,7 +44,7 @@ class SpendingFileModelTestCase(TestCase):
         self._assert_spending_file_is_valid()
     
     def test_file_can_be_png(self):
-        file = SimpleUploadedFile("file.png", content=b"file_content", content_type="application/png")
+        file = SimpleUploadedFile("file.png", content=b"file_content", content_type="image/png")
         self.spending_file.file = file
         self._assert_spending_file_is_valid()
 

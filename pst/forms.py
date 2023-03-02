@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type, Budget
+from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply
 from django.forms import ClearableFileInput
 from django.contrib import messages
 
@@ -148,8 +148,6 @@ class AddSpendingForm(forms.ModelForm):
         required=False,
     )
 
-
-
 # class UserProfileForm(forms.ModelForm):
 #     class Meta:
 #         model = UserProfile
@@ -160,4 +158,20 @@ class BudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
         fields = ['name', 'limit']
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
+
+    image = forms.ImageField(
+        label='image',
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        required=False,
+    )   
+
+class ReplyForm(forms.ModelForm):
+    class Meta:
+        model = Reply
+        fields = ['content']
 

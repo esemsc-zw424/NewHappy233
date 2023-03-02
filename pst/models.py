@@ -5,7 +5,10 @@ from django.core.validators import RegexValidator, MaxValueValidator, MinValueVa
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from libgravatar import Gravatar
-
+from django.core.exceptions import ValidationError
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
+import os
 
 class Spending_type(models.TextChoices):
     EXPENDITURE = "Expenditure"
@@ -95,7 +98,8 @@ class User(AbstractUser):
 
 class Categories(models.Model):
 
-    name = models.CharField(  # name of the category
+
+    name = models.CharField( # name of the category
         max_length=100
     )
 
@@ -174,6 +178,7 @@ class SpendingFile(models.Model):
         upload_to='user_files/'
     )
 
+
 class Budget(models.Model):
     name = models.CharField(max_length=100)
     limit = models.DecimalField(max_digits=10, decimal_places=2)
@@ -198,4 +203,108 @@ class Reward(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.points_required} points)"
+
+# this model is for posts in the forum
+class Post(models.Model):
+
+    # this field store the user when sent this post
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
+
+    # this field store the title of the post
+    # the title are not expected to be very long and can be empty if user don't want to have a title
+    title = models.CharField(
+        blank = True,
+        max_length= 150,
+    )
+
+    # this field store the content of the post
+    content = models.TextField( # for stroing the content of the post
+        blank = False,
+    )
+
+    # this field store the number of likes other user gave
+    # likes = models.IntegerField( # this store the number of likes other user gave
+    #     default=0,
+    #     blank = False,
+    #     validators=[
+    #         MinValueValidator(0),
+    #     ]
+    # )
+    likes = GenericRelation('Like')
+
+    # this field store the date and time when this post sent
+    post_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.content
+
+
+def validate_file_extension(value):
+        ext = os.path.splitext(value.name)[1]  # [0] returns path+filename
+        valid_extensions = ['.jpg', '.jpeg', '.png']
+        if not ext.lower() in valid_extensions:
+            raise ValidationError('File format not supported.')
+
+class PostImage(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(
+        null=True,
+        blank=True,
+        upload_to='post_images/',
+        validators=[validate_file_extension],
+    )
+
+# this model is for replies under a post
+class Reply(models.Model):
+    
+    # this field store the user when sent this reply
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reply', blank = False)
+
+    # this field store the post where this reply belongs to
+    parent_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reply', blank = False)
+
+    # if this reply is the reply for another reply under the same post, then this field will be use to mark the parent reply
+    parent_reply = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+
+    # this field store the content of the post
+    # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
+    content = models.TextField( 
+        blank = False,
+    )
+
+    # this field store the number of likes other user gave
+    # likes = models.IntegerField(
+    #     default=0,
+    #     blank = False,
+    #     validators=[
+    #         MinValueValidator(0),
+    #     ]
+    # )
+    likes = GenericRelation('Like')
+
+    # this field store the date and time when this reply sent
+    reply_date = models.DateTimeField(auto_now_add=True, blank = False)
+
+    def __str__(self):
+        return self.content
+    
+class Like(models.Model):
+    # used GenericForeignKey so like can be applied on both reply and post model 
+    
+    # user who gaves this like
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # this refers to what type of model this object this is 
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+
+    # this refers to a specific object under this model
+    object_id = models.PositiveIntegerField()
+
+    # shortcut property that combines content_type and object_id to return the actual object being liked
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        unique_together = [['user', 'content_type', 'object_id']]
+
+
 
