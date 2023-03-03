@@ -35,7 +35,7 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
-   
+
 
     def create_superuser(self, first_name, last_name, email, password, **extra_fields):
         user = self.create_user(first_name, last_name, email, password)
@@ -59,8 +59,9 @@ class User(AbstractUser):
     ]
     gender = models.CharField(
         max_length=20, choices=GENDER_CHOICES, blank=True)
-    phone_number = models.CharField(max_length=15, blank=True)
-    address = models.CharField(max_length=50, blank=True)
+    phone_regex = RegexValidator(regex=r'^\d{10,15}$', message="Phone number must be entered in the format: '9999999999' and maximum 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], max_length=15, blank=True)
+    address = models.CharField(max_length=100, blank=True)
 
 
     objects = UserManager()
@@ -75,26 +76,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
-
-
-# class UserProfile(models.Model):  # Create User Profile
-#     GENDER_CHOICES = [
-#         ('M', 'Male'),
-#         ('F', 'Female'),
-#         ('PNTS', 'Perfer not to say')
-#     ]
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     bio = models.TextField(max_length=500, blank=True)
-#     gender = models.CharField(max_length=4, choices=GENDER_CHOICES, blank=True)
-#     location = models.CharField(max_length=30, blank=True)
-#     birth_date = models.DateField(null=True, blank=True)
-#     phone_number = models.CharField(max_length=15, blank=True)
-
-#     def __str__(self):
-#         return str(self.user)
-
-# Create your models here.
-
 
 class Categories(models.Model):
 
@@ -256,7 +237,7 @@ class PostImage(models.Model):
 
 # this model is for replies under a post
 class Reply(models.Model):
-    
+
     # this field store the user when sent this reply
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reply', blank = False)
 
@@ -268,7 +249,7 @@ class Reply(models.Model):
 
     # this field store the content of the post
     # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
-    content = models.TextField( 
+    content = models.TextField(
         blank = False,
     )
 
@@ -287,14 +268,14 @@ class Reply(models.Model):
 
     def __str__(self):
         return self.content
-    
+
 class Like(models.Model):
-    # used GenericForeignKey so like can be applied on both reply and post model 
-    
+    # used GenericForeignKey so like can be applied on both reply and post model
+
     # user who gaves this like
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    # this refers to what type of model this object this is 
+    # this refers to what type of model this object this is
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
 
     # this refers to a specific object under this model
@@ -305,6 +286,3 @@ class Like(models.Model):
 
     class Meta:
         unique_together = [['user', 'content_type', 'object_id']]
-
-
-

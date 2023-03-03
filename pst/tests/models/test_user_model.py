@@ -50,6 +50,42 @@ class UserModelTestCase(TestCase):
         second_user = User.objects.get(email='lll@example.org')
         self.user.last_name = second_user.last_name
         self._assert_user_is_valid()
+    
+    def test_bio_can_be_blank(self):
+        self.user.bio= ''
+        self._assert_user_is_valid()
+    
+    def test_bio_cannot_exceed_500_length(self):
+        self.user.bio = 'x' * 501
+        self._assert_user_is_invalid()
+    
+    def test_gnder_can_be_blank(self):
+        self.user.gender= ''
+        self._assert_user_is_valid()
+
+    def test_gender_must_be_one_of_the_option(self):
+        self.user.gender = 'unknown'
+        self._assert_user_is_invalid()
+    
+    def test_phone_number_can_be_blank(self):
+        self.user.phone_number= ''
+        self._assert_user_is_valid()
+
+    def test_phone_number_cannot_exceed_15_length(self):
+        self.user.phone_number = '1' * 15
+        self._assert_user_is_invalid()
+    
+    def test_phone_number_must_be_number(self):
+        self.user.phone_number = 'abcdfedad' 
+        self._assert_user_is_invalid()
+
+    def test_address_can_be_blank(self):
+        self.user.address= ''
+        self._assert_user_is_valid()
+    
+    def test_phone_number_cannot_exceed_100_length(self):
+        self.user.phone_number = 'a' * 100
+        self._assert_user_is_invalid()
 
     def _assert_user_is_valid(self):
         try:

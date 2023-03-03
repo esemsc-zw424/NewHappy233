@@ -63,8 +63,11 @@
         <a href='{% url 'forum' %}' class = "btn btn-primary mb-3">Return Forum</a>
 
         <div class="post">
+            <div class="author">
+                <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
+                <a href="{% url 'view_post_user' post.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">{{ post.user.get_full_name }} </a>
+            </div>
             <h1>{{ post.title }}</h1>
-            <div class="author">Author: {{ post.user.get_full_name }}</div>
             <div class="content">Content: {{ post.content }}</div>
             <div class="images">
                 {% for i in post.images.all %}
@@ -92,9 +95,11 @@
             </div>
         </div>
 
+        
         {% if post.reply.exists %}
+        <div class="Replies Container">
             <div>Replies:</div>
-            {% for r in post.reply.all %}
+            {% for r in page_obj %}
             <div class="reply">
                     {% if r.parent_reply %}
                         <div class="parent-reply">
@@ -105,7 +110,10 @@
                             {% endif %}
                         </div>
                     {% endif %}
-                <div class="author">{{ r.user.get_full_name }}</div>
+                <div class="author">
+                    <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
+                    <a href="{% url 'view_post_user' r.user.id r.id %}" style="text-decoration:none; font-weight:bold; color:black;">{{ r.user.get_full_name }} </a>
+                </div>
                 <div class="content">{{ r.content }}</div>
                 <div class="info">in {{ r.reply_date|date:'d M Y, H:i' }}</div>
                 <div>
@@ -128,6 +136,8 @@
                 </div>
             </div>
             {% endfor%}
+        {% include 'pagination.html' %}
+        </div>
         {% endif %}
         
     </div>

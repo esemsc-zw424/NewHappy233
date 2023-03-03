@@ -8,7 +8,9 @@
             "first_name": "john",
             "last_name": "doe",
             "bio": "bio1",
-            "gender": "male"
+            "gender": "Male",
+            "phone_number": "0111111111",
+            "address": "Street ABC"
         }
     },
     {
@@ -16,12 +18,13 @@
         "pk": 2,
         "fields": {
             "password":"pbkdf2_sha256$390000$ZPgc9DL7tgUkTQE9WZz3Jy$pB5wi2s322YotSVGmSPEzpe/CIYT9/1fZ73pDQ5NSl8=",
-
             "email": "lll@example.org",
             "first_name": "Oreo",
             "last_name": "pic",
             "bio": "bio2",
-            "gender": "female"
+            "gender": "Female",
+            "phone_number": "0111111112",
+            "address": "Street BCD"
         }
     }
 ]

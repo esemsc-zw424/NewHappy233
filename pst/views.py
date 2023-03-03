@@ -2,7 +2,11 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
+from django.urls import reverse
 
+
+from django.http import HttpResponseNotFound
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseBadRequest
 from django.contrib import messages
@@ -144,23 +148,6 @@ def respond(user_input):
             if token in synonyms:
                 return random.choice(responses[keyword])
     return "Sorry, I do not understand what you mean."
-
-
-# @login_required
-# def add_spending(request):
-#     if request.method == 'POST':
-#         form = AddSpendingForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             spending = form.save(commit=False)
-#             spending.spending_owner = request.user
-#             for file in request.FILES.getlist('file'):
-#                 spending.file = file
-#             spending.save()
-#             return redirect('home')
-#     else:
-#         form = AddSpendingForm()
-#     return render(request, 'add_spending.html',  {'form': form})
-
 
 @login_required
 def add_spending(request):
@@ -319,10 +306,6 @@ def show_budget(request):
             messages.add_message(request, messages.INFO, 'you have exceeded the limit')
     return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
 
-# @login_required
-# def cal_spending():
-#      spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
-#      return spending_total
 
 @login_required
 def index(request):
@@ -365,16 +348,25 @@ def redeem(request, reward_id):
 @login_required
 def forum(request):
     posts = Post.objects.all().order_by('-post_date')
+    paginator = Paginator(posts, 2)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     for post in posts:
         post.replies = Reply.objects.filter(parent_post=post)
-    return render(request, 'forum.html', {'posts': posts})
+
+    context = {'posts': posts, 'page_obj': page_obj}
+    return render(request, 'forum.html', context)
 
 @login_required
 def personal_forum(request):
     posts = Post.objects.filter(user=request.user).order_by('-post_date')
+    paginator = Paginator(posts, 2)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     for post in posts:
         post.replies = Reply.objects.filter(parent_post=post)
-    return render(request, 'personal_forum.html', {'posts': posts})
+    context = {'posts': posts, 'page_obj': page_obj}
+    return render(request, 'personal_forum.html', context)
 
 @login_required
 def add_post(request):
@@ -396,8 +388,16 @@ def add_post(request):
 
 @login_required
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    context = {'post': post}
+    #post = get_object_or_404(Post, id=post_id)
+    try:
+        post = Post.objects.get(id=post_id)
+    except Post.DoesNotExist:
+        return HttpResponseNotFound()
+    replies = Reply.objects.filter(parent_post=post)
+    paginator = Paginator(replies, 2)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'post': post, 'replies': replies, 'page_obj': page_obj}
     return render(request, 'post_detail.html', context)
 
 @login_required
@@ -421,7 +421,9 @@ def like_post(request, post_id):
         )
         created = True
     like_count = post.likes.count()
-    return redirect('forum')
+    
+    return redirect(request.META.get('HTTP_REFERER', reverse('forum')))
+
 
 @login_required
 def like_post_details(request, post_id):
@@ -444,7 +446,9 @@ def like_post_details(request, post_id):
         )
         created = True
     like_count = post.likes.count()
-    return redirect('post_detail', post_id=post.id)
+    
+    redirect_url = request.META.get('HTTP_REFERER', reverse('post_detail', args=[post_id]))
+    return redirect(redirect_url)
 
 @login_required
 def like_reply(request, reply_id, post_id):
@@ -468,7 +472,11 @@ def like_reply(request, reply_id, post_id):
         )
         created = True
     like_count = reply.likes.count()
-    return redirect('post_detail', post_id=post.id)
+    redirect_url = request.META.get('HTTP_REFERER', reverse('post_detail', args=[post_id]))
+    return redirect(redirect_url)
+    
+    
+
 
 @login_required
 def add_reply_to_post(request, post_id):
@@ -507,5 +515,10 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
     context = {'form': form, 'post': post, 'parent_reply': parent_reply}
     return render(request, 'add_reply_to_reply.html', context)
 
-
-
+@login_required
+def view_post_user(request, user_id, post_id):
+    user = User.objects.get(id=user_id)
+    post = Post.objects.get(id=post_id)
+    context = {'user': user, 'post': post}
+    return render(request, 'view_post_user.html', context)
+    

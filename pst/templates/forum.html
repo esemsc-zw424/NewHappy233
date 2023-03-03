@@ -12,15 +12,19 @@
         <h1>Forum</h1>
         <hr>
         <a href="{% url 'add_post' %}" class="btn btn-primary mb-3">Add Post</a>
-        <a href="{% url 'personal_forum'%}" class = "btn btn-primary mb-3">Personal Forum</a>
+        <a href="{% url 'personal_forum' %}" class = "btn btn-primary mb-3">Personal Forum</a>
         <a href="{% url 'home' %}" class = "btn btn-primary mb-3">Return Home</a>
 
-        {% for post in posts %}
+        {% for post in page_obj %}
             <div class="card mb-3">
-                <a href="{% url 'post_detail' post.id %}" class="text-dark text-decoration-none">
-                    <div class="card-header">
-                        {{ post.user.get_full_name }} 
-                    </div>
+                
+                <div class="card-header">
+                    {% if post.user %}
+                        <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
+                        <a href="{% url 'view_post_user' post.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">{{ post.user.get_full_name }} </a>
+                    {% endif %}
+                </div>
+                <a href="{% url 'post_detail' post.id %}" class="text-dark text-decoration-none" >
                     <div class="card-body">
                         <h5 class="card-title">{{ post.title }}</h5>
 
@@ -79,7 +83,9 @@
         {% empty %}
             <p>No posts found.</p>
         {% endfor %}
+        {% include 'pagination.html' %}
     </div>
+    
 
     <!-- add the Bootstrap JavaScript file -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
