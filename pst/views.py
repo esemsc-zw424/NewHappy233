@@ -348,25 +348,23 @@ def redeem(request, reward_id):
 @login_required
 def forum(request):
     posts = Post.objects.all().order_by('-post_date')
-    paginator = Paginator(posts, 2)
+    paginator = Paginator(posts, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    for post in posts:
+    for post in page_obj:
         post.replies = Reply.objects.filter(parent_post=post)
 
-    context = {'posts': posts, 'page_obj': page_obj}
-    return render(request, 'forum.html', context)
+    return render(request, 'forum.html', {'page_obj': page_obj})
 
 @login_required
 def personal_forum(request):
     posts = Post.objects.filter(user=request.user).order_by('-post_date')
-    paginator = Paginator(posts, 2)
+    paginator = Paginator(posts, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    for post in posts:
+    for post in page_obj:
         post.replies = Reply.objects.filter(parent_post=post)
-    context = {'posts': posts, 'page_obj': page_obj}
-    return render(request, 'personal_forum.html', context)
+    return render(request, 'personal_forum.html', {'page_obj': page_obj})
 
 @login_required
 def add_post(request):
