@@ -364,7 +364,14 @@ def personal_forum(request):
     page_obj = paginator.get_page(page_number)
     for post in page_obj:
         post.replies = Reply.objects.filter(parent_post=post)
-    return render(request, 'personal_forum.html', {'page_obj': page_obj})
+
+    reply_page_number = request.GET.get('reply_page')
+    replies = Reply.objects.filter(user=request.user).order_by('-reply_date')
+    reply_paginator = Paginator(replies, 5)
+    reply_page_obj = reply_paginator.get_page(reply_page_number)
+
+    
+    return render(request, 'personal_forum.html', {'page_obj': page_obj, 'reply_page_obj': reply_page_obj})
 
 @login_required
 def add_post(request):
