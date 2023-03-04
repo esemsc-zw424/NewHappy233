@@ -5,6 +5,30 @@
     <title>Forum</title>
     <!-- add the Bootstrap CSS file -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+    <style>
+        .reply {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+        }
+        .reply .author {
+            margin-bottom: 10px;
+        }
+        .reply .info {
+            color: #666;
+            font-size: 14px;
+        }
+        .reply .parent-reply {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+    </style>
 </head>
 <body>   
     <div class="container">
@@ -46,18 +70,58 @@
                         <div>{{ post.replies.count  }} Replies</div>
                         <div>{{ post.likes.count }} Likes</div>
                     </div>
+                    {% if post.replies.exists %}
+                        <div class="card-footer text-muted d-flex justify-content-between">
+                            <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content }}</div>
+                        </div>
+                    {% endif %}
                 </a>
-                {% if post.replies.exists %}
-                <div class="card-footer text-muted d-flex justify-content-between">
-                    <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content }}</div>
-                </div>
-                {% endif %}
             
             </div>
         {% empty %}
             <p>No posts found.</p>
         {% endfor %}
         {% include 'pagination.html' %}
+
+        {% for r in reply_page_obj %}
+            <a href="{% url 'post_detail' r.parent_post.id %}" class="text-dark text-decoration-none">
+                <div class="reply">
+                        {% if r.parent_reply %}
+                            <div class="parent-reply">
+                                {% if r.parent_reply.content|length > 50 %}
+                                    <div>{{ r.parent_reply.user.get_full_name }}: {{ r.parent_reply.content|slice:":50"|add:" ..." }}</div>
+                                {% else %}
+                                    <div>{{ r.parent_reply.user.get_full_name }}: {{ r.parent_reply.content|slice:":50" }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    <div class="content">{{ r.content }}</div>
+                    <div class="info">in {{ r.reply_date|date:'d M Y, H:i' }}</div>
+                    <div class="card-footer text-muted d-flex justify-content-between">        
+                        <div>{{ r.likes.count }} Likes</div>
+                    </div>
+                </div>
+            </a>
+        {% endfor%}
+        <div class="pagination">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                {% if reply_page_obj.has_previous %}
+                  <li class="page-item"><a class="page-link" href="?reply_page={{ reply_page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                {% if reply_page_obj.has_other_pages %}
+                {% for num in reply_page_obj.paginator.page_range %}
+                  <li class="page-item {% if reply_page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?reply_page={{ num }}">{{ num }}</a>
+                  </li>
+                {% endfor %}
+                {% endif %}
+                {% if reply_page_obj.has_next %}
+                  <li class="page-item"><a class="page-link" href="?reply_page={{ reply_page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+                </ul>
+              </nav>
+        </div>
     </div>
     
 
