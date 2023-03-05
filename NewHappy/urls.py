@@ -33,6 +33,8 @@ urlpatterns = [
     path('add_spending_categories/', views.add_spending_categories, name = 'add_spending_categories'),
     path('view_spending_categories', views.view_spending_categories, name = 'view_spending_categories'),
     path('update_spending_categories/<int:category_id>/', views.update_spending_categories, name = 'update_spending_categories'),
+    path('expenditure_report/', views.sum_expenditures, name = 'sum_expenditures'),
+    path('income_report/', views.sum_incomes, name = 'sum_incomes'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

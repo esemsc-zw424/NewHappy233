@@ -2,11 +2,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.shortcuts import render,redirect
 from django.contrib import messages
-from .forms import  CategoriesForm
+from .forms import  CategoriesForm, AddSpendingForm
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from .models import User ,Categories
+from django.db.models import Sum
+from .models import User, Categories, Spending
 
 
 from .models import SpendingFile
@@ -204,4 +205,16 @@ def update_spending_categories(request, category_id):
         category = Categories.objects.get(id=category_id)
         form = CategoriesForm(instance=category)
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
+
+@login_required
+def sum_expenditures(request):
+    expenditures = Spending.objects.filter(spending_type=Spending_type.EXPENDITURE).order_by('-spending_category')
+    expenditures_amount = expenditures.values('spending_category').annotate(exp_amount=Sum('amount'))
+    return render(request, 'expenditure_report.html', {'expenditures': expenditures, 'expenditures_amount': expenditures_amount})
+
+@login_required
+def sum_incomes(request):
+    incomes = Spending.objects.filter(spending_type=Spending_type.INCOME).order_by('-spending_category')
+    incomes_amount = incomes.values('spending_category').annotate(income_amount=Sum('amount'))
+    return render(request, 'income_report.html', {'incomes': incomes, 'incomes_amount': incomes_amount})
 
