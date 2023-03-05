@@ -1,14 +1,7 @@
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from django.urls import reverse
-
-
-from django.http import HttpResponseNotFound
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseBadRequest
+from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib import messages
 from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
 from django.http import HttpResponse, JsonResponse
@@ -19,7 +12,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
 import datetime
-
 
 
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
@@ -48,8 +40,8 @@ from django.db.models import Sum
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
-
-
+    
+@login_prohibited
 def visitor_signup(request):
     if request.method == 'POST':
         form = VisitorSignupForm(request.POST)
@@ -79,6 +71,7 @@ def log_in(request):
     if request.method == 'POST':
         next = request.POST.get('next') or ''
         form = LoginForm(request.POST)
+        messages.add_message(request, messages.ERROR,"The credentials provided are invalid!")
         if form.is_valid():
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
@@ -87,9 +80,9 @@ def log_in(request):
                 login(request, user)
                 redirect_url = next or 'home'
                 return redirect(redirect_url)
-       # messages.add_message(request, messages.ERROR,
-                # "The credentials provided are invalid!")
+        
         else:
+            
             next = request.GET.get('next') or ''
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
@@ -152,6 +145,7 @@ def respond(user_input):
 @login_required
 def add_spending(request):
     if request.method == 'POST':
+        
         form = AddSpendingForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             spending = form.save(commit=False)
@@ -169,7 +163,7 @@ def add_spending(request):
 
 
 @login_required
-def view_spending(request):
+def view_spendings(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
@@ -183,12 +177,44 @@ def view_spending(request):
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    spendings = Spending.objects.filter(spending_owner=request.user)
 
-    context = {'spending': spending, 'page_obj': page_obj}
+    form = EditSpendingForm(user=request.user)
+    context = {'form': form, 'spending': spending, 'page_obj': page_obj}
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'spending_table.html', context)
     else:
-        return render(request, 'view_spending.html', context)
+        return render(request, 'view_spendings.html', context)
+
+
+
+@login_required
+def edit_spending(request, spending_id):
+    try:
+        spending = Spending.objects.get(id = spending_id)
+    except ObjectDoesNotExist:
+        return render(request, 'view_spendings.html')
+
+    if request.method == 'POST':
+        form = EditSpendingForm(request.user, request.POST, instance=spending)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'success')
+            return redirect('view_spendings')
+    else:
+        form = EditSpendingForm(user=request.user)
+    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
+
+
+@login_required
+def delete_spending(request, spending_id):
+
+    delete_spending = get_object_or_404(Spending, id = spending_id)
+    delete_spending.delete()
+    messages.warning(request, "spending has been deleted")
+    return redirect('view_spendings') 
+   
 
 
 @login_required
@@ -526,4 +552,3 @@ def view_post_user(request, user_id, post_id):
     post = Post.objects.get(id=post_id)
     context = {'user': user, 'post': post}
     return render(request, 'view_post_user.html', context)
-    

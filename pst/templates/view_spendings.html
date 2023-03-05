@@ -26,7 +26,7 @@
         <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
         <p>
             <div class="row align-items-center g-2">
-                <form method="GET" action="{% url 'view_spending' %}">
+                <form method="GET" action="{% url 'view_spendings' %}">
                     <div class="col">
                     <div class="form-floating">
                         <input type="date" class="form-control" id="start_date" name="start_date">
@@ -62,7 +62,9 @@
         <tbody>
             {% for i in page_obj %}
             <tr class="align-middle">
-                <td> {{ i.title }} </td>
+                <td><button type="button" class="btn btn-primary" 
+                    data-bs-toggle="modal" data-bs-target="#editSpendingModal{{ i.id }}">{{ i.title }}</button></td>
+
                 <td> {{ i.descriptions }} </td>
                 <td> {{ i.spending_type}} </td>
                 <td> {{ i.amount}} </td>
@@ -76,6 +78,26 @@
                 </td>
                 
             </tr>
+            <div class="modal fade" id="editSpendingModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editSpendingModalLabel">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editSpendingModalLabel">Edit Spending</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="{%url 'edit_spending' i.id %}">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <button class="btn btn-primary">Update</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
         </tbody>
     </table>

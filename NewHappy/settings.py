@@ -149,7 +149,6 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 
-ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS= False
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

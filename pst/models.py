@@ -115,10 +115,7 @@ class Spending(models.Model):
         blank=False
     )
 
-
-    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner',
-                                       blank=False)  # this refers to the user when create this spending
-
+    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') #this refers to the user when create this spending
 
     amount = models.IntegerField(  # this refers to the amount this user spent or gained
         blank=False,
@@ -133,8 +130,8 @@ class Spending(models.Model):
         max_length=500,
     )
 
-    date = models.DateField(  # data of the spending
-        blank=False,
+    date = models.DateField( # date of the spending
+        blank = False,
     )
 
     spending_type = models.CharField(  # this refers to the spending type
