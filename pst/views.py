@@ -7,14 +7,14 @@ from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileFor
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from .models import User, Categories
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Sum
 import datetime
 
 
-from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
+from .models import User, Categories, Spending, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
 
 from .forms import *
 from django.views import View
@@ -302,6 +302,18 @@ def edit_profile(request):
 @login_required
 def user_guideline(request):
     return render(request, 'user_guideline.html')
+    
+@login_required
+def sum_expenditures(request):
+    expenditures = Spending.objects.filter(spending_type=Spending_type.EXPENDITURE).order_by('-spending_category')
+    expenditures_amount = expenditures.values('spending_category').annotate(exp_amount=Sum('amount'))
+    return render(request, 'expenditure_report.html', {'expenditures': expenditures, 'expenditures_amount': expenditures_amount})
+
+@login_required
+def sum_incomes(request):
+    incomes = Spending.objects.filter(spending_type=Spending_type.INCOME).order_by('-spending_category')
+    incomes_amount = incomes.values('spending_category').annotate(income_amount=Sum('amount'))
+    return render(request, 'income_report.html', {'incomes': incomes, 'incomes_amount': incomes_amount})
 
 @login_required
 def set_budget(request):
@@ -505,9 +517,6 @@ def like_reply(request, reply_id, post_id):
     like_count = reply.likes.count()
     redirect_url = request.META.get('HTTP_REFERER', reverse('post_detail', args=[post_id]))
     return redirect(redirect_url)
-    
-    
-
 
 @login_required
 def add_reply_to_post(request, post_id):

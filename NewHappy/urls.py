@@ -46,6 +46,9 @@ urlpatterns = [
     path('redeem/<int:reward_id>/', views.redeem, name='redeem'),
     path('user_profile/', views.user_profile, name='user_profile'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('expenditure_report/', views.sum_expenditures, name = 'sum_expenditures'),
+    path('income_report/', views.sum_incomes, name = 'sum_incomes'),
+
 
     path('forum/', views.forum, name = 'forum'),
     path('add_post/', views.add_post, name = 'add_post'),
