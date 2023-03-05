@@ -1,0 +1,54 @@
+{% extends 'base_content.html' %}
+{% block content %}
+    <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
+<div class="row content">
+    <h1>Your budget is: </h1>
+    <p>{{budget.limit}}
+    </p>
+</div>
+<head>
+	<meta charset="utf-8">
+	<title>Progress Bar</title>
+{#	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">#}
+{#	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>#}
+{#	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
+</head>
+<body>
+
+<div class="container">
+    <style>
+.progress-bar {
+  height: 20px;
+  background-color:
+    {% if spending_percentage < 80 %}
+      green
+    {% elif spending_percentage >= 80 and spending_percentage < 90 %}
+      yellow
+    {% else %}
+      red
+    {% endif %};
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+</style>
+{% if budget != None %}
+  <h2>Current ratio</h2>
+  <div class="progress">
+    <div class="progress-bar" role="progressbar" style="width: {{ spending_percentage }}%; color: black;" aria-valuenow="{{ spending_percentage }}" aria-valuemin="0" aria-valuemax="90" style="width:{{ spending_percentage }}%">
+      {{ spending_percentage }}%
+    </div>
+  </div>
+{% endif %}
+</div>
+<div class="container">
+    {% if budget == None %}
+        <h1>You have not set budget yet</h1>
+        <h3>Click the button below to set your budget</h3>
+        <a href ='{% url 'budget_set' %}' class = 'btn btn-lg btn-primary'>Set Budget</a>
+        {% endif %}
+</div>
+
+
+</body>
+{% endblock %}

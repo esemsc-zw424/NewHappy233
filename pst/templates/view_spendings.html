@@ -1,0 +1,111 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+
+<script>
+    function filterSpending() {
+        const start_date = document.getElementById('start_date').value;
+        const end_date = document.getElementById('end_date').value;
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status == 200){
+                document.getElementById('spending-table').innerHTML = this.responseText;
+            }
+        };
+        xhttp.open('GET', `/spending?start_date=${start_date}&end_date=${end_date}`, true);
+        xhttp.send();
+        return false;
+    }
+
+</script>
+
+<div class="container">
+    <table class="table" id="spending-table">
+        <h1>View Spending</h1>
+        <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
+        <p>
+            <div class="row align-items-center g-2">
+                <form method="GET" action="{% url 'view_spendings' %}">
+                    <div class="col">
+                    <div class="form-floating">
+                        <input type="date" class="form-control" id="start_date" name="start_date">
+                        <label for="floatingInputGrid">Start date:</label>
+                    </div>
+                    </div>
+                    <div class="col">
+                    <div class="form-floating">
+                        <input type="date" class="form-control" id="end_date" name="end_date">
+                        <label for="floatingInputGrid">End date:</label>
+                    </div>
+                    </div>
+                    <div class="col">
+                        <button type="submit" id="find-button" class="btn btn btn-primary btn-lg" onclick="filterSpending">Find</button>
+                    </div>
+                </form>
+            </div>
+
+        </p>
+        
+        <thead>
+            <tr>
+                <th scope="col">title</th>
+                <th scope="col">description</th>
+                <th scope="col">spending type</th>
+                <th scope="col">amount</th>
+                <th scope="col">spending owner</th>
+                <th scope="col">date</th>
+                <th scope="col">file</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for i in page_obj %}
+            <tr class="align-middle">
+                <td><button type="button" class="btn btn-primary" 
+                    data-bs-toggle="modal" data-bs-target="#editSpendingModal{{ i.id }}">{{ i.title }}</button></td>
+
+                <td> {{ i.descriptions }} </td>
+                <td> {{ i.spending_type}} </td>
+                <td> {{ i.amount}} </td>
+                <td> {{ i.spending_owner}} </td>
+                <td>{{ i.date|date:"m/d/Y" }} </td>
+
+                <td>
+                    {% for individual in i.files.all %}
+                    <a href="{{ individual.file.url }}">{{ individual.file.url }}</a>
+                    {% endfor %}
+                </td>
+                
+            </tr>
+            <div class="modal fade" id="editSpendingModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editSpendingModalLabel">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editSpendingModalLabel">Edit Spending</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="{%url 'edit_spending' i.id %}">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <button class="btn btn-primary">Update</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    {% include 'pagination.html' %}
+
+
+
+</div>
+{% endblock %}
