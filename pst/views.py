@@ -7,6 +7,7 @@ from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileFor
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+<<<<<<< HEAD
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
@@ -15,6 +16,16 @@ import datetime
 
 
 from .models import User, Categories, Spending, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
+=======
+from .models import User, Categories
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
+from django.contrib.contenttypes.models import ContentType
+import datetime
+
+
+from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
+>>>>>>> origin
 
 from .forms import *
 from django.views import View
@@ -302,6 +313,7 @@ def edit_profile(request):
 @login_required
 def user_guideline(request):
     return render(request, 'user_guideline.html')
+<<<<<<< HEAD
     
 @login_required
 def sum_expenditures(request):
@@ -314,6 +326,8 @@ def sum_incomes(request):
     incomes = Spending.objects.filter(spending_type=Spending_type.INCOME).order_by('-spending_category')
     incomes_amount = incomes.values('spending_category').annotate(income_amount=Sum('amount'))
     return render(request, 'income_report.html', {'incomes': incomes, 'incomes_amount': incomes_amount})
+=======
+>>>>>>> origin
 
 @login_required
 def set_budget(request):
@@ -517,6 +531,12 @@ def like_reply(request, reply_id, post_id):
     like_count = reply.likes.count()
     redirect_url = request.META.get('HTTP_REFERER', reverse('post_detail', args=[post_id]))
     return redirect(redirect_url)
+<<<<<<< HEAD
+=======
+    
+    
+
+>>>>>>> origin
 
 @login_required
 def add_reply_to_post(request, post_id):
