@@ -3,6 +3,8 @@ from django.contrib import admin
 from .models import User, Spending, SpendingFile, Categories, Post, PostImage, Reply, Like
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.models import Group
+
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -19,6 +21,20 @@ class MyUserAdmin(UserAdmin):
     list_display = [
         'email', 'first_name', 'last_name',
     ]
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name',
+         'bio', 'gender', 'phone_number', 'address')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff',
+         'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name', 'is_staff', 'is_active')}
+         ),
+    )
 
 
 @admin.register(Spending)

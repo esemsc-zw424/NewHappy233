@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 import os
-
+from django.contrib.auth.models import Permission
 class Spending_type(models.TextChoices):
     EXPENDITURE = "Expenditure"
     INCOME = "Income"
@@ -37,12 +37,7 @@ class UserManager(BaseUserManager):
 
 
 
-    def create_superuser(self, first_name, last_name, email, password, **extra_fields):
-        user = self.create_user(first_name, last_name, email, password)
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
-        return user
+    
 
 
 class User(AbstractUser):
@@ -62,6 +57,7 @@ class User(AbstractUser):
     phone_regex = RegexValidator(regex=r'^\d{10,15}$', message="Phone number must be entered in the format: '9999999999' and maximum 15 digits allowed.")
     phone_number = models.CharField(validators=[phone_regex], max_length=15, blank=True)
     address = models.CharField(max_length=100, blank=True)
+    categories_created = models.BooleanField(default=False)
 
 
     objects = UserManager()
