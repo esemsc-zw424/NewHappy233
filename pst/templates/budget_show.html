@@ -1,11 +1,7 @@
 {% extends 'base_content.html' %}
 {% block content %}
     <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
-<div class="row content">
-    <h1>Your budget is: </h1>
-    <p>{{budget.limit}}
-    </p>
-</div>
+
 <head>
 	<meta charset="utf-8">
 	<title>Progress Bar</title>
@@ -32,6 +28,10 @@
 }
 
 </style>
+{% if budget %}
+    <h1>Your budget is: </h1>
+    <p>{{budget.limit}}</p>
+{% endif %}
 {% if budget != None %}
   <h2>Current ratio</h2>
   <div class="progress">

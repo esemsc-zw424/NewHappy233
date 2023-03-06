@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from django.contrib.auth.decorators import login_required
@@ -21,7 +22,6 @@ from django.contrib.contenttypes.models import ContentType
 import datetime
 
 
-
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
 
 from .forms import *
@@ -37,9 +37,6 @@ import random
 import nltk
 nltk.download('punkt')
 nltk.download('wordnet')
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from django.db.models import Sum
 
 
 # Create your views here.
@@ -55,7 +52,8 @@ def visitor_signup(request):
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            auth.login(request, user,
+                       backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
         else:
             return render(request, 'visitor_signup.html', {'form': form})
@@ -66,7 +64,35 @@ def visitor_signup(request):
 
 @login_required
 def home(request):
-    return render(request, 'home.html')
+    user = request.user
+    percentage = calculate_budget(request)
+    current_month = datetime.date.today().month
+
+    revenue = Spending.objects.filter(
+        spending_owner=request.user,
+        date__month=current_month,
+        spending_type=Spending_type.INCOME,
+    )
+
+    if (not revenue):
+        monthly_revenue = 0
+    else:
+        monthly_revenue = revenue.aggregate(nums=Sum('amount')).get('nums')
+
+    expense = Spending.objects.filter(
+        spending_owner=request.user,
+        date__month=current_month,
+        spending_type=Spending_type.EXPENDITURE,
+    )
+
+    if (not expense):
+        monthly_expense = 0
+    else:
+        monthly_expense = expense.aggregate(nums=Sum('amount')).get('nums')
+
+    context = {'user': user, 'percentage': percentage,
+               'revenue': monthly_revenue, 'expense': monthly_expense}
+    return render(request, 'home.html', context)
 
 
 @login_prohibited
@@ -149,6 +175,7 @@ def respond(user_input):
                 return random.choice(responses[keyword])
     return "Sorry, I do not understand what you mean."
 
+
 @login_required
 def add_spending(request):
     if request.method == 'POST':
@@ -176,7 +203,8 @@ def view_spending(request):
     if start_date and end_date:
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
-        spending = Spending.objects.filter(date__range=[start_date, end_date]).order_by('date')
+        spending = Spending.objects.filter(
+            date__range=[start_date, end_date]).order_by('date')
     else:
         spending = Spending.objects.all().order_by('date')
 
@@ -249,6 +277,7 @@ def update_spending_categories(request, category_id):
         form = CategoriesForm(instance=category)
     return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
 
+
 @login_required
 def user_profile(request):
     user = request.user
@@ -273,9 +302,11 @@ def edit_profile(request):
         form = EditProfileForm(instance=user)
     return render(request, 'edit_profile.html', {'form': form})
 
+
 @login_required
 def user_guideline(request):
     return render(request, 'user_guideline.html')
+
 
 @login_required
 def set_budget(request):
@@ -291,20 +322,28 @@ def set_budget(request):
         form = BudgetForm()
     return render(request, 'budget_set.html', {'form': form})
 
-@login_required
-def show_budget(request):
+
+def calculate_budget(request):
     total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
     budget = Budget.objects.filter(budget_owner=request.user).last()
     if budget == None:
         spending_percentage = 0
     elif total == None:
-        messages.add_message(request, messages.INFO, 'you have not spent yet')
         spending_percentage = 0
     else:
         spending_percentage = int((total / budget.limit) * 100)
-        if spending_percentage >= 100:
-            messages.add_message(request, messages.INFO, 'you have exceeded the limit')
-    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
+    return spending_percentage
+
+
+@login_required
+def show_budget(request):
+    budget = Budget.objects.filter(budget_owner=request.user).last()
+    percentage = calculate_budget(request)
+
+    if percentage >= 100:
+        messages.add_message(request, messages.INFO,
+                             'you have exceeded the limit')
+    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': percentage})
 
 
 @login_required
@@ -322,6 +361,7 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
+
 @login_required
 def redeem(request, reward_id):
     reward = Reward.objects.get(id=reward_id)
@@ -335,15 +375,16 @@ def redeem(request, reward_id):
         error_message = "You don't have enough reward points to redeem this reward."
         return render(request, 'error.html', context)
     elif reward_points.points >= reward.points_required:
-            reward_points.points -= reward.points_required
-            reward_points.save()
-            return redirect('index')
+        reward_points.points -= reward.points_required
+        reward_points.save()
+        return redirect('index')
     else:
         error_message = "You don't have enough reward points to redeem this reward."
         context = {
-            'error_message': error_message,}
+            'error_message': error_message, }
 
         return render(request, 'error.html', context)
+
 
 @login_required
 def forum(request):
@@ -355,6 +396,7 @@ def forum(request):
         post.replies = Reply.objects.filter(parent_post=post)
 
     return render(request, 'forum.html', {'page_obj': page_obj})
+
 
 @login_required
 def personal_forum(request):
@@ -370,26 +412,27 @@ def personal_forum(request):
     reply_paginator = Paginator(replies, 5)
     reply_page_obj = reply_paginator.get_page(reply_page_number)
 
-    
     return render(request, 'personal_forum.html', {'page_obj': page_obj, 'reply_page_obj': reply_page_obj})
+
 
 @login_required
 def add_post(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-            post = form.save(commit = False)
+            post = form.save(commit=False)
             post.user = request.user
             post.save()
             for file in request.FILES.getlist('image'):
                 PostImage.objects.create(
-                    post = post,
-                    image = file
+                    post=post,
+                    image=file
                 )
             return redirect('forum')
     else:
         form = PostForm()
     return render(request, 'add_post.html',  {'form': form})
+
 
 @login_required
 def post_detail(request, post_id):
@@ -404,6 +447,7 @@ def post_detail(request, post_id):
     page_obj = paginator.get_page(page_number)
     context = {'post': post, 'replies': replies, 'page_obj': page_obj}
     return render(request, 'post_detail.html', context)
+
 
 @login_required
 def like_post(request, post_id):
@@ -426,7 +470,7 @@ def like_post(request, post_id):
         )
         created = True
     like_count = post.likes.count()
-    
+
     return redirect(request.META.get('HTTP_REFERER', reverse('forum')))
 
 
@@ -451,9 +495,11 @@ def like_post_details(request, post_id):
         )
         created = True
     like_count = post.likes.count()
-    
-    redirect_url = request.META.get('HTTP_REFERER', reverse('post_detail', args=[post_id]))
+
+    redirect_url = request.META.get(
+        'HTTP_REFERER', reverse('post_detail', args=[post_id]))
     return redirect(redirect_url)
+
 
 @login_required
 def like_reply(request, reply_id, post_id):
@@ -477,10 +523,9 @@ def like_reply(request, reply_id, post_id):
         )
         created = True
     like_count = reply.likes.count()
-    redirect_url = request.META.get('HTTP_REFERER', reverse('post_detail', args=[post_id]))
+    redirect_url = request.META.get(
+        'HTTP_REFERER', reverse('post_detail', args=[post_id]))
     return redirect(redirect_url)
-    
-    
 
 
 @login_required
@@ -501,6 +546,7 @@ def add_reply_to_post(request, post_id):
     context = {'form': form, 'post': post}
     return render(request, 'add_reply_to_post.html', context)
 
+
 @login_required
 def add_reply_to_reply(request, post_id, parent_reply_id):
     post = get_object_or_404(Post, id=post_id)
@@ -520,10 +566,10 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
     context = {'form': form, 'post': post, 'parent_reply': parent_reply}
     return render(request, 'add_reply_to_reply.html', context)
 
+
 @login_required
 def view_post_user(request, user_id, post_id):
     user = User.objects.get(id=user_id)
     post = Post.objects.get(id=post_id)
     context = {'user': user, 'post': post}
     return render(request, 'view_post_user.html', context)
-    

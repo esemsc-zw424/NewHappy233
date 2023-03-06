@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'crispy_forms',
     'crispy_bootstrap5',
-   
+
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -115,13 +115,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 AUTHENTICATION_BACKENDS = [
-   
+
     # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
 
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend'
-    
+
 ]
 
 # Provider specific settings
@@ -131,15 +131,15 @@ SOCIALACCOUNT_PROVIDERS = {
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
         'SCOPE': [
-            #'profile',
+            # 'profile',
             'email',
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
-            
+
         },
         'OAUTH_PKCE_ENABLED': True,
-    
+
         'APP': {
             'client_id': '914621288374-g0l2sqmg19jqg3be86dkjnm5gecrbqlp.apps.googleusercontent.com',
             'secret': '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',
@@ -149,7 +149,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 
-ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS= False
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -166,7 +166,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
