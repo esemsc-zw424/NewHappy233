@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>User Profile</h1>
+    <p>Username: {{ user_profile.user.username }}</p>
+    <p>Email: {{ user_profile.user.email }}</p>
+    {% if model == 'post' %}
+        <p>Post Title: {{ user_profile.title }}</p>
+        <p>Post Content: {{ user_profile.content }}</p>
+    {% elif model == 'reply' %}
+        <p>Reply Content: {{ user_profile.content }}</p>
+    {% endif %}
+{% endblock %}

@@ -47,9 +47,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    #'allauth.socialaccount.providers.apple',
     'allauth.socialaccount.providers.google',
-    #'allauth.socialaccount.providers.weixin',
+
 ]
 
 
@@ -68,7 +67,7 @@ ROOT_URLCONF = 'NewHappy.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -121,8 +120,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 
     # `allauth` specific authentication methods, such as login by e-mail
-    'allauth.account.auth_backends.AuthenticationBackend',
-   
+    'allauth.account.auth_backends.AuthenticationBackend'
+    
 ]
 
 # Provider specific settings
@@ -136,7 +135,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'email',
         ],
         'AUTH_PARAMS': {
-            'access_type': 'offline',
+            'access_type': 'online',
+            
         },
         'OAUTH_PKCE_ENABLED': True,
     
@@ -147,6 +147,7 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
 
 
 # Internationalization
@@ -177,7 +178,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'pst.User'
 
 REDIRECT_URL_WHEN_LOGGED_IN = 'home'
-
 LOGIN_REDIRECT_URL = 'home'
 
 SITE_ID = 1
@@ -191,6 +191,3 @@ MESSAGE_TAGS = {
     message_constants.DEBUG: 'dark',
     message_constants.ERROR: 'danger'
 }
-
-
-
