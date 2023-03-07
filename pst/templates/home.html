@@ -1,18 +1,7 @@
 {% extends 'base_content.html' %}
 {% block content %}
 
-<style>
-  .square {
-    width:80px;
-    height: 4px;
-    border: 1px solid black;
-    background-color: transparent;
-    color: black;
-    text-align: center;
-    font-size: 24px;
 
-  }
-</style>
 <div>
     <h1>home page placeholder</h1>
     <a href ='{% url 'add_spending' %}' class = 'btn btn-lg btn-primary'>Add spending</a>
@@ -35,7 +24,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <table id="my-table">
+            <table id="reward-table">
               <tr>
                 <th>Mon</th>
                 <th>Tue</th>
@@ -45,32 +34,23 @@
                 <th>Sat</th>
                 <th>Sun</th>
               </tr>
-              <tbody>
-               <tr>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-                
-               </tr>
-               <tr>
-                <td class="square">ss</td>
-                <td class="square">ss</td>
-               </tr>
-               
+                <tbody>
 
-	              
-              </tbody>
+                    {% for i in week_list %}
+                      <tr>
+                        {% for j in weekday_list %}
+
+                            <td class="square">{{current_datetime}} <i class="bi bi-cart-check"></i></td>
+
+                        {% endfor %}
+                      </tr>
+                    {% endfor %}
+               </tbody>
             </table>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
+
           </div>
         </div>
       </div>

@@ -39,7 +39,8 @@ from django.db.models import Sum
 
 # Create your views here.
 
-
+high_reward_points = 3
+normal_reward_points = 1
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
@@ -84,7 +85,7 @@ def add_consecutive_login_days(request):
         user.consecutive_login_days += 1 
         get_reward_points(request)
             
-        # user has not log in consecutively        
+        # user has not logged in consecutively
     else:
         user.consecutive_login_days = 1
         user.reward_points += 1
@@ -92,11 +93,12 @@ def add_consecutive_login_days(request):
 
 def get_reward_points(request):
     user = request.user
-    # give user extra reward  user has login consecutive for a week
-    if user.consecutive_login_days > 7:
-        user.reward_points += 3
+
+    # give user extra reward  user has login consecutive for two days
+    if user.consecutive_login_days > 2:
+        user.reward_points += high_reward_points
     else:
-        user.reward_points += 1
+        user.reward_points += normal_reward_points
 
 
 def check_already_logged_in_once_daily(request):
@@ -122,7 +124,12 @@ def home(request):
     user = request.user
     #if user.is_authenticated & user.login_daily == False:
         #show_calendar(request)
-    return render(request, 'home.html')
+    week_list = [1,2,3,4,5]
+    weekday_list = [1,2,3,4,5,6,7]
+    current_day = str(timezone.now().day)
+    context = {"week_list": week_list, "weekday_list": weekday_list,"current_datetime":current_day,
+               "high_reward_points": high_reward_points, "normal_reward_points": normal_reward_points}
+    return render(request, 'home.html', context)
 
 
 @login_required
