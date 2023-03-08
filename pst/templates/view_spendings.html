@@ -1,4 +1,11 @@
 {% extends 'base_content.html' %}
+{% block head %}
+<style>
+    .custom-spacing {
+  margin-right: -10px;
+}
+</style>
+{% endblock %}
 {% block content %}
 
 
@@ -22,27 +29,35 @@
 
 <div class="container">
     <table class="table" id="spending-table">
-        <h1>View Spending</h1>
-        <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
+        <h1>Your Spending:</h1>
+        
         <p>
             <div class="row align-items-center g-2">
                 <form method="GET" action="{% url 'view_spendings' %}">
-                    <div class="col">
+                    <div class="col col-lg-3">
                     <div class="form-floating">
                         <input type="date" class="form-control" id="start_date" name="start_date">
                         <label for="floatingInputGrid">Start date:</label>
                     </div>
                     </div>
-                    <div class="col">
+                    <div class="col col-lg-3">
                     <div class="form-floating">
                         <input type="date" class="form-control" id="end_date" name="end_date">
                         <label for="floatingInputGrid">End date:</label>
                     </div>
                     </div>
-                    <div class="col">
-                        <button type="submit" id="find-button" class="btn btn btn-primary btn-lg" onclick="filterSpending">Find</button>
+                    <div class="col-md-auto" >
+                        <button type="submit" id="find-button" class="btn btn-primary btn-lg" style="font-size: 22px;" onclick="filterSpending">Find</button>
                     </div>
+                    <div class="col-md-auto" >
+                         <a href='{% url 'add_spending' %}' class="btn btn-primary btn-lg" style="font-size: 22px;">+</a>
+                    </div>
+                    <div class="col-md-auto" >
+                        <a href='{% url 'home' %}' class="btn btn btn-primary btn-lg" style="font-size: 22px;">Return</a>
+                    </div>
+                    
                 </form>
+                
             </div>
 
         </p>

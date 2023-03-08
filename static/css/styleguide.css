@@ -1,0 +1,50 @@
+:root { 
+  --black: #000000;
+  --bunker: #131215;
+  --fair-pink: #ffeaea;
+  --mainlightblue: #dde2ff;
+  --persian-blue: #1c38c9;
+  --white: #ffffff3d;
+  --woodsmoke: #120f0f1a;
+ 
+  --font-size-l: 32px;
+  --font-size-m: 24px;
+  --font-size-s: 15px;
+  --font-size-xl: 64px;
+  --font-size-xs: 12px;
+ 
+  --font-family-outfit: "Outfit", Helvetica;
+  --font-family-poppins: "Poppins", Helvetica;
+  --font-family-qwigley: "Qwigley", Helvetica;
+}
+.outfit-normal-bunker-24px {
+  color: var(--bunker);
+  font-family: var(--font-family-outfit);
+  font-size: var(--font-size-m);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.poppins-medium-bunker-24px {
+  color: var(--bunker);
+  font-family: var(--font-family-poppins);
+  font-size: var(--font-size-m);
+  font-style: normal;
+  font-weight: 500;
+}
+
+.poppins-medium-bunker-32px {
+  color: var(--bunker);
+  font-family: var(--font-family-poppins);
+  font-size: var(--font-size-l);
+  font-style: normal;
+  font-weight: 500;
+}
+
+.poppins-normal-persian-blue-15px {
+  color: var(--persian-blue);
+  font-family: var(--font-family-poppins);
+  font-size: var(--font-size-s);
+  font-style: normal;
+  font-weight: 400;
+}
