@@ -1,7 +1,9 @@
 {% extends 'base_content.html' %}
 {% block content %}
-    <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
-
+    
+<div class="text-center mt-5">
+    
+</div>
 <head>
 	<meta charset="utf-8">
 	<title>Progress Bar</title>
@@ -11,8 +13,8 @@
 </head>
 <body>
 
-<div class="container">
-    <style>
+<div class="container mt-5">
+<style>
 .progress-bar {
   height: 20px;
   background-color:
@@ -28,26 +30,35 @@
 }
 
 </style>
-{% if budget %}
-    <h1>Your budget is: </h1>
-    <p>{{budget.limit}}</p>
-{% endif %}
+
+
 {% if budget != None %}
-  <h2>Current ratio</h2>
+  <div class="mt-5">
+    <h1>Your budget is: &nbsp £ {{budget.limit}} </h1>  
+    <h2>Current ratio:</h2>
+  </div>
   <div class="progress">
     <div class="progress-bar" role="progressbar" style="width: {{ spending_percentage }}%; color: black;" aria-valuenow="{{ spending_percentage }}" aria-valuemin="0" aria-valuemax="90" style="width:{{ spending_percentage }}%">
       {{ spending_percentage }}%
     </div>
   </div>
+  <div class="text-center mt-5">
+    <a href='{% url 'home' %}'class="btn btn btn-primary">Return</a>
+  </div>
 {% endif %}
 </div>
+
 <div class="container">
     {% if budget == None %}
         <h1>You have not set budget yet</h1>
         <h3>Click the button below to set your budget</h3>
         <a href ='{% url 'budget_set' %}' class = 'btn btn-lg btn-primary'>Set Budget</a>
+        <a href='{% url 'home' %}'class="btn btn-lg btn-primary">Return</a>
         {% endif %}
+    <div class="text-center mt-5">
+    </div>
 </div>
+
 
 
 </body>

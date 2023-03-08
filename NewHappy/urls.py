@@ -37,18 +37,26 @@ urlpatterns = [
     path('chat_bot/', views.chat_bot, name='chat_bot'),
     path('log_out/', views.log_out, name='log_out'),
     path('accounts/', include('allauth.urls')),
-    path('view_spending', views.view_spending, name='view_spending'),
+
+    path('view_spendings', views.view_spendings, name='view_spendings'),
     path('add_spending_categories/', views.add_spending_categories,
          name='add_spending_categories'),
     path('view_spending_categories', views.view_spending_categories,
          name='view_spending_categories'),
     path('update_spending_categories/<int:category_id>/',
          views.update_spending_categories, name='update_spending_categories'),
-
+    path('edit_spending/<int:spending_id>/',
+         views.edit_spending, name='edit_spending'),
+    path('delete_spending/<int:spending_id>/',
+         views.delete_spending, name='delete_spending'),
     path('shopping_mall/index/', views.index, name='index'),
+
     path('redeem/<int:reward_id>/', views.redeem, name='redeem'),
     path('user_profile/', views.user_profile, name='user_profile'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('expenditure_report/', views.sum_expenditures, name='sum_expenditures'),
+    path('income_report/', views.sum_incomes, name='sum_incomes'),
+
 
     path('forum/', views.forum, name='forum'),
     path('add_post/', views.add_post, name='add_post'),
@@ -66,7 +74,7 @@ urlpatterns = [
     path('view_post_user/<user_id>/<post_id>/',
          views.view_post_user, name='view_post_user'),
 
-
+    path('view_settings/', views.view_settings, name='view_settings'),
 
 ]
 
