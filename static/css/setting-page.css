@@ -1,0 +1,38 @@
+  .setting-page .container-center-both {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 128vh;
+  }
+
+  .setting-page .my-title {
+      color: #84b6d2;
+      font-family: var(--font-family-outfit);
+      font-size: 36px;
+      font-weight: 400;
+  }
+
+  .setting-page .my-plan {
+      color: #848cd2;
+      font-family: var(--font-family-outfit);
+      font-size: 36px;
+      font-weight: 400;
+  }
+
+  .setting-page .place {
+      color: #9d84d2;
+      font-family: var(--font-family-outfit);
+      font-size: 36px;
+      font-weight: 400;
+  }
+
+  .setting-page .other {
+      color: #9d84d2;
+      font-family: var(--font-family-outfit);
+      font-size: 36px;
+      font-weight: 400;
+  }
+
+  .setting-page .spacing {
+      margin-bottom: 13%;
+  }

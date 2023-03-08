@@ -1,19 +1,24 @@
 {% load widget_tweaks %}
 {% for field in form %}
-    <div class="mb-3">
-        {{ field.label_tag }}
-        {% if form.is_bound %}
-            {% if field.errors %}
-                {% render_field field class="form-control is-invalid" %}
+    <div class="form-group row mb-4" >
+        <label class="col-6 col-form-label">{{ field.label_tag }}</label>
+        <div class="col-6">
+            {% if field.widget.input_type != 'checkbox' %}
+                {{ field|add_class:"form-control form-control" }}
             {% else %}
-                {% render_field field class="form-control is-valid" %}
+                <div class="form-check">
+                    {{ field }}
+                    <label class="form-check-label">{{ field.label }}</label>
+                </div>
             {% endif %}
-            <div class="invalid-feedback">
-                {{ field.errors }}
-            </div>
-        {% else %}
-            {% render_field field class="form-control" %}
-        {% endif %}
+            {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
     </div>
-
 {% endfor %}
