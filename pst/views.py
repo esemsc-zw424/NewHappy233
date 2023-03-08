@@ -41,6 +41,7 @@ from django.db.models import Sum
 
 high_reward_points = 3
 normal_reward_points = 1
+current_datetime = timezone.now()
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
@@ -80,7 +81,6 @@ def visitor_introduction(request):
 
 def add_consecutive_login_days(request):
     user = request.user
-    current_datetime = timezone.now()
     if current_datetime - user.last_login_date < timedelta(hours=24):
         user.consecutive_login_days += 1 
         get_reward_points(request)
@@ -102,7 +102,6 @@ def get_reward_points(request):
 
 
 def check_already_logged_in_once_daily(request):
-    current_datetime = timezone.now()
     user = request.user
     # if over a day since last login
     if current_datetime - user.last_login_date > timedelta(hours=24) :
@@ -113,12 +112,21 @@ def check_already_logged_in_once_daily(request):
         user.save()
 
 
+def get_number_days_from_register(request):
+    created_at = request.user.created_at
+    num_days = (current_datetime - created_at).days
+    return num_days
 
-def test(request):
-    user = request.user
-    #if user.is_authenticated & user.login_daily == False:
-        #show_calendar(request)
-    return render(request, 'test.html')
+
+def get_position_in_daily_reward(request):
+    days = get_number_days_from_register(request)
+    pos = {
+        "vertical_pos": days / 7 % 5,
+        "horizontal_pos": days % 7
+    }
+    return pos
+
+
 @login_required
 def home(request):
     user = request.user
@@ -127,7 +135,10 @@ def home(request):
     week_list = [1,2,3,4,5]
     weekday_list = [1,2,3,4,5,6,7]
     current_day = str(timezone.now().day)
-    context = {"week_list": week_list, "weekday_list": weekday_list,"current_datetime":current_day,
+    pos = get_position_in_daily_reward(request)
+    hor_pos = pos["horizontal_pos"]
+    ver_pos = pos["vertical_pos"]
+    context = {"hor_pos":hor_pos,"ver_pos":ver_pos,"week_list": week_list, "weekday_list": weekday_list,"current_datetime":current_day,
                "high_reward_points": high_reward_points, "normal_reward_points": normal_reward_points}
     return render(request, 'home.html', context)
 

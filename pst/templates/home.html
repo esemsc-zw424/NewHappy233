@@ -39,9 +39,11 @@
                     {% for i in week_list %}
                       <tr>
                         {% for j in weekday_list %}
-
-                            <td class="square">{{current_datetime}} <i class="bi bi-cart-check"></i></td>
-
+                          {% if i == ver_pos and j == hor_pos %}
+                            <td class="square"> <i class="bi bi-cart-check"></i></td>
+                          {% else %}
+                            <td class = "square">day {{j}}</td>
+                          {% endif %}
                         {% endfor %}
                       </tr>
                     {% endfor %}
