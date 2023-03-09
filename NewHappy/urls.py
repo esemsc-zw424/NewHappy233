@@ -71,6 +71,7 @@ urlpatterns = [
     path('add_reply_to_reply/<int:post_id>/<int:parent_reply_id>/',
          views.add_reply_to_reply, name='add_reply_to_reply'),
     path('personal_forum/', views.personal_forum, name='personal_forum'),
+    path('personal_forum_reply/', views.personal_forum_reply, name='personal_forum_reply'),
     path('view_post_user/<user_id>/<post_id>/',
          views.view_post_user, name='view_post_user'),
 
