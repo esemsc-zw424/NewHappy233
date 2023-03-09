@@ -14,7 +14,47 @@
                             <br>
                             {% csrf_token %}
                             {% include 'partials/bootstrap_form.html' with form=form %}
-                            <input type="submit" value="Submit" class = 'btn btn-lg btn-primary'>
+
+                            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            <script>
+                            $(document).ready(function() {
+                                // Get the default spending type from the form data
+                                var default_spending_type = $('#id_spending_type').val();
+
+                                // Load the categories for the default spending type
+                                $.ajax({
+                                    url: '{% url "get_categories_by_type" %}',
+                                    data: {
+                                        'spending_type': default_spending_type
+                                    },
+                                    success: function(data) {
+                                        $('#id_spending_category').empty();
+                                        $.each(data.categories, function(index, value) {
+                                            $('#id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                        });
+                                    }
+                                });
+
+                                // Update the categories when the spending type is changed
+                                $('#id_spending_type').on('change', function() {
+                                    var spending_type = $(this).val();
+                                    $.ajax({
+                                        url: '{% url "get_categories_by_type" %}',
+                                        data: {
+                                            'spending_type': spending_type
+                                        },
+                                        success: function(data) {
+                                            $('#id_spending_category').empty();
+                                            $.each(data.categories, function(index, value) {
+                                                $('#id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                            });
+                                        }
+                                    });
+                                });
+                            });
+                            </script>
+
+                            <input type="submit" value="Submit" class="btn btn-lg btn-primary">
                         </div>
                         </form>
                     </div>
@@ -23,4 +63,5 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+
+{% endblock %}

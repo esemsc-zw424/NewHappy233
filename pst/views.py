@@ -194,6 +194,17 @@ def add_spending(request):
         form = AddSpendingForm(user=request.user)
     return render(request, 'add_spending.html',  {'form': form})
 
+def get_categories_by_type(request):
+    spending_type = request.GET.get('spending_type', '')
+    categories = Categories.objects.filter(
+        owner=request.user,
+        categories_type=spending_type
+    ).values('id', 'name')
+
+    data = {
+        'categories': list(categories)
+    }
+    return JsonResponse(data)
 
 @login_required
 def view_spendings(request):

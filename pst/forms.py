@@ -144,8 +144,7 @@ class AddSpendingForm(forms.ModelForm):
 
     file = forms.FileField(
         label='file',
-        # allows multiple files to be uploaded
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),    
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
     )
 
@@ -189,6 +188,7 @@ class EditSpendingForm(forms.ModelForm):
                 }
             )
             return spending
+        
 # class UserProfileForm(forms.ModelForm):
 #     class Meta:
 #         model = UserProfile
@@ -217,4 +217,4 @@ class ReplyForm(forms.ModelForm):
         fields = ['content', 'parent_reply']
         widgets = {'parent_reply': forms.HiddenInput()}
 
-            
+
