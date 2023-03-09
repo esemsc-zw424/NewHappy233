@@ -120,10 +120,12 @@ def get_number_days_from_register(request):
 
 def get_position_in_daily_reward(request):
     days = get_number_days_from_register(request)
+    days = days % 35
     pos = {
-        "vertical_pos": days / 7 % 5,
+        "vertical_pos": int(days / 7)+1,
         "horizontal_pos": days % 7
     }
+
     return pos
 
 

@@ -1,5 +1,6 @@
 {% extends 'base_content.html' %}
 {% block content %}
+{% load mathfilters %}
 
 
 <div>
@@ -35,14 +36,21 @@
                 <th>Sun</th>
               </tr>
                 <tbody>
-
                     {% for i in week_list %}
                       <tr>
                         {% for j in weekday_list %}
                           {% if i == ver_pos and j == hor_pos %}
-                            <td class="square"> <i class="bi bi-cart-check"></i></td>
+                            {% with within_bracket=i|sub:1%}
+                                {% with mul=within_bracket|mul:7 %}
+                                <td class="square"> day{{mul|add:j}}  <i class="bi bi-cart-check"></i></td>
+                                {% endwith %}
+                          {% endwith %}
                           {% else %}
-                            <td class = "square">day {{j}}</td>
+                           {% with within_bracket=i|sub:1%}
+                                {% with mul=within_bracket|mul:7 %}
+                                    <td class = "square"> day{{mul|add:j}}  <br>sss</td>
+                                {% endwith %}
+                            {% endwith %}
                           {% endif %}
                         {% endfor %}
                       </tr>
