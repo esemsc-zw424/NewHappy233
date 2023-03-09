@@ -26,10 +26,10 @@
                 var expenditure_graph = new Chart(ctx, {
                     type: 'pie',
                     data: {
-                        labels:[{% for i in expenditures %} '{{i.spending_category}}', {% endfor %}],
+                        labels:[{% for i in expenditures_data %} '{{i.spending_category__name}}', {% endfor %}],
                         datasets: [{
                             label: '# of expenditures',
-                            data:[{% for i in expenditures_amount %} {{i.exp_amount}}, {% endfor %}],
+                            data:[{% for i in  expenditures_data %} {{i.exp_amount}}, {% endfor %}],
                             backgroundColor: [
                                 'rgba(255, 99, 132, 0.8)',
                                 'rgba(54, 162, 235, 0.8)',
@@ -74,10 +74,10 @@
                 var expenditure_graph = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels:[{% for i in expenditures %} '{{i.spending_category}}', {% endfor %}],
+                        labels:[{% for i in  expenditures_data %} '{{i.spending_category__name}}', {% endfor %}],
                         datasets: [{
                             label: 'amount of expenditures',
-                            data:[{% for i in expenditures_amount %} {{i.exp_amount}}, {% endfor %}],
+                            data:[{% for i in  expenditures_data %} {{i.exp_amount}}, {% endfor %}],
                             backgroundColor: [
                                 'rgba(255, 99, 132, 0.8)',
                                 'rgba(54, 162, 235, 0.8)',
