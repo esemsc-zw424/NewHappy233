@@ -18,10 +18,8 @@
                             <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                             <script>
                             $(document).ready(function() {
-                                // Get the default spending type from the form data
                                 var default_spending_type = $('#id_spending_type').val();
 
-                                // Load the categories for the default spending type
                                 $.ajax({
                                     url: '{% url "get_categories_by_type" %}',
                                     data: {
@@ -35,7 +33,6 @@
                                     }
                                 });
 
-                                // Update the categories when the spending type is changed
                                 $('#id_spending_type').on('change', function() {
                                     var spending_type = $(this).val();
                                     $.ajax({

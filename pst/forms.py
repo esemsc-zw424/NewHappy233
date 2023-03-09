@@ -188,7 +188,7 @@ class EditSpendingForm(forms.ModelForm):
                 }
             )
             return spending
-        
+            
 # class UserProfileForm(forms.ModelForm):
 #     class Meta:
 #         model = UserProfile

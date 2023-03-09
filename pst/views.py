@@ -247,7 +247,7 @@ def edit_spending(request, spending_id):
             return redirect('view_spendings')
     else:
         form = EditSpendingForm(user=request.user)
-    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
+    return redirect('view_spendings')
 
 
 @login_required
