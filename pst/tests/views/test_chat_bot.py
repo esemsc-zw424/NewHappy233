@@ -37,4 +37,5 @@ class ChatBotTestCase(TestCase):
     def test_chat_bot_finance_response(self):
         response = self.client.post('/chat_bot/', {'user_input': 'finance'})
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'With the PSC, you can take control of your personal finances and make informed decisions about your spending and saving.', response.content)
+        self.assertIn(b'With the PST, you can take control of your personal finances and make informed decisions about your spending and saving.', response.content)
+       
