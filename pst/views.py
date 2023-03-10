@@ -15,8 +15,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Sum
-import datetime
 
+import calendar
+from django.utils import timezone
+from datetime import date, datetime, timedelta
+from calendar import HTMLCalendar
 
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
 
@@ -349,21 +352,17 @@ def user_guideline(request):
 
 
 @login_required
+def spending_report(request):
+    expenditures = Spending.objects.filter(spending_type=Spending_type.EXPENDITURE)
+    expenditures_data = expenditures.values('spending_category__name').annotate(exp_amount=Sum('amount'))
+    return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
+
 def sum_expenditures(request):
     expenditures = Spending.objects.filter(
         spending_type=Spending_type.EXPENDITURE).order_by('-spending_category')
     expenditures_amount = expenditures.values(
         'spending_category').annotate(exp_amount=Sum('amount'))
     return render(request, 'expenditure_report.html', {'expenditures': expenditures, 'expenditures_amount': expenditures_amount})
-
-
-@login_required
-def sum_incomes(request):
-    incomes = Spending.objects.filter(
-        spending_type=Spending_type.INCOME).order_by('-spending_category')
-    incomes_amount = incomes.values(
-        'spending_category').annotate(income_amount=Sum('amount'))
-    return render(request, 'income_report.html', {'incomes': incomes, 'incomes_amount': incomes_amount})
 
 
 @login_required
@@ -642,3 +641,54 @@ def view_post_user(request, user_id, post_id):
 @login_required
 def view_settings(request):
     return render(request, 'setting_page.html')
+
+
+
+#Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
+def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
+    month_calendar = calendar.Calendar()
+    month_calendar_list = month_calendar.monthdays2calendar(year,month)
+    month_name = calendar.month_name[month]
+    spendings = Spending.objects.all()
+    if month==1:
+        previous_month = 12
+        previous_year = year - 1
+        next_month = 2
+        next_year = year
+    elif month ==12:
+        previous_month = 11
+        previous_year = year
+        next_month = 1
+        next_year = year + 1
+    else:
+        previous_month = month - 1
+        next_month = month + 1
+        next_year = year
+        previous_year = year
+
+    for i in range(0, len(month_calendar_list)):
+        for j in range(0, len(month_calendar_list[i])):
+            spendings_daily = []
+            exp_sum = 0
+            income_sum = 0
+            #adds each spending in the database to each date in the calendar
+            for spending in spendings:
+                if spending.date.day == month_calendar_list[i][j][0] and spending.date.month == month and spending.date.year == year:
+                    spendings_daily.append(spending)
+            #calculates the sum of expenditures and sums of all the spendings in a single day
+            for spending_daily in spendings_daily:
+                if spending_daily.spending_type == Spending_type.EXPENDITURE:
+                    exp_sum += spending_daily.amount
+                else:
+                    income_sum += spending_daily.amount
+            month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
+
+    context = {'month_calendar_list': month_calendar_list,
+               'year': year, 'month': month_name,
+               'previous_month': previous_month, 
+               'previous_year': previous_year, 
+               'next_month': next_month, 
+               'next_year': next_year,
+               'exp_amount': exp_sum,
+               'income_amount': income_sum}
+    return render(request, 'spending_calendar.html', context)
