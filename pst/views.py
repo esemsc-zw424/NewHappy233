@@ -21,7 +21,6 @@ from django.utils import timezone
 from datetime import date, datetime, timedelta
 from calendar import HTMLCalendar
 
-
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
 
 from .forms import *
@@ -358,12 +357,12 @@ def spending_report(request):
     expenditures_data = expenditures.values('spending_category__name').annotate(exp_amount=Sum('amount'))
     return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
 
-
-@login_required
-def income_report(request):
-    incomes = Spending.objects.filter(spending_type=Spending_type.INCOME).order_by('-spending_category')
-    incomes_amount = incomes.values('spending_category').annotate(income_amount=Sum('amount'))
-    return render(request, 'income_report.html', {'incomes': incomes, 'incomes_amount': incomes_amount})
+def sum_expenditures(request):
+    expenditures = Spending.objects.filter(
+        spending_type=Spending_type.EXPENDITURE).order_by('-spending_category')
+    expenditures_amount = expenditures.values(
+        'spending_category').annotate(exp_amount=Sum('amount'))
+    return render(request, 'expenditure_report.html', {'expenditures': expenditures, 'expenditures_amount': expenditures_amount})
 
 
 @login_required
