@@ -156,7 +156,7 @@ def respond(user_input):
         "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"],
         "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."],
         "saving": ["Our Personal Spending Tracker can help you track your savings and keep you on track to reach your financial goals."],
-        "finance": ["With the PSC, you can take control of your personal finances and make informed decisions about your spending and saving."],
+        "finance": ["With the PST, you can take control of your personal finances and make informed decisions about your spending and saving."],
         "hello": ["Hello! How may I help you?"],
         "bye": ["Goodbye! Have a great day!"],
     }
