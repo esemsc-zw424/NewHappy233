@@ -45,7 +45,8 @@
                   {% for spending in day.2 %}
                     <a href="#" class="btn btn-primary text-start p-2 m-1" style="line-height: 0.9rem;">
                       <div class="d-none d-sm-block">
-                        {% if spending.date.hour < 10 %}0{{spending.date.hour}}{% else %}{{spending.date.hour}}{% endif %}:{% if spending.date.minute < 10 %}0{{spending.date.minute}}{% else %}{{spending.date.minute}}{% endif %}
+                        <!-- {% if spending.date.hour < 10 %}0{{spending.date.hour}}{% else %}{{spending.date.hour}}{% endif %}:{% if spending.date.minute < 10 %}0{{spending.date.minute}}{% else %}{{spending.date.minute}}{% endif %} -->
+                        {{ spending.amount }}
                       </div>
                       <div class="d-block d-sm-none" style="font-size: 0.8rem">
                         

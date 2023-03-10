@@ -308,10 +308,10 @@ def user_guideline(request):
     return render(request, 'user_guideline.html')
     
 @login_required
-def expenditure_report(request):
+def spending_report(request):
     expenditures = Spending.objects.filter(spending_type=Spending_type.EXPENDITURE)
     expenditures_data = expenditures.values('spending_category__name').annotate(exp_amount=Sum('amount'))
-    return render(request, 'expenditure_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
+    return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
 
 @login_required
 def income_report(request):
@@ -570,6 +570,37 @@ def view_post_user(request, user_id, post_id):
 
 #Add a field for the user model which is called request_expenditure, it determines whether user is requesting expenditures or incomes
 def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
+    month_calendar = calendar.Calendar()
+    month_calendar_list = month_calendar.monthdays2calendar(year,month)
+    month_name = calendar.month_name[month]
+    spendings = Spending.objects.all()
+    if month==1:
+        previous_month = 12
+        previous_year = year - 1
+        next_month = 2
+        next_year = year
+    elif month ==12:
+        previous_month = 11
+        previous_year = year
+        next_month = 1
+        next_year = year + 1
+    else:
+        previous_month = month - 1
+        next_month = month + 1
+        next_year = year
+        previous_year = year
+
+    for i in range(0, len(month_calendar_list)):
+        for j in range(0, len(month_calendar_list[i])):
+            spendings_daily = []
+            for spending in spendings:
+                if spending.date.day == month_calendar_list[i][j][0] and spending.date.month == month and spending.date.year == year:
+                    spendings_daily.append(spending)
+            month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], spendings_daily)
+
+    return render(request, 'spending_calendar.html', {'month_calendar_list': month_calendar_list, 'year': year, 'month': month_name, 'previous_month':previous_month, 'previous_year':previous_year, 'next_month':next_month, 'next_year':next_year})
+
+def calendar_page(request, year=datetime.now().year, month=datetime.now().month):
     month_calendar = calendar.Calendar()
     month_calendar_list = month_calendar.monthdays2calendar(year,month)
     month_name = calendar.month_name[month]
