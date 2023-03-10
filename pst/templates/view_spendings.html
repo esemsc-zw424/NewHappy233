@@ -1,4 +1,11 @@
 {% extends 'base_content.html' %}
+{% block head %}
+<style>
+    .custom-spacing {
+  margin-right: -10px;
+}
+</style>
+{% endblock %}
 {% block content %}
 
 
@@ -22,27 +29,35 @@
 
 <div class="container">
     <table class="table" id="spending-table">
-        <h1>View Spending</h1>
-        <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
+        <h1>Your Spending:</h1>
+        
         <p>
             <div class="row align-items-center g-2">
                 <form method="GET" action="{% url 'view_spendings' %}">
-                    <div class="col">
+                    <div class="col col-lg-3">
                     <div class="form-floating">
                         <input type="date" class="form-control" id="start_date" name="start_date">
                         <label for="floatingInputGrid">Start date:</label>
                     </div>
                     </div>
-                    <div class="col">
+                    <div class="col col-lg-3">
                     <div class="form-floating">
                         <input type="date" class="form-control" id="end_date" name="end_date">
                         <label for="floatingInputGrid">End date:</label>
                     </div>
                     </div>
-                    <div class="col">
-                        <button type="submit" id="find-button" class="btn btn btn-primary btn-lg" onclick="filterSpending">Find</button>
+                    <div class="col-md-auto" >
+                        <button type="submit" id="find-button" class="btn btn-primary btn-lg" style="font-size: 22px;" onclick="filterSpending">Find</button>
                     </div>
+                    <div class="col-md-auto" >
+                         <a href='{% url 'add_spending' %}' class="btn btn-primary btn-lg" style="font-size: 22px;">+</a>
+                    </div>
+                    <div class="col-md-auto" >
+                        <a href='{% url 'home' %}' class="btn btn btn-primary btn-lg" style="font-size: 22px;">Return</a>
+                    </div>
+                    
                 </form>
+                
             </div>
 
         </p>
@@ -52,6 +67,7 @@
                 <th scope="col">title</th>
                 <th scope="col">description</th>
                 <th scope="col">spending type</th>
+                <th scope="col">spending category</th>
                 <th scope="col">amount</th>
                 <th scope="col">spending owner</th>
                 <th scope="col">date</th>
@@ -67,6 +83,7 @@
 
                 <td> {{ i.descriptions }} </td>
                 <td> {{ i.spending_type}} </td>
+                <td> {{ i.spending_category}} </td>
                 <td> {{ i.amount}} </td>
                 <td> {{ i.spending_owner}} </td>
                 <td>{{ i.date|date:"m/d/Y" }} </td>
@@ -87,10 +104,53 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            <form method="post" action="{%url 'edit_spending' i.id %}">
+                            <form method="post" action="{% url 'edit_spending' i.id %}">
                                 {% csrf_token %}
                                 {{ form.as_p }}
-                                <button class="btn btn-primary">Update</button>
+        
+                                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                                <script>
+                                $(document).ready(function() {
+                                    // Get the default spending type and category from the form data
+                                    var default_spending_type = $('#editSpendingModal{{ i.id }} #id_spending_type').val();
+                                    var default_spending_category = $('#editSpendingModal{{ i.id }} #id_spending_category').val();
+        
+                                    // Load the categories for the default spending type
+                                    $.ajax({
+                                        url: '{% url "get_categories_by_type" %}',
+                                        data: {
+                                            'spending_type': default_spending_type
+                                        },
+                                        success: function(data) {
+                                            $('#editSpendingModal{{ i.id }} #id_spending_category').empty();
+                                            $.each(data.categories, function(index, value) {
+                                                $('#editSpendingModal{{ i.id }} #id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                            });
+        
+                                            // Set the default spending category
+                                            $('#editSpendingModal{{ i.id }} #id_spending_category').val(default_spending_category);
+                                        }
+                                    });
+        
+                                    $('#editSpendingModal{{ i.id }} #id_spending_type').on('change', function() {
+                                        var spending_type = $(this).val();
+                                        $.ajax({
+                                            url: '{% url "get_categories_by_type" %}',
+                                            data: {
+                                                'spending_type': spending_type
+                                            },
+                                            success: function(data) {
+                                                $('#editSpendingModal{{ i.id }} #id_spending_category').empty();
+                                                $.each(data.categories, function(index, value) {
+                                                    $('#editSpendingModal{{ i.id }} #id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                                });
+                                            }
+                                        });
+                                    });
+                                });
+                                </script>
+    
+                                <input type="submit" value="Submit" class="btn btn-lg btn-primary">
                             </form>
                         </div>
                         <div class="modal-footer">
