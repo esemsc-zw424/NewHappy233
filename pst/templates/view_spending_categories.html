@@ -1,12 +1,16 @@
 {% extends 'base_content.html' %}
 {% block content %}
 
-<h1>View Spending Categories</h1>
 
 <div class="container">
       
     <table class="table">
-        <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
+        
+        <h1>Your Spending Categories:</h1>
+        <div>
+            <p><a href ='{% url 'add_spending_categories' %}' class = 'btn btn-primary'>Customise Categories</a></p>
+            <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
+        </div>
         <br>
         <h3>Expenditure</h3>
         <thead>
