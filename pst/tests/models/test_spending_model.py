@@ -37,14 +37,22 @@ class SpendingModelTestCase(TestCase):
         self.spending.amount = ''
         self._assert_spending_is_invalid()
 
-    def test_spending_amount_cannot_be_larger_than_10000000(self):
-        self.spending.amount = 10000001
+    def test_amount_max_digits(self):
+        self.spending.amount = 999999.99
+        self._assert_spending_is_valid()
+    
+    def test_amount_max_digits_cannot_exceed_8_digits(self):
+        self.spending.amount = 9999999.99
         self._assert_spending_is_invalid()
 
-    def test_spending_amount_can_be_10000000(self):
-        self.spending.amount = 10000000
+    def test_spending_amount_can_be_0(self):
+        self.spending.amount = 0
         self._assert_spending_is_valid()
-
+    
+    def test_spending_amount_can_be_0(self):
+        self.spending.amount = 0
+        self._assert_spending_is_valid()
+    
     def test_spending_amount_can_be_0(self):
         self.spending.amount = 0
         self._assert_spending_is_valid()

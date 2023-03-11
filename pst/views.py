@@ -102,20 +102,20 @@ def log_in(request):
     if request.method == 'POST':
         next = request.POST.get('next') or ''
         form = LoginForm(request.POST)
-        messages.add_message(request, messages.ERROR,
-                             "The credentials provided are invalid!")
         if form.is_valid():
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
             user = authenticate(username=email, password=password)
             if user is not None:
                 login(request, user)
+                next = request.GET.get('next') or ''
                 redirect_url = next or 'home'
                 return redirect(redirect_url)
 
         else:
+            messages.add_message(request, messages.ERROR,
+                                 "The credentials provided are invalid!")
 
-            next = request.GET.get('next') or ''
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
 
@@ -178,7 +178,6 @@ def respond(user_input):
 @login_required
 def add_spending(request):
     if request.method == 'POST':
-
         form = AddSpendingForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             spending = form.save(commit=False)
@@ -189,10 +188,11 @@ def add_spending(request):
                     spending=spending,
                     file=file
                 )
-            return redirect('home')
+            return redirect('view_spendings')
     else:
         form = AddSpendingForm(user=request.user)
-    return render(request, 'add_spending.html',  {'form': form})
+    return render(request, 'view_spendings.html',  {'form': form})
+
 
 def get_categories_by_type(request):
     spending_type = request.GET.get('spending_type', '')
@@ -206,6 +206,7 @@ def get_categories_by_type(request):
     }
     return JsonResponse(data)
 
+
 @login_required
 def view_spendings(request):
     start_date = request.GET.get('start_date')
@@ -215,14 +216,15 @@ def view_spendings(request):
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
         spending = Spending.objects.filter(spending_owner=request.user,
-            date__range=[start_date, end_date]).order_by('date')
+                                           date__range=[start_date, end_date]).order_by('date')
     else:
-        spending = Spending.objects.filter(spending_owner=request.user).order_by('date')
+        spending = Spending.objects.filter(
+            spending_owner=request.user).order_by('date')
 
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     form = EditSpendingForm(user=request.user)
     context = {'form': form, 'spending': spending, 'page_obj': page_obj}
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -243,7 +245,7 @@ def edit_spending(request, spending_id):
 
         if form.is_valid():
             form.save()
-            messages.success(request, 'success')
+            messages.success(request, 'Change made successfully')
             return redirect('view_spendings')
     else:
         form = EditSpendingForm(user=request.user)
@@ -260,29 +262,45 @@ def delete_spending(request, spending_id):
 
 
 @login_required
+def add_spending(request):
+    if request.method == 'POST':
+        form = AddSpendingForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            spending = form.save(commit=False)
+            spending.spending_owner = request.user
+            spending.save()
+            for file in request.FILES.getlist('file'):
+                SpendingFile.objects.create(
+                    spending=spending,
+                    file=file
+                )
+            return redirect('view_spendings')
+    else:
+        form = AddSpendingForm()
+    return render(request, 'view_spendings.html',  {'form': form})
+
+@login_required
 def add_spending_categories(request):
     if request.method == 'POST':
-        form = CategoriesForm(request.POST, request.FILES)
+        form = CategoriesForm(request.POST)
         if form.is_valid():
             category = form.save(commit=False)
             category.owner = request.user
             category.save()
-            return redirect('home')
+            return redirect('view_spending_categories')
     else:
         form = CategoriesForm()
-    return render(request, 'add_spending_categories.html',  {'form': form})
+    return render(request, 'view_spending_categories.html',  {'form': form})
 
 
 @login_required
 def view_spending_categories(request):
-
     if request.method == 'POST':
         delete_spending_categories(request)
-    categories_expenditure = Categories.objects.filter(
-        categories_type=Spending_type.EXPENDITURE, owner=request.user)
-    categories_income = Categories.objects.filter(
-        categories_type=Spending_type.INCOME, owner=request.user)
-    return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
+    form = CategoriesForm()
+    categories_expenditure = Categories.objects.filter(categories_type=Spending_type.EXPENDITURE, owner=request.user)
+    categories_income = Categories.objects.filter(categories_type=Spending_type.INCOME, owner=request.user)
+    return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income, 'form': form})
 
 
 @login_required
@@ -408,7 +426,10 @@ def show_budget(request):
     if percentage >= 100 and not message_exists:
         messages.add_message(request, messages.INFO,
                              'you have exceeded the limit')
-    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': percentage})
+    
+    form = BudgetForm()
+
+    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': percentage, 'form': form})
 
 
 @login_required
@@ -639,6 +660,8 @@ def view_post_user(request, user_id, post_id):
     context = {'user': user, 'post': post}
     return render(request, 'view_post_user.html', context)
 
+
 @login_required
 def view_settings(request):
-    return render(request, 'setting_page.html')
+    form = BudgetForm()
+    return render(request, 'setting_page.html', {'form': form})
