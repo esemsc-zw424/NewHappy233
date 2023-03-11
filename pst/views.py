@@ -373,10 +373,8 @@ def user_guideline(request):
 
 @login_required
 def spending_report(request):
-    expenditures = Spending.objects.filter(
-        spending_type=Spending_type.EXPENDITURE)
-    expenditures_data = expenditures.values(
-        'spending_category__name').annotate(exp_amount=Sum('amount'))
+    expenditures = Spending.objects.filter(spending_owner=request.user, spending_type=Spending_type.EXPENDITURE)
+    expenditures_data = expenditures.values('spending_category__name').annotate(exp_amount=Sum('amount'))
     return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
 
 @login_required
