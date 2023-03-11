@@ -62,36 +62,8 @@ def visitor_signup(request):
         return render(request, 'visitor_signup.html', {'form': form})
 
 
-@login_required
-def home(request):
-    user = request.user
-    percentage = calculate_budget(request)
-    month = date.today().month
-    year = date.today().year
-
-    revenue = Spending.objects.filter(
-        spending_owner=request.user,
-        date__month=month,
-        spending_type=Spending_type.INCOME,
-    )
-
-    if (not revenue):
-        monthly_revenue = 0
-    else:
-        monthly_revenue = revenue.aggregate(nums=Sum('amount')).get('nums')
-
-    expense = Spending.objects.filter(
-        spending_owner=request.user,
-        date__month=month,
-        spending_type=Spending_type.EXPENDITURE,
-    )
-
-    if (not expense):
-        monthly_expense = 0
-    else:
-        monthly_expense = expense.aggregate(nums=Sum('amount')).get('nums')
-
-    
+#Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
+def spending_calendar_1(request, year=datetime.now().year, month=datetime.now().month):
     month_calendar = calendar.Calendar()
     month_calendar_list = month_calendar.monthdays2calendar(year,month)
     month_name = calendar.month_name[month]
@@ -129,19 +101,55 @@ def home(request):
                     income_sum += spending_daily.amount
             month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
 
-    calendar_context = {'month_calendar_list': month_calendar_list,
-               'year': year, 'month': month_name,
+    context = {'month_calendar_list': month_calendar_list,
+               'year': year, 'month': month_name, 
                'previous_month': previous_month, 
                'previous_year': previous_year, 
                'next_month': next_month, 
                'next_year': next_year,
                'exp_amount': exp_sum,
                'income_amount': income_sum}
+    return context
+
+
+
+
+
+
+
+@login_required
+def home(request):
+    user = request.user
+    percentage = calculate_budget(request)
+    month=datetime.now().month
+    revenue = Spending.objects.filter(
+        spending_owner=request.user,
+        date__month=month,
+        spending_type=Spending_type.INCOME,
+    )
+
+    if (not revenue):
+        monthly_revenue = 0
+    else:
+        monthly_revenue = revenue.aggregate(nums=Sum('amount')).get('nums')
+
+    expense = Spending.objects.filter(
+        spending_owner=request.user,
+        date__month=month,
+        spending_type=Spending_type.EXPENDITURE,
+    )
+
+    if (not expense):
+        monthly_expense = 0
+    else:
+        monthly_expense = expense.aggregate(nums=Sum('amount')).get('nums')
+
     
-   
     context = {'user': user, 'percentage': percentage,
-               'revenue': monthly_revenue, 'expense': monthly_expense}
+               'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
     
+    calendar_context = spending_calendar_1(request)
+
     context.update(calendar_context)
                
 
@@ -745,4 +753,3 @@ def spending_calendar(request, year=datetime.now().year, month=datetime.now().mo
                'exp_amount': exp_sum,
                'income_amount': income_sum}
     return render(request, 'spending_calendar.html', context)
-
