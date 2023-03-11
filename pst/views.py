@@ -379,15 +379,6 @@ def spending_report(request):
         'spending_category__name').annotate(exp_amount=Sum('amount'))
     return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
 
-
-def sum_expenditures(request):
-    expenditures = Spending.objects.filter(
-        spending_type=Spending_type.EXPENDITURE).order_by('-spending_category')
-    expenditures_amount = expenditures.values(
-        'spending_category').annotate(exp_amount=Sum('amount'))
-    return render(request, 'expenditure_report.html', {'expenditures': expenditures, 'expenditures_amount': expenditures_amount})
-
-
 @login_required
 def set_budget(request):
     if request.method == 'POST':
