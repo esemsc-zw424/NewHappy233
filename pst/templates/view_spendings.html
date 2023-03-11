@@ -50,17 +50,71 @@
                         <button type="submit" id="find-button" class="btn btn-primary btn-lg" style="font-size: 22px;" onclick="filterSpending">Find</button>
                     </div>
                     <div class="col-md-auto" >
-                         <a href='{% url 'add_spending' %}' class="btn btn-primary btn-lg" style="font-size: 22px;">+</a>
+                         <button type="button" class="btn btn-primary btn-lg" style="font-size: 22px;" data-bs-toggle="modal" data-bs-target="#add_spending_modal">+</button>
                     </div>
                     <div class="col-md-auto" >
                         <a href='{% url 'home' %}' class="btn btn btn-primary btn-lg" style="font-size: 22px;">Return</a>
                     </div>
                     
                 </form>
-                
             </div>
-
         </p>
+
+        <!-- modal for add spending -->
+        <div class="modal fade" id="add_spending_modal" tabindex="-1" role="dialog" aria-labelledby="add_spending_modal_label">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="add_spending_modal_label">Add Spending</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'add_spending' %}" method="post">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            <script>
+                                $(document).ready(function () {
+                                    var default_spending_type = $('#id_spending_type').val();
+        
+                                    $.ajax({
+                                        url: '{% url "get_categories_by_type" %}',
+                                        data: {
+                                            'spending_type': default_spending_type
+                                        },
+                                        success: function (data) {
+                                            $('#id_spending_category').empty();
+                                            $.each(data.categories, function (index, value) {
+                                                $('#id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                            });
+                                        }
+                                    });
+        
+                                    $('#id_spending_type').on('change', function () {
+                                        var spending_type = $(this).val();
+                                        $.ajax({
+                                            url: '{% url "get_categories_by_type" %}',
+                                            data: {
+                                                'spending_type': spending_type
+                                            },
+                                            success: function (data) {
+                                                $('#id_spending_category').empty();
+                                                $.each(data.categories, function (index, value) {
+                                                    $('#id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                                });
+                                            }
+                                        });
+                                    });
+                                });
+                            </script>
+                            <input type="submit" class="btn btn-primary" value="Add"></button>
+                        </form>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
         
         <thead>
             <tr>
@@ -78,9 +132,9 @@
         <tbody>
             {% for i in page_obj %}
             <tr class="align-middle">
-                <td><button type="button" class="btn btn-primary" 
-                    data-bs-toggle="modal" data-bs-target="#editSpendingModal{{ i.id }}">{{ i.title }}</button></td>
-
+                <!-- <td><button type="button" class="btn btn-primary" 
+                    data-bs-toggle="modal" data-bs-target="#editSpendingModal{{ i.id }}">{{ i.title }}</button></td> -->
+                <td><a href="{% url 'edit_spending' i.id %}"  data-bs-toggle="modal" data-bs-target="#editSpendingModal{{ i.id }}">{{ i.title }}</a></td>
                 <td> {{ i.descriptions }} </td>
                 <td> {{ i.spending_type}} </td>
                 <td> {{ i.spending_category}} </td>
