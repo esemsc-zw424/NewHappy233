@@ -17,9 +17,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Sum
 
 import calendar
-from django.utils import timezone
-from datetime import date, datetime, timedelta
-from calendar import HTMLCalendar
+from datetime import date, datetime
 
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
 
@@ -66,11 +64,12 @@ def visitor_signup(request):
 def home(request):
     user = request.user
     percentage = calculate_budget(request)
-    current_month = datetime.now().month
+    month = date.today().month
+    year = date.today().year
 
     revenue = Spending.objects.filter(
         spending_owner=request.user,
-        date__month=current_month,
+        date__month=month,
         spending_type=Spending_type.INCOME,
     )
 
@@ -81,7 +80,7 @@ def home(request):
 
     expense = Spending.objects.filter(
         spending_owner=request.user,
-        date__month=current_month,
+        date__month=month,
         spending_type=Spending_type.EXPENDITURE,
     )
 
@@ -91,7 +90,7 @@ def home(request):
         monthly_expense = expense.aggregate(nums=Sum('amount')).get('nums')
 
     context = {'user': user, 'percentage': percentage,
-               'revenue': monthly_revenue, 'expense': monthly_expense}
+               'revenue': monthly_revenue, 'expense': monthly_expense, 'month': month, 'year': year}
     return render(request, 'home.html', context)
 
 
@@ -105,20 +104,20 @@ def log_in(request):
     if request.method == 'POST':
         next = request.POST.get('next') or ''
         form = LoginForm(request.POST)
-        messages.add_message(request, messages.ERROR,
-                             "The credentials provided are invalid!")
         if form.is_valid():
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
             user = authenticate(username=email, password=password)
             if user is not None:
                 login(request, user)
+                next = request.GET.get('next') or ''
                 redirect_url = next or 'home'
                 return redirect(redirect_url)
 
         else:
+            messages.add_message(request, messages.ERROR,
+                                 "The credentials provided are invalid!")
 
-            next = request.GET.get('next') or ''
     form = LoginForm()
     return render(request, 'log_in.html', {'form': form})
 
@@ -181,7 +180,6 @@ def respond(user_input):
 @login_required
 def add_spending(request):
     if request.method == 'POST':
-
         form = AddSpendingForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             spending = form.save(commit=False)
@@ -192,10 +190,11 @@ def add_spending(request):
                     spending=spending,
                     file=file
                 )
-            return redirect('home')
+            return redirect('view_spendings')
     else:
         form = AddSpendingForm(user=request.user)
-    return render(request, 'add_spending.html',  {'form': form})
+    return render(request, 'view_spendings.html',  {'form': form})
+
 
 def get_categories_by_type(request):
     spending_type = request.GET.get('spending_type', '')
@@ -209,6 +208,7 @@ def get_categories_by_type(request):
     }
     return JsonResponse(data)
 
+
 @login_required
 def view_spendings(request):
     start_date = request.GET.get('start_date')
@@ -218,14 +218,15 @@ def view_spendings(request):
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
         spending = Spending.objects.filter(spending_owner=request.user,
-            date__range=[start_date, end_date]).order_by('date')
+                                           date__range=[start_date, end_date]).order_by('date')
     else:
-        spending = Spending.objects.filter(spending_owner=request.user).order_by('date')
+        spending = Spending.objects.filter(
+            spending_owner=request.user).order_by('date')
 
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     form = EditSpendingForm(user=request.user)
     context = {'form': form, 'spending': spending, 'page_obj': page_obj}
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -246,7 +247,7 @@ def edit_spending(request, spending_id):
 
         if form.is_valid():
             form.save()
-            messages.success(request, 'success')
+            messages.success(request, 'Change made successfully')
             return redirect('view_spendings')
     else:
         form = EditSpendingForm(user=request.user)
@@ -263,29 +264,48 @@ def delete_spending(request, spending_id):
 
 
 @login_required
+def add_spending(request):
+    if request.method == 'POST':
+        form = AddSpendingForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            spending = form.save(commit=False)
+            spending.spending_owner = request.user
+            spending.save()
+            for file in request.FILES.getlist('file'):
+                SpendingFile.objects.create(
+                    spending=spending,
+                    file=file
+                )
+            return redirect('view_spendings')
+    else:
+        form = AddSpendingForm()
+    return render(request, 'view_spendings.html',  {'form': form})
+
+
+@login_required
 def add_spending_categories(request):
     if request.method == 'POST':
-        form = CategoriesForm(request.POST, request.FILES)
+        form = CategoriesForm(request.POST)
         if form.is_valid():
             category = form.save(commit=False)
             category.owner = request.user
             category.save()
-            return redirect('home')
+            return redirect('view_spending_categories')
     else:
         form = CategoriesForm()
-    return render(request, 'add_spending_categories.html',  {'form': form})
+    return render(request, 'view_spending_categories.html',  {'form': form})
 
 
 @login_required
 def view_spending_categories(request):
-
     if request.method == 'POST':
         delete_spending_categories(request)
+    form = CategoriesForm()
     categories_expenditure = Categories.objects.filter(
         categories_type=Spending_type.EXPENDITURE, owner=request.user)
     categories_income = Categories.objects.filter(
         categories_type=Spending_type.INCOME, owner=request.user)
-    return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
+    return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income, 'form': form})
 
 
 @login_required
@@ -353,9 +373,12 @@ def user_guideline(request):
 
 @login_required
 def spending_report(request):
-    expenditures = Spending.objects.filter(spending_type=Spending_type.EXPENDITURE)
-    expenditures_data = expenditures.values('spending_category__name').annotate(exp_amount=Sum('amount'))
+    expenditures = Spending.objects.filter(
+        spending_type=Spending_type.EXPENDITURE)
+    expenditures_data = expenditures.values(
+        'spending_category__name').annotate(exp_amount=Sum('amount'))
     return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
+
 
 def sum_expenditures(request):
     expenditures = Spending.objects.filter(
@@ -407,7 +430,10 @@ def show_budget(request):
     if percentage >= 100 and not message_exists:
         messages.add_message(request, messages.INFO,
                              'you have exceeded the limit')
-    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': percentage})
+
+    form = BudgetForm()
+
+    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': percentage, 'form': form})
 
 
 @login_required
@@ -638,24 +664,25 @@ def view_post_user(request, user_id, post_id):
     context = {'user': user, 'post': post}
     return render(request, 'view_post_user.html', context)
 
+
 @login_required
 def view_settings(request):
-    return render(request, 'setting_page.html')
+    form = BudgetForm()
+    return render(request, 'setting_page.html', {'form': form})
 
-
-
-#Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
+@login_required
+# Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
     month_calendar = calendar.Calendar()
-    month_calendar_list = month_calendar.monthdays2calendar(year,month)
+    month_calendar_list = month_calendar.monthdays2calendar(year, month)
     month_name = calendar.month_name[month]
     spendings = Spending.objects.all()
-    if month==1:
+    if month == 1:
         previous_month = 12
         previous_year = year - 1
         next_month = 2
         next_year = year
-    elif month ==12:
+    elif month == 12:
         previous_month = 11
         previous_year = year
         next_month = 1
@@ -671,11 +698,11 @@ def spending_calendar(request, year=datetime.now().year, month=datetime.now().mo
             spendings_daily = []
             exp_sum = 0
             income_sum = 0
-            #adds each spending in the database to each date in the calendar
+            # adds each spending in the database to each date in the calendar
             for spending in spendings:
                 if spending.date.day == month_calendar_list[i][j][0] and spending.date.month == month and spending.date.year == year:
                     spendings_daily.append(spending)
-            #calculates the sum of expenditures and sums of all the spendings in a single day
+            # calculates the sum of expenditures and sums of all the spendings in a single day
             for spending_daily in spendings_daily:
                 if spending_daily.spending_type == Spending_type.EXPENDITURE:
                     exp_sum += spending_daily.amount
@@ -685,9 +712,9 @@ def spending_calendar(request, year=datetime.now().year, month=datetime.now().mo
 
     context = {'month_calendar_list': month_calendar_list,
                'year': year, 'month': month_name,
-               'previous_month': previous_month, 
-               'previous_year': previous_year, 
-               'next_month': next_month, 
+               'previous_month': previous_month,
+               'previous_year': previous_year,
+               'next_month': next_month,
                'next_year': next_year,
                'exp_amount': exp_sum,
                'income_amount': income_sum}

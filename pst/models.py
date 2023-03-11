@@ -79,7 +79,6 @@ class User(AbstractUser):
 
 class Categories(models.Model):
 
-
     name = models.CharField( # name of the category
         max_length=100
     )
@@ -117,10 +116,11 @@ class Spending(models.Model):
 
     spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') #this refers to the user when create this spending
 
-    amount = models.IntegerField(  # this refers to the amount this user spent or gained
+    amount = models.DecimalField(  # this refers to the amount this user spent or gained
         blank=False,
+        max_digits=8,
+        decimal_places=2,
         validators=[
-            MaxValueValidator(10000000),
             MinValueValidator(0),
         ]
     )
