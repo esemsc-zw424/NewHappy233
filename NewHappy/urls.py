@@ -57,7 +57,7 @@ urlpatterns = [
     path('personal_forum/', views.personal_forum, name ='personal_forum'),
     path('view_post_user/<user_id>/<post_id>/', views.view_post_user, name='view_post_user'),
 
-
+    path('home/get_reward_points/', views.get_reward_points, name='get_reward_points'),
 
 ]
 

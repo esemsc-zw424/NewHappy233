@@ -45,3 +45,6 @@ table:not(#reward-table) tr:hover {
   font-size: 24px;
 
 }
+rewardPos.disabled {
+  cursor: not-allowed;
+}

@@ -81,30 +81,33 @@ def visitor_introduction(request):
 
 def add_consecutive_login_days(request):
     user = request.user
-    if current_datetime - user.last_login_date < timedelta(hours=24):
-        user.consecutive_login_days += 1 
-        get_reward_points(request)
+    if current_datetime - user.last_login < timedelta(hours=24):
+        user.consecutive_login_days += 1
             
         # user has not logged in consecutively
     else:
         user.consecutive_login_days = 1
-        user.reward_points += 1
+    user.save()
 
 
 def get_reward_points(request):
+     
+    print("rewarsd sdasdasdasdasdasdasdasdasdas")
     user = request.user
-
     # give user extra reward  user has login consecutive for two days
     if user.consecutive_login_days > 2:
         user.reward_points += high_reward_points
     else:
         user.reward_points += normal_reward_points
+    user.save()
+    return JsonResponse({"status": "success"})
+    
 
 
 def check_already_logged_in_once_daily(request):
     user = request.user
     # if over a day since last login
-    if current_datetime - user.last_login_date > timedelta(hours=24) :
+    if current_datetime - user.last_login > timedelta(hours=24) :
         user.logged_in_once_daily = False 
         user.save()
     else:
@@ -113,8 +116,8 @@ def check_already_logged_in_once_daily(request):
 
 
 def get_number_days_from_register(request):
-    created_at = request.user.created_at
-    num_days = (current_datetime - created_at).days
+    date_joined = request.user.date_joined
+    num_days = (current_datetime - date_joined).days
     return num_days
 
 
@@ -183,17 +186,20 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 redirect_url = next or 'home'
-
+                next = request.GET.get('next') or ''
                 check_already_logged_in_once_daily(request)
-                user.last_login_date = timezone.now()
+                user.last_login = timezone.now()
                 user.save()
-                
+
                 return redirect(redirect_url)
         
-        else:
-            messages.add_message(request, messages.ERROR,"The credentials provided are invalid!")
-            next = request.GET.get('next') or ''
+            else:
+                messages.add_message(request, messages.ERROR, "The credentials provided are invalid!")
+
+
+
     form = LoginForm()
+
     return render(request, 'log_in.html', {'form': form})
 
 

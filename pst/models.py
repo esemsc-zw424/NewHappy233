@@ -56,12 +56,10 @@ class User(AbstractUser):
     phone_number = models.CharField(validators=[phone_regex], max_length=15, blank=True)
     address = models.CharField(max_length=100, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
     reward_points = models.IntegerField(default=0)
     consecutive_login_days = models.IntegerField(default=0)
-    last_login_date = models.DateTimeField(auto_now_add=True)
     logged_in_once_daily = models.BooleanField(default = False)
-
+    
     objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']

@@ -12,6 +12,8 @@ class MyUserChangeForm(UserChangeForm):
                   'first_name')
 
 
+
+
 @admin.register(User)
 class MyUserAdmin(UserAdmin):
     ordering = ('email',)
@@ -19,8 +21,20 @@ class MyUserAdmin(UserAdmin):
     list_display = [
         'email', 'first_name', 'last_name',
     ]
-
-
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name',
+         'bio', 'gender', 'phone_number', 'address','reward_points')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff',
+         'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name', 'is_staff', 'is_active')}
+         ),
+    )
 @admin.register(Spending)
 class SpendingAdmin(admin.ModelAdmin):
     list_display = [
