@@ -66,7 +66,7 @@ def visitor_signup(request):
 def home(request):
     user = request.user
     percentage = calculate_budget(request)
-    current_month = datetime.date.today().month
+    current_month = datetime.now().month
 
     revenue = Spending.objects.filter(
         spending_owner=request.user,
