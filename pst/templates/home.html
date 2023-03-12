@@ -18,13 +18,13 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
    
     
-    {% load static %}
+   
 
     <div class="modal" id="reward" tabindex="-1">
       <div class="modal-dialog" style="min-width:50%;" >
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Check in</h5> 
+            <h5 class="modal-title">Daily Reward</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -33,23 +33,24 @@
                     {% for i in week_list %}
                       <tr>
                         {% for j in weekday_list %}
-                          {% if i == ver_pos and j == hor_pos %}
-                            {% with within_bracket=i|sub:1 %}
+                          {% with within_bracket=i|sub:1 %}
                                 {% with mul=within_bracket|mul:7 %}
-                                
-                                <td class="square" id="rewardPos"  name= "rewardPos" ><button onclick="rewardPosClickHandler()" >day{{mul|add:j}}<i class="bi bi-cart-check"></i></button> </td>
+                                    {% with day=mul|add:j %}
+                                        {% if day == pos %}
+                                             <td class="square" id="rewardPos"  name= "rewardPos" ><button  onclick="rewardPosClickHandler()" >day{{day}}<i class="bi bi-cart-check"></i></button> </td>
+                                        {% elif day == super_reward_pos %}
+                                            <td class = "square" style="color: rgb(255, 24, 7);"> day{{day}}  <br>
+                                                <i class="fa-solid fa-gem"></i>
+                                                {{high_reward_points}}</td>
+                                        {% else %}
+                                             <td class = "square"> day{{day}}  <br>
+                                             <i class="fa-solid fa-sack-dollar"></i>
+
+                                                {{normal_reward_points}}</td>
+                                        {% endif %}
+                                    {% endwith %}
                                 {% endwith %}
                           {% endwith %}
-                          {% else %}
-                           {% with within_bracket=i|sub:1%}
-                                {% with mul=within_bracket|mul:7 %}
-                                    <td class = "square"> day{{mul|add:j}}  <br>
-                                      <i class="fa-solid fa-sack-dollar"></i>
-
-                                      {{normal_reward_points}}</td>
-                                {% endwith %}
-                            {% endwith %}
-                          {% endif %}
                         {% endfor %}
                       </tr>
                     {% endfor %}
@@ -57,7 +58,8 @@
             </table>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <p>Log in for 7 consecutive days to receive <p class="fw-bold"><i class="fa-solid fa-fire" style="color: rgb(255, 24, 7);"></i>  super reward</p></p>
+            
 
           </div>
         </div>

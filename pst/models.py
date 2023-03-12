@@ -57,7 +57,7 @@ class User(AbstractUser):
     address = models.CharField(max_length=100, blank=True)
 
     reward_points = models.IntegerField(default=0)
-    consecutive_login_days = models.IntegerField(default=0)
+    consecutive_login_days = models.IntegerField(default=1)
     logged_in_once_daily = models.BooleanField(default = False)
     
     objects = UserManager()

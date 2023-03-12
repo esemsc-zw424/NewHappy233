@@ -46,7 +46,7 @@ table:not(#reward-table) tr:hover {
 
 }
 
-#reward.modal-dialog {
-  max-width: 700px;
-  margin: 1.75rem auto;
+.note_font {
+  font-family: "Trebuchet MS", Verdana, sans-serif;
 }
+

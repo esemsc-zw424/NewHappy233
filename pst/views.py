@@ -66,19 +66,6 @@ def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
 
 
-# def show_calendar(request):
-#     #show calendar only once after login
-#     #if request.session.get('modal_shown', False):
-    
-#     if request.user.is_authenticated & request.user.login_daily == False: 
-
-        #show calendar only once after login
-        
-
-        #request.session['modal_shown'] = True
-        #messages.info(request, 'Congratulations! You have been awarded  reward points for logging in today.')   
-
-
 def add_consecutive_login_days(request):
     user = request.user
     if current_datetime - user.last_login < timedelta(hours=24):
@@ -91,23 +78,22 @@ def add_consecutive_login_days(request):
 
 
 def get_reward_points(request):
-     
-    print("rewarsd sdasdasdasdasdasdasdasdasdas")
     user = request.user
-    # give user extra reward  user has login consecutive for two days
-    if user.consecutive_login_days > 2:
+    
+    # give user extra reward if user has login consecutive for seven days
+    if user.consecutive_login_days > 7:
         user.reward_points += high_reward_points
     else:
         user.reward_points += normal_reward_points
     user.save()
+    
     return JsonResponse({"status": "success"})
     
-
 
 def check_already_logged_in_once_daily(request):
     user = request.user
     # if over a day since last login
-    if current_datetime - user.last_login > timedelta(hours=24) :
+    if current_datetime - user.last_login > timedelta(hours=24):
         user.logged_in_once_daily = False 
         user.save()
     else:
@@ -117,19 +103,25 @@ def check_already_logged_in_once_daily(request):
 
 def get_number_days_from_register(request):
     date_joined = request.user.date_joined
-    num_days = (current_datetime - date_joined).days
+    num_days = (current_datetime - date_joined).days + 1
     return num_days
 
 
 def get_position_in_daily_reward(request):
-    days = get_number_days_from_register(request)
-    days = days % 35
-    pos = {
-        "vertical_pos": int(days / 7)+1,
-        "horizontal_pos": days % 7
-    }
+    pos = get_number_days_from_register(request)
+    return pos % 35
 
-    return pos
+
+def get_super_reward_position(request):
+    cur_pos = get_position_in_daily_reward(request)
+    days_need = 8 - request.user.consecutive_login_days
+    print(cur_pos + days_need)
+    print(request.user.consecutive_login_days)
+    return cur_pos + days_need
+
+
+
+
 
 
 @login_required
@@ -141,9 +133,8 @@ def home(request):
     weekday_list = [1,2,3,4,5,6,7]
     current_day = str(timezone.now().day)
     pos = get_position_in_daily_reward(request)
-    hor_pos = pos["horizontal_pos"]
-    ver_pos = pos["vertical_pos"]
-    context = {"hor_pos":hor_pos,"ver_pos":ver_pos,"week_list": week_list, "weekday_list": weekday_list,"current_datetime":current_day,
+    super_reward_pos = get_super_reward_position(request)
+    context = {"pos":pos,"super_reward_pos":super_reward_pos, "week_list": week_list, "weekday_list": weekday_list,"current_datetime":current_day,
                "high_reward_points": high_reward_points, "normal_reward_points": normal_reward_points}
     return render(request, 'home.html', context)
 
@@ -188,6 +179,7 @@ def log_in(request):
                 redirect_url = next or 'home'
                 next = request.GET.get('next') or ''
                 check_already_logged_in_once_daily(request)
+                add_consecutive_login_days(request)
                 user.last_login = timezone.now()
                 user.save()
 
