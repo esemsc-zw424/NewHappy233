@@ -61,7 +61,7 @@ def visitor_signup(request):
 
 
 #Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
-def spending_calendar_1(request, year=datetime.now().year, month=datetime.now().month):
+def get_spending_calendar_context(request, year=datetime.now().year, month=datetime.now().month):
     month_calendar = calendar.Calendar()
     month_calendar_list = month_calendar.monthdays2calendar(year,month)
     month_name = calendar.month_name[month]
@@ -109,13 +109,6 @@ def spending_calendar_1(request, year=datetime.now().year, month=datetime.now().
                'income_amount': income_sum}
     return context
 
-
-
-
-
-
-
-@login_required
 @login_required
 def home(request):
     user = request.user
@@ -147,7 +140,7 @@ def home(request):
     context = {'user': user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
     
-    calendar_context = spending_calendar_1(request)
+    calendar_context = get_spending_calendar_context(request)
 
     context.update(calendar_context)
                
@@ -703,49 +696,5 @@ def view_settings(request):
 @login_required
 # Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
-    month_calendar = calendar.Calendar()
-    month_calendar_list = month_calendar.monthdays2calendar(year, month)
-    month_name = calendar.month_name[month]
-    spendings = Spending.objects.all()
-    if month == 1:
-        previous_month = 12
-        previous_year = year - 1
-        next_month = 2
-        next_year = year
-    elif month == 12:
-        previous_month = 11
-        previous_year = year
-        next_month = 1
-        next_year = year + 1
-    else:
-        previous_month = month - 1
-        next_month = month + 1
-        next_year = year
-        previous_year = year
-
-    for i in range(0, len(month_calendar_list)):
-        for j in range(0, len(month_calendar_list[i])):
-            spendings_daily = []
-            exp_sum = 0
-            income_sum = 0
-            # adds each spending in the database to each date in the calendar
-            for spending in spendings:
-                if spending.date.day == month_calendar_list[i][j][0] and spending.date.month == month and spending.date.year == year:
-                    spendings_daily.append(spending)
-            # calculates the sum of expenditures and sums of all the spendings in a single day
-            for spending_daily in spendings_daily:
-                if spending_daily.spending_type == Spending_type.EXPENDITURE:
-                    exp_sum += spending_daily.amount
-                else:
-                    income_sum += spending_daily.amount
-            month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
-
-    context = {'month_calendar_list': month_calendar_list,
-               'year': year, 'month': month_name,
-               'previous_month': previous_month,
-               'previous_year': previous_year,
-               'next_month': next_month,
-               'next_year': next_year,
-               'exp_amount': exp_sum,
-               'income_amount': income_sum}
+    context = get_spending_calendar_context(request, year, month)   
     return render(request, 'spending_calendar.html', context)
