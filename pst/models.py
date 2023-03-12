@@ -36,15 +36,6 @@ class UserManager(BaseUserManager):
         return user
 
 
-
-    def create_superuser(self, first_name, last_name, email, password, **extra_fields):
-        user = self.create_user(first_name, last_name, email, password)
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
-        return user
-
-
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True, blank=False)
@@ -78,7 +69,6 @@ class User(AbstractUser):
         return self.email
 
 class Categories(models.Model):
-
 
     name = models.CharField( # name of the category
         max_length=100
@@ -117,10 +107,11 @@ class Spending(models.Model):
 
     spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') #this refers to the user when create this spending
 
-    amount = models.IntegerField(  # this refers to the amount this user spent or gained
+    amount = models.DecimalField(  # this refers to the amount this user spent or gained
         blank=False,
+        max_digits=8,
+        decimal_places=2,
         validators=[
-            MaxValueValidator(10000000),
             MinValueValidator(0),
         ]
     )

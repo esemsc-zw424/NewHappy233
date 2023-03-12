@@ -45,6 +45,8 @@ urlpatterns = [
          name='view_spending_categories'),
     path('update_spending_categories/<int:category_id>/',
          views.update_spending_categories, name='update_spending_categories'),
+    path('delete_spending_categories/<int:category_id>', views.delete_spending_categories, name='delete_spending_categories'),
+
     path('edit_spending/<int:spending_id>/',
          views.edit_spending, name='edit_spending'),
     path('delete_spending/<int:spending_id>/',
