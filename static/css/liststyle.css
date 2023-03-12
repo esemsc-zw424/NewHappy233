@@ -45,6 +45,8 @@ table:not(#reward-table) tr:hover {
   font-size: 24px;
 
 }
-rewardPos.disabled {
-  cursor: not-allowed;
+
+#reward.modal-dialog {
+  max-width: 700px;
+  margin: 1.75rem auto;
 }
