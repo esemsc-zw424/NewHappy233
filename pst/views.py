@@ -177,24 +177,6 @@ def respond(user_input):
     return "Sorry, I do not understand what you mean."
 
 
-@login_required
-def add_spending(request):
-    if request.method == 'POST':
-        form = AddSpendingForm(request.POST, request.FILES, user=request.user)
-        if form.is_valid():
-            spending = form.save(commit=False)
-            spending.spending_owner = request.user
-            spending.save()
-            for file in request.FILES.getlist('file'):
-                SpendingFile.objects.create(
-                    spending=spending,
-                    file=file
-                )
-            return redirect('view_spendings')
-    else:
-        form = AddSpendingForm(user=request.user)
-    return render(request, 'view_spendings.html',  {'form': form})
-
 
 def get_categories_by_type(request):
     spending_type = request.GET.get('spending_type', '')
@@ -298,8 +280,6 @@ def add_spending_categories(request):
 
 @login_required
 def view_spending_categories(request):
-    if request.method == 'POST':
-        delete_spending_categories(request)
     form = CategoriesForm()
     categories_expenditure = Categories.objects.filter(
         categories_type=Spending_type.EXPENDITURE, owner=request.user)
@@ -309,16 +289,14 @@ def view_spending_categories(request):
 
 
 @login_required
-def delete_spending_categories(request):
-    if request.method == 'POST':
-        category_id = request.POST.get('category_id')
-        category = Categories.objects.get(id=category_id)
-        if category.default_category == False:
-            category.delete()
-        else:
-            messages.add_message(request, messages.ERROR,
-                                 "You can not delete default category!")
-        return redirect('view_spending_categories')
+def delete_spending_categories(request, category_id):
+    category = Categories.objects.get(id=category_id)
+    if category.default_category == False:
+        category.delete()
+    else:
+        messages.add_message(request, messages.ERROR,
+                                "You can not delete default category!")
+    return redirect('view_spending_categories')
 
 
 @login_required
@@ -330,6 +308,7 @@ def update_spending_categories(request, category_id):
             if form.is_valid():
                 form = CategoriesForm(request.POST, instance=category)
                 form.save()
+                messages.success(request, 'Change made successfully')
                 return redirect('view_spending_categories')
         else:
             messages.add_message(request, messages.ERROR,
@@ -338,7 +317,7 @@ def update_spending_categories(request, category_id):
     else:
         category = Categories.objects.get(id=category_id)
         form = CategoriesForm(instance=category)
-    return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
+    return redirect('view_spending_categories')
 
 
 @login_required
