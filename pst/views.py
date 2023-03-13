@@ -196,22 +196,32 @@ def respond(user_input):
     lemmatizer = WordNetLemmatizer()
     keywords = {
         "pst": ["personal spending tracker", "pst"],
-        "budget": ["budget", "spending budget", "financial budget"],
+        "category": ["category", "categories", "spending category"],
+        "budget": ["budget", "spending budget", "financial budget", "myplan"],
         "expense": ["expense", "spending", "financial expense"],
         "track": ["track", "record", "keep track"],
-        "saving": ["saving", "save", "financial saving"],
-        "finance": ["finance", "financial management", "money management"],
+        "forum": ["forum", "discussion board", "message board", "online community", "bulletin board", "chat room"],
+        "report": ["report", "chart"],
+        "reward": ["reward", "shop", "points"],
+        "calender": ["calender", "date"],
+
+        "help": ["help"],
         "hello": ["hi", "hello", "hey", "greetings", "heya", "hola", "what's up", "sup"],
         "bye": ["bye", "goodbye", "see you later", "adios", "later", "farewell"]
     }
 
     responses = {
         "pst": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."],
+        "category": ["While we offer default categories for both income and expenses, you always have the option to customize them to fit your personal preferences and needs in the settings!"],
         "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses."],
-        "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"],
+        "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent."],
         "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."],
-        "saving": ["Our Personal Spending Tracker can help you track your savings and keep you on track to reach your financial goals."],
-        "finance": ["With the PST, you can take control of your personal finances and make informed decisions about your spending and saving."],
+        "forum": ["Our online forum is a great place to connect with other users, share tips and advice, and discuss personal finance topics. You can join the forum by simply clicking on the Forum button on the home page."],
+        "report": ["Our report feature can create a chart of your expenses and provide a detailed list of your spending."],
+        "reward": ["By using our Personal Spending Tracker consistently, you can earn points which can be redeemed for various rewards in our reward shop."],
+        "calender": ["Our calendar feature can assist you in monitoring your income and expenses for the current month, allowing you to quickly determine your spending and effectively manage your financial plan with greater efficiency!"],
+
+        "help": ["you can try asking about pst, budget, expense, track, forum, report, rewards, category, calender for more information."],
         "hello": ["Hello! How may I help you?"],
         "bye": ["Goodbye! Have a great day!"],
     }
@@ -233,7 +243,7 @@ def respond(user_input):
     if possible_keywords:
         message = f"Did you mean {', '.join(possible_keywords)}?"
     else:
-        message = "Sorry, I do not understand what you mean. You can try asking about budget, expense, savings, finance, or tracking."
+        message = "Sorry, I do not understand what you mean. You can type 'help' for a list of possible commands."
 
     for keyword in possible_keywords:
         if keyword in responses:
