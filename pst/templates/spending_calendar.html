@@ -43,12 +43,12 @@
                 <h5>{{day.0}}</h5>
                 <div>
                   {% if day.2 != 0 or day.3 != 0 %}
-                    <a href="#" class="btn btn-primary text-start p-2 m-1" style="line-height: 0.9rem;">
-                      <div class="d-none d-sm-block">
-                        <p>expenditure: <b>{{ day.2 }}</b></p>
-                        <p>income: <b>{{ day.3 }}</b></p>
+                   
+                      <div class="d-none d-sm-block" style="color: #268598;">
+                        <p>expenditure: £<b>{{ day.2 }}</b></p>
+                        <p>income: £<b>{{ day.3 }}</b></p>
                       </div>
-                    </a>
+                    
                   {% endif %}
                 </div>
                 {% endif %}
