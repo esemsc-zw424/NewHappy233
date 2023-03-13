@@ -170,11 +170,24 @@ def respond(user_input):
     tokens = word_tokenize(user_input)
     tokens = [lemmatizer.lemmatize(token.lower()) for token in tokens]
 
+    possible_keywords = []
     for keyword, synonyms in keywords.items():
         for token in tokens:
             if token in synonyms:
-                return random.choice(responses[keyword])
-    return "Sorry, I do not understand what you mean."
+                possible_keywords.append(keyword)
+                break
+
+    if possible_keywords:
+        message = f"Did you mean {', '.join(possible_keywords)}?"
+    else:
+        message = "Sorry, I do not understand what you mean. You can try asking about budget, expense, savings, finance, or tracking."
+
+    for keyword in possible_keywords:
+        if keyword in responses:
+            message = random.choice(responses[keyword])
+            break
+
+    return message
 
 
 @login_required
