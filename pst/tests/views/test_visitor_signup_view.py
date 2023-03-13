@@ -26,7 +26,7 @@ class VisitorSignupViewTestCase(TestCase):
     def test_get_signup_view(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'signup.html')
+        self.assertTemplateUsed(response, 'visitor_signup.html')
         form = response.context['form']
         self.assertTrue(form, VisitorSignupForm)
         self.assertFalse(form.is_bound)

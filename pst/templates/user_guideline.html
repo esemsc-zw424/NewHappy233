@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <style>
+      body {
+        background-image: linear-gradient(to right, #f8cdda, #a8c0ff);
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        max-width: 900px;
+        text-align: center;
+      }
+
+      .card {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 2px 2px 8px #333;
+        margin-top: 50px;
+      }
+
+      .card h1 {
+        font-size: 36px;
+        margin-bottom: 30px;
+      }
+
+      .card h2 {
+        font-size: 28px;
+        margin-bottom: 30px;
+      }
+
+      .card p {
+        font-size: 18px;
+        margin-bottom: 50px;
+      }
+
+      .card ol {
+          text-align: center;
+      }
+
+      .btn {
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Welcome to the Personal Spending Tracker</h1>
+        <p>
+          This software is designed to help you track your spending and manage your budget effectively.
+          Set a limit for your budget, track your spending and see where your money is going.
+
+        </p >
+        <h2>Here are a few tips for you to get started.</h2>
+
+<ol>
+    <li>Set your budget limit: Go to the "Budgets" page and click on "Set Budget". Enter your budget limit, start date, and end date, and save it.</li>
+    <li>Track your expenses: Go to the "Expenses" page and click on "Add Expense". Enter the details of your expenses, such as the date, category, and amount, and save the expense.</li>
+    <li>View your spending history: Go to the "History" page to view a summary of your spending history and see how close you are to reaching your budget limit.</li>
+</ol>
+
+<p>
+    Start tracking your spending today and take control of your finances!
+</p >
+<p>
+    <a href="{% url 'view_settings' %}" class="btn">Return to Settings</a>
+    <a href="{% url 'home' %}" class="btn">Return to home page</a>
+</p>
+      </div>
+    </div>
+  </body>
+</html>

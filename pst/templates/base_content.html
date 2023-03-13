@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% block body %}
-    {% include 'partials/navbar.html' %}
-  
-    {% block content %}
-    {% endblock %}
+
+  {% include 'partials/navbar.html' %}
+  {% include 'partials/messages.html' %}
+  {% load static %}
+  {% block content %}
+  {% endblock %}
+
 {% endblock %}

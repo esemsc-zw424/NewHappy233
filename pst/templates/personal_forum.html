@@ -1,0 +1,154 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <title>Forum</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/8eaf89f6f3.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            padding: 1rem;
+        }
+        .btn-primary:hover,
+        .text-dark:hover {
+            background-color: rgba(180, 230, 255, 0.5);
+            color: #fff;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+            border-radius: 0;
+        }
+        .card-header {
+            font-size: 0.9rem;
+            color: #666;
+            background-color: #fff;
+            border-bottom: 1px solid #e4e4e4;
+        }
+        .card-footer {
+            font-size: 0.9rem;
+            color: #999;
+            background-color: #fff;
+            border-top: 1px solid #e4e4e4;
+        }
+        .profile-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        .card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .post-content {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .post-content a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .post-content a:hover {
+            text-decoration: underline;
+        }
+        .images img {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        .reply-content {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 1rem;
+            padding-left: 2rem;
+            border-left: 2px solid #ddd;
+        }
+        .reply-content p {
+            margin-bottom: 0.5rem;
+        }
+        .reply-content a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .reply-content a:hover {
+            text-decoration: underline;
+        }
+        .pagination {
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>   
+    <div class="container">
+        <h1>Personal Forum</h1>
+        <hr>
+        <a href='{% url 'forum' %}' class = 'btn btn-primary mb-3'>Return Forum</a>
+        <a href='{% url 'personal_forum_reply' %}' class = 'btn btn-primary mb-3'>Replies</a>
+        {% for post in page_obj %}
+            <div class="card mb-3">
+                <a href="{% url 'post_detail' post.id %}" class="text-dark text-decoration-none">
+                    <div class="card-header">
+                        {{ post.user.get_full_name }} 
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+
+                        <div class="post-content">
+                            {% if post.content|length > 50 %}
+                                {{ post.content|slice:":50"|add:" ..." }}
+                                <br>
+                                <a href="{% url 'post_detail' post.id %}" class="text-dark text-underline " >show more</a>
+                            {% else %}
+                                {{ post.content|slice:":50"}}                                                    
+                            {% endif %}
+                            
+                        </div>
+
+                        <div class="images">
+                            {% for i in post.images.all %}
+                            <img src="{{ i.image.url }}" width="200" height="200"></a>
+                            {% endfor %}                        
+                        </div>
+
+                        <div>
+                            {{ post.post_date|date:'d M Y, H:i'}}
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-muted d-flex justify-content-between">        
+                        <div>{{ post.replies.count  }} Replies</div>
+                        <div>{{ post.likes.count }} Likes</div>
+                    </div>
+                    {% if post.replies.exists %}
+                        <div class="card-footer text-muted d-flex justify-content-between">
+                            <div>{{ post.replies.first.user.get_full_name }}: {{ post.replies.first.content }}</div>
+                        </div>
+                    {% endif %}
+                </a>
+            
+            </div>
+        {% empty %}
+            <p>No posts found.</p>
+        {% endfor %}
+        {% include 'pagination.html' %}
+    </div>
+    
+
+    <!-- add the Bootstrap JavaScript file -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</body>
+{% endblock %}

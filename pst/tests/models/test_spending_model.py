@@ -1,15 +1,14 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from pst.models import Spending, Spending_type, User
+from pst.models import Spending, User
 
 class SpendingModelTestCase(TestCase):
 
     # this test will test all field in Spending model
-    fixtures = ['pst/tests/fixtures/users.json'], ['pst/tests/fixtures/spending.json']
+    fixtures = ['pst/tests/fixtures/spending.json'], ['pst/tests/fixtures/users.json']
 
     def setUp(self):
         self.spending_owner = User.objects.get(email = "johndoe@example.org")
-
         self.spending = Spending.objects.get(descriptions = "This is test spending 1")
 
     def _assert_spending_is_valid(self):
@@ -22,27 +21,38 @@ class SpendingModelTestCase(TestCase):
         with self.assertRaises(ValidationError):
             self.spending.full_clean()
 
-    def test_valid_spending(self):
-        self._assert_spending_is_valid()
+    def test_title_cannot_be_blank(self):
+        self.spending.title = ''
+        self._assert_spending_is_invalid()
 
+    def test_title_cannot_exceed_30_characters(self):
+        self.spending.title = 'x' * 31
+        self._assert_spending_is_invalid()
 
     def test_spending_owner_cannot_be_blank(self):
         self.spending.spending_owner = None
         self._assert_spending_is_invalid()
 
-
     def test_spending_amount_cannot_be_blank(self):
         self.spending.amount = ''
         self._assert_spending_is_invalid()
 
-    def test_spending_amount_cannot_be_larger_than_10000000(self):
-        self.spending.amount = 10000001
+    def test_amount_max_digits(self):
+        self.spending.amount = 999999.99
+        self._assert_spending_is_valid()
+    
+    def test_amount_max_digits_cannot_exceed_8_digits(self):
+        self.spending.amount = 9999999.99
         self._assert_spending_is_invalid()
 
-    def test_spending_amount_can_be_10000000(self):
-        self.spending.amount = 10000000
+    def test_spending_amount_can_be_0(self):
+        self.spending.amount = 0
         self._assert_spending_is_valid()
-
+    
+    def test_spending_amount_can_be_0(self):
+        self.spending.amount = 0
+        self._assert_spending_is_valid()
+    
     def test_spending_amount_can_be_0(self):
         self.spending.amount = 0
         self._assert_spending_is_valid()
@@ -59,7 +69,6 @@ class SpendingModelTestCase(TestCase):
     def test_spending_amount_must_only_contain_numbers(self):
         self.spending.amount = 'xxx'
         self._assert_spending_is_invalid()
-
 
     def test_amount_must_only_contain_number(self):
         self.spending.amount = 'sss'
@@ -82,7 +91,6 @@ class SpendingModelTestCase(TestCase):
         self.spending.descriptions = second_spending.descriptions
         self._assert_spending_is_valid()
 
-    
     def test_date_cannot_be_blank(self):
         self.spending.date = None
         self._assert_spending_is_invalid()
@@ -103,8 +111,10 @@ class SpendingModelTestCase(TestCase):
         self.spending.spending_type = 'xxxx'
         self._assert_spending_is_invalid()
 
-    def test_spending_type_must_not_be_uniqure(self):
+    def test_spending_type_must_not_be_unique(self):
         second_spending = Spending.objects.get(descriptions = "This is test spending 2")
         self.spending.spending_type = second_spending.spending_type
         self._assert_spending_is_valid()
-        
+    
+
+    # test of category needs to be implemented later.

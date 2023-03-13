@@ -4,43 +4,62 @@
         "pk": 1,
         "fields": {
             "password": "pbkdf2_sha256$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
-            
             "email": "johndoe@example.org",
             "first_name": "john",
-            "last_name": "doe"
+            "last_name": "doe",
+            "bio": "bio1",
+            "gender": "Male",
+            "phone_number": "0111111111",
+            "address": "Street ABC"
         }
     },
     {
         "model": "pst.user",
         "pk": 2,
         "fields": {
-            "password": "pbkdf2_sha333$390000$jPu8imKWYYssIYNKBaldaV$TXrA5IIkSUF95RTGF3eWoh8DSLnw/tycGtMXH9dOvO8=",
-          
+            "password":"pbkdf2_sha256$390000$ZPgc9DL7tgUkTQE9WZz3Jy$pB5wi2s322YotSVGmSPEzpe/CIYT9/1fZ73pDQ5NSl8=",
             "email": "lll@example.org",
             "first_name": "Oreo",
-            "last_name": "pic"
+            "last_name": "pic",
+            "bio": "bio2",
+            "gender": "Female",
+            "phone_number": "0111111112",
+            "address": "Street BCD"
         }
     },
     {
-        "model": "pst.spending",
+        "model": "pst.categories",
         "pk": 3,
         "fields": {
-            "spending_owner": 1,
-            "amount": 88,
-            "descriptions": "This is test spending 1",
-            "date": "2023-01-31",
-            "spending_type": "Expenditure"
+            "name": "Food",
+            "owner": 1,
+            "categories_type": "Expenditure"
         }
     },
     {
         "model": "pst.spending",
         "pk": 4,
         "fields": {
+            "title": "spending1",
+            "spending_owner": 1,
+            "amount": 88,
+            "descriptions": "This is test spending 1",
+            "date": "2023-01-31",
+            "spending_type": "Expenditure",
+            "spending_category": 3
+        }
+    },
+    {
+        "model": "pst.spending",
+        "pk": 5,
+        "fields": {
+            "title": "spending2",
             "spending_owner": 2,
             "amount": 88,
             "descriptions": "This is test spending 2",
             "date": "2023-02-20",
-            "spending_type": "Expenditure"
+            "spending_type": "Expenditure",
+            "spending_category": 3
         }
     }
 ]

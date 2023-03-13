@@ -1,0 +1,65 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<div class ="container">
+  <p class="fs-1">Hello, {{ request.user.first_name }}, this is your spending calendar!</p>
+  <div class ="row">
+    <div class="col">
+      <div class="card">
+        <h2 class="card-header container">
+          <div class="row">
+            <a href="{% url 'spending_calendar' year=previous_year month=previous_month %}" class="btn btn-secondary col-2"><</a><div class="col flex-1 text-center">{{month}} {{year}}</div><a href="{% url 'spending_calendar' year=next_year month=next_month %}" class="btn btn-secondary col-2">></a>
+          </div>
+        </h2>
+          <div class="class-body p-2">
+            <div class="row row-cols-7">
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Monday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Tuesday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Wednesday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Thursday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Friday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Saturday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Sunday</h5>
+              </div>
+            </div>
+            {% for week in month_calendar_list %}
+            <div class="row">
+              {% for day in week  %}
+              <div class="col" style="min-height: 8rem;">
+                {% if day.0 != 0 %}
+                <h5>{{day.0}}</h5>
+                <div>
+                  {% if day.2 != 0 or day.3 != 0 %}
+                   
+                      <div class="d-none d-sm-block" style="color: #268598;">
+                        <p>expenditure: £<b>{{ day.2 }}</b></p>
+                        <p>income: £<b>{{ day.3 }}</b></p>
+                      </div>
+                    
+                  {% endif %}
+                </div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <title>Post detail</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/8eaf89f6f3.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Post details</h1>
+        <hr>
+        <a href="{% url 'add_reply_to_post' post.id %}" class="btn btn-primary mb-3">Add reply to the post</a>
+        <a href='{% url 'forum' %}' class = "btn btn-primary mb-3">Return Forum</a>
+
+        <div class="post">
+            <div class="author">
+                <a href="{% url 'view_post_user' post.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">
+                    <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
+                    {{ post.user.get_full_name }} 
+                </a>
+            </div>
+            <h1>{{ post.title }}</h1>
+            <div class="content">Content: {{ post.content }}</div>
+            <div class="images">
+                {% for i in post.images.all %}
+                <img src="{{ i.image.url }}" width="200" height="200">
+                {% endfor %}
+            </div>
+            <div class="info">{{ post.post_date|date:'d M Y, H:i'}}</div>
+            <div class="info">{{ post.reply.count }} replies | {{ post.likes.count}} likes</div>
+            <div>
+                {% if request.user.is_authenticated %}
+                    {% if request.user in post.likes.all %}
+                        <form method="post" action="{% url 'like_post_details' post.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-primary btn-sm" name="like_action" value="unlike"><i class="far fa-thumbs-up"></i> {{ post.likes.count }} Unlike</button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'like_post_details' post.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm" name="like_action" value="like"><i class="far fa-thumbs-up"></i> {{ post.likes.count }} Like</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm"><i class="far fa-thumbs-up"></i> {{ post.likes.count }} Like</a>
+                {% endif %}
+            </div>
+        </div>
+
+        
+        {% if post.reply.exists %}
+        <div class="Replies Container">
+            <div>Replies:</div>
+            {% for r in page_obj %}
+            <div class="reply">
+                    {% if r.parent_reply %}
+                        <div class="parent-reply">
+                            {% if r.parent_reply.content|length > 50 %}
+                                <div>{{ r.parent_reply.user.get_full_name }}: {{ r.parent_reply.content|slice:":50"|add:" ..." }}</div>
+                            {% else %}
+                                <div>{{ r.parent_reply.user.get_full_name }}: {{ r.parent_reply.content|slice:":50" }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                <div class="author">
+                    <a href="{% url 'view_post_user' r.user.id r.id %}" style="text-decoration:none; font-weight:bold; color:black;">
+                        <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
+                        {{ r.user.get_full_name }} 
+                    </a>
+                </div>
+                <div class="content">{{ r.content }}</div>
+                <div class="info">in {{ r.reply_date|date:'d M Y, H:i' }}</div>
+                <div>
+                    {% if request.user.is_authenticated %}
+                        {% if request.user in r.likes.all %}
+                            <form method="post" action="{% url 'like_reply' r.id post.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary btn-sm" name="like_action" value="unlike"><i class="far fa-thumbs-up"></i> {{ r.likes.count }} Unlike</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'like_reply' r.id post.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm" name="like_action" value="like"><i class="far fa-thumbs-up"></i> {{ r.likes.count }} Like</button>
+                            </form>
+                        {% endif %}
+                        <a href="{% url 'add_reply_to_reply' post.id r.id %}" class="btn btn-primary btn-sm">Reply</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm"><i class="far fa-thumbs-up"></i> {{ r.likes.count }} Like</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor%}
+        {% include 'pagination.html' %}
+        </div>
+        {% endif %}
+        
+    </div>
+    <!-- add the Bootstrap JavaScript file -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+</body>
+{% endblock %}
