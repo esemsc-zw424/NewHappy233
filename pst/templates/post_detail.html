@@ -3,57 +3,10 @@
 <head>
     <meta charset="utf-8">
     <title>Post detail</title>
-    <!-- add the Bootstrap CSS file -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
-    <style>
-        .post {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 20px;
-        }
-        .post h1 {
-            margin-bottom: 10px;
-        }
-        .post img {
-            margin-right: 10px;
-        }
-        .post .author {
-            margin-bottom: 10px;
-        }
-        .post .info {
-            color: #666;
-            font-size: 14px;
-        }
-        .post .content {
-            color: #666;
-            font-size: 20px;
-            word-wrap: break-word;
-        }
-        
-        .reply {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 20px;
-            word-wrap: break-word;
-        }
-        .reply .author {
-            margin-bottom: 10px;
-        }
-        .reply .info {
-            color: #666;
-            font-size: 14px;
-        }
-        .reply .parent-reply {
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 10px;
-            word-wrap: break-word;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/8eaf89f6f3.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="container">
@@ -64,8 +17,10 @@
 
         <div class="post">
             <div class="author">
-                <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
-                <a href="{% url 'view_post_user' post.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">{{ post.user.get_full_name }} </a>
+                <a href="{% url 'view_post_user' post.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">
+                    <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
+                    {{ post.user.get_full_name }} 
+                </a>
             </div>
             <h1>{{ post.title }}</h1>
             <div class="content">Content: {{ post.content }}</div>
@@ -111,8 +66,10 @@
                         </div>
                     {% endif %}
                 <div class="author">
-                    <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
-                    <a href="{% url 'view_post_user' r.user.id r.id %}" style="text-decoration:none; font-weight:bold; color:black;">{{ r.user.get_full_name }} </a>
+                    <a href="{% url 'view_post_user' r.user.id r.id %}" style="text-decoration:none; font-weight:bold; color:black;">
+                        <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
+                        {{ r.user.get_full_name }} 
+                    </a>
                 </div>
                 <div class="content">{{ r.content }}</div>
                 <div class="info">in {{ r.reply_date|date:'d M Y, H:i' }}</div>

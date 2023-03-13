@@ -520,12 +520,17 @@ def personal_forum(request):
     for post in page_obj:
         post.replies = Reply.objects.filter(parent_post=post)
 
+    return render(request, 'personal_forum.html', {'page_obj': page_obj})
+
+@login_required
+def personal_forum_reply(request):
     reply_page_number = request.GET.get('reply_page')
     replies = Reply.objects.filter(user=request.user).order_by('-reply_date')
     reply_paginator = Paginator(replies, 5)
     reply_page_obj = reply_paginator.get_page(reply_page_number)
 
-    return render(request, 'personal_forum.html', {'page_obj': page_obj, 'reply_page_obj': reply_page_obj})
+    return render(request, 'personal_forum_reply.html', {'reply_page_obj': reply_page_obj})
+
 
 
 @login_required
@@ -555,7 +560,7 @@ def post_detail(request, post_id):
     except Post.DoesNotExist:
         return HttpResponseNotFound()
     replies = Reply.objects.filter(parent_post=post)
-    paginator = Paginator(replies, 2)
+    paginator = Paginator(replies, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {'post': post, 'replies': replies, 'page_obj': page_obj}
