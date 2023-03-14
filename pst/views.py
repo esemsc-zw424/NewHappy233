@@ -215,8 +215,8 @@ def view_spendings(request):
     end_date = request.GET.get('end_date')
 
     if start_date and end_date:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
         spending = Spending.objects.filter(spending_owner=request.user,
                                            date__range=[start_date, end_date]).order_by('date')
     else:
@@ -373,9 +373,27 @@ def user_guideline(request):
 
 @login_required
 def spending_report(request):
-    expenditures = Spending.objects.filter(spending_owner=request.user, spending_type=Spending_type.EXPENDITURE)
-    expenditures_data = expenditures.values('spending_category__name').annotate(exp_amount=Sum('amount'))
-    return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    selected_categories = request.GET.get('selected_categories')
+    if start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        spendings = Spending.objects.filter(spending_owner=request.user, date__range=[start_date, end_date])
+    else:
+        spendings = Spending.objects.filter(spending_owner=request.user)
+    if selected_categories == 'Expenditure':
+        selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
+    else:
+        selected_spendings = spendings.filter(spending_type=Spending_type.INCOME)
+    spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
+    return render(request, 'spending_report.html', {'selected_spendings': selected_spendings, 'spendings_data': spendings_data})
+
+# @login_required
+# def copy_spending_report(request):
+#     expenditures = Spending.objects.filter(spending_owner=request.user, spending_type=Spending_type.EXPENDITURE)
+#     expenditures_data = expenditures.values('spending_category__name').annotate(exp_amount=Sum('amount'))
+#     return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
 
 @login_required
 def set_budget(request):
@@ -665,7 +683,7 @@ def spending_calendar(request, year=datetime.now().year, month=datetime.now().mo
     month_calendar = calendar.Calendar()
     month_calendar_list = month_calendar.monthdays2calendar(year, month)
     month_name = calendar.month_name[month]
-    spendings = Spending.objects.all()
+    spendings = Spending.objects.filter(spending_owner=request.user)
     if month == 1:
         previous_month = 12
         previous_year = year - 1
