@@ -41,16 +41,17 @@
         const start_date = document.getElementById('start_date').value;
         const end_date = document.getElementById('end_date').value;
         const selected_categories = document.getElementById('selected_categories').value;
+        const selected_filter = document.getElementById('selected_filter').value;
 
         const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function(){
-            if(this.readyState == 4 && this.status == 200){
+        xhttp.onreadystatechange = function() {
+            if(this.readyState == 4 && this.status == 200) {
                 document.getElementById('spending_pie_graph').innerHTML = this.responseText;
                 document.getElementById('spending_bar_graph').innerHTML = this.responseText;
                 document.getElementById('spending_list').innerHTML = this.responseText;
             }
         };
-        xhttp.open('GET', `/spendings?start_date=${start_date}&end_date=${end_date}&selected_categories=${selected_categories}`, true);
+        xhttp.open('GET', `/spendings?start_date=${start_date}&end_date=${end_date}&selected_categories=${selected_categories}&selected_filter=${selected_filter}`, true);
         xhttp.send();
         return false;
     }
@@ -66,8 +67,8 @@
             </div>
         </div>
 
-        <div class="row">
-            <form method="GET" action="{% url 'spending_report' %}">
+        <form method="GET" action="{% url 'spending_report' %}">
+            <div class="row">
                 <div class="col col-lg-3">
                 <div class="form-floating">
                     <input type="date" class="form-control" id="start_date" name="start_date">
@@ -81,20 +82,20 @@
                 </div>
                 </div>
                 <div class="col col-lg-3">
-                <select id="selected_categories" name="selected_categories">
-                    <option value = "Expenditure" selected>Expenditure</option>
+                <select id="selected_categories" name="selected_categories" style="height: 58px;font-size: 22px;">
+                    <option value = "Expenditure">Expenditure</option>
                     <option value = "Income">Income</option>
                 </select>
                 </div>
                 <div class="col-md-auto">
                     <button type="submit" id="generate-button" class="btn btn-primary btn-lg" style="font-size: 22px;" onclick="selectSpending">Generate report</button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
 
         <div class="row">
             <div class="chartMenu">
-                <p>Spending analysis graph</p>
+                <p>{{ report_type }} analysis graph</p>
             </div>
             <div class="chartCard">
                 <div class="chartBox">
@@ -199,21 +200,23 @@
         </div></br>
         
         <div class="row">
-            <div class="row">
-                <div class="col">
-                    <h3>Spendings List</h3>
-                </div>
+            <h3>{{ report_type }} List</h3>
 
-                <div class="col offset-md-10">
-                    <label for="filter">Filter by:</label>
-                    <select id="filter" name="filter">
-                        <option value="category">category</option>
-                        <option value="amount">amount</option>
-                        <option value="owner">owner</option>
-                        <option value="date" selected>date</option>
-                    </select>
+            <form method="GET" action="{% url 'spending_report' %}">
+                <div class="row">
+                    <div class="col offset-md-9">
+                        <label for="filter">Filter by:</label>
+                        <select id="selected_filter" name="selected_filter">
+                            <option value="category">category</option>
+                            <option value="amount">amount</option>
+                            <option value="date" selected>date</option>
+                        </select>
+                    </div>
+                    <div class="col-md-auto">
+                        <button type="submit" id="apply-button" class="btn btn-primary btn-lg" style="font-size: 12px;" onclick="selectSpending">Apply filter</button>
+                    </div>
                 </div>
-            </div>
+            </form>
 
             <table class="table" id="spending_list">
                 <thead>
@@ -228,7 +231,7 @@
                 </thead>
         
                 <tbody>
-                    {% for i in selected_spendings %}
+                    {% for i in filtered_spendings %}
                     <tr class="align-middle">
                         <td> {{ i.spending_owner }}</td>
                         <td> {{ i.date }}</td>

@@ -376,18 +376,36 @@ def spending_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     selected_categories = request.GET.get('selected_categories')
+    selected_filter = request.GET.get('selected_filter')
     if start_date and end_date:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
         spendings = Spending.objects.filter(spending_owner=request.user, date__range=[start_date, end_date])
     else:
         spendings = Spending.objects.filter(spending_owner=request.user)
-    if selected_categories == 'Expenditure':
-        selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
-    else:
+
+    if selected_categories == 'Income':
+        report_type = 'Income'
         selected_spendings = spendings.filter(spending_type=Spending_type.INCOME)
+    else:
+        report_type = 'Expenditure'
+        selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
     spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
-    return render(request, 'spending_report.html', {'selected_spendings': selected_spendings, 'spendings_data': spendings_data})
+
+    if selected_filter == 'amount':
+        filtered_spendings = selected_spendings.order_by('amount')
+    elif selected_filter == 'category':
+        filtered_spendings = selected_spendings.order_by('-spending_category')
+    else:
+        filtered_spendings = selected_spendings.order_by('date')
+
+    context = {
+        'report_type': report_type,
+        'selected_spendings': selected_spendings,
+        'spendings_data': spendings_data,
+        'filtered_spendings': filtered_spendings
+    }
+    return render(request, 'spending_report.html', context)
 
 # @login_required
 # def copy_spending_report(request):
