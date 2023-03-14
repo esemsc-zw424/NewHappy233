@@ -134,7 +134,7 @@ class AddSpendingForm(forms.ModelForm):
             spending_type = self.data.get('spending_type', '')
             self.fields['spending_category'].queryset = Categories.objects.filter(
                 owner=user)  # this part filter out categories that belongs to current user
-
+        
     class Meta:
         model = Spending
         fields = ['title', 'amount', 'descriptions',
