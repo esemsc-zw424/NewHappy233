@@ -4,6 +4,7 @@ from django.forms import ModelForm, Form
 from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply
 from django.forms import ClearableFileInput
 from django.contrib import messages
+from datetime import date
 
 
 class CategoriesForm(forms.ModelForm):
@@ -123,7 +124,8 @@ class LoginForm(Form):
 
 class AddSpendingForm(forms.ModelForm):
 
-    spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), empty_label=None)
+    spending_category = forms.ModelChoiceField(
+        queryset=Categories.objects.none(), empty_label=None)
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -139,7 +141,7 @@ class AddSpendingForm(forms.ModelForm):
                   'date', 'spending_type', 'spending_category']
 
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'value': date.today().strftime('%Y-%m-%d')}),
         }
 
     file = forms.FileField(
@@ -148,7 +150,8 @@ class AddSpendingForm(forms.ModelForm):
         required=False,
     )
 
-class EditSpendingForm(forms.ModelForm):   
+
+class EditSpendingForm(forms.ModelForm):
 
     #spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), empty_label=None)
     class Meta:
@@ -165,12 +168,15 @@ class EditSpendingForm(forms.ModelForm):
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
     )
+
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super(EditSpendingForm, self).__init__(*args, **kwargs)
         if user:
             spending_type = self.data.get('spending_type', '')
-            self.fields['spending_category'].queryset = Categories.objects.filter(owner = user) # this part filter out categories that belongs to current user
+            self.fields['spending_category'].queryset = Categories.objects.filter(
+                owner=user)  # this part filter out categories that belongs to current user
+        self.fields['date'].initial = date.today()
 
     def save(self):
         if self.is_valid():
@@ -179,7 +185,7 @@ class EditSpendingForm(forms.ModelForm):
                 id=self.instance.id,
                 defaults={
                     'spending_owner': self.user,
-                    'title':self.cleaned_data.get('title'),
+                    'title': self.cleaned_data.get('title'),
                     'amount': self.cleaned_data.get('amount'),
                     'descriptions': self.cleaned_data.get('descriptions'),
                     'date': self.cleaned_data.get('date'),
@@ -188,17 +194,19 @@ class EditSpendingForm(forms.ModelForm):
                 }
             )
             return spending
-            
+
 # class UserProfileForm(forms.ModelForm):
 #     class Meta:
 #         model = UserProfile
 #         fields = ['bio', 'location', 'birth_date',
 #                   'gender', 'phone_number', ]
 
+
 class BudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
         fields = ['name', 'limit']
+
 
 class PostForm(forms.ModelForm):
     class Meta:
@@ -209,12 +217,11 @@ class PostForm(forms.ModelForm):
         label='image',
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
-    )   
+    )
+
 
 class ReplyForm(forms.ModelForm):
     class Meta:
         model = Reply
         fields = ['content', 'parent_reply']
         widgets = {'parent_reply': forms.HiddenInput()}
-
-
