@@ -17,8 +17,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Sum
 
 import calendar
+import datetime as dt
 from datetime import date, datetime
-
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
 
 from .forms import *
@@ -60,18 +60,18 @@ def visitor_signup(request):
         return render(request, 'visitor_signup.html', {'form': form})
 
 
-#Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
+# Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def get_spending_calendar_context(request, year=datetime.now().year, month=datetime.now().month):
     month_calendar = calendar.Calendar()
-    month_calendar_list = month_calendar.monthdays2calendar(year,month)
+    month_calendar_list = month_calendar.monthdays2calendar(year, month)
     month_name = calendar.month_name[month]
     spendings = Spending.objects.all()
-    if month==1:
+    if month == 1:
         previous_month = 12
         previous_year = year - 1
         next_month = 2
         next_year = year
-    elif month ==12:
+    elif month == 12:
         previous_month = 11
         previous_year = year
         next_month = 1
@@ -87,33 +87,35 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
             spendings_daily = []
             exp_sum = 0
             income_sum = 0
-            #adds each spending in the database to each date in the calendar
+            # adds each spending in the database to each date in the calendar
             for spending in spendings:
                 if spending.date.day == month_calendar_list[i][j][0] and spending.date.month == month and spending.date.year == year:
                     spendings_daily.append(spending)
-            #calculates the sum of expenditures and sums of all the spendings in a single day
+            # calculates the sum of expenditures and sums of all the spendings in a single day
             for spending_daily in spendings_daily:
                 if spending_daily.spending_type == Spending_type.EXPENDITURE:
                     exp_sum += spending_daily.amount
                 else:
                     income_sum += spending_daily.amount
-            month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
+            month_calendar_list[i][j] = (
+                month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
 
     context = {'month_calendar_list': month_calendar_list,
-               'year': year, 'month': month_name, 
-               'previous_month': previous_month, 
-               'previous_year': previous_year, 
-               'next_month': next_month, 
+               'year': year, 'month': month_name,
+               'previous_month': previous_month,
+               'previous_year': previous_year,
+               'next_month': next_month,
                'next_year': next_year,
                'exp_amount': exp_sum,
                'income_amount': income_sum}
     return context
 
+
 @login_required
 def home(request):
     user = request.user
     percentage = calculate_budget(request)
-    month=datetime.now().month
+    month = datetime.now().month
     revenue = Spending.objects.filter(
         spending_owner=request.user,
         date__month=month,
@@ -136,16 +138,15 @@ def home(request):
     else:
         monthly_expense = expense.aggregate(nums=Sum('amount')).get('nums')
 
-    
     context = {'user': user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
-    
+
     calendar_context = get_spending_calendar_context(request)
 
     context.update(calendar_context)
-               
 
     return render(request, 'home.html', context)
+
 
 @login_prohibited
 def visitor_introduction(request):
@@ -253,7 +254,6 @@ def respond(user_input):
     return message
 
 
-
 def get_categories_by_type(request):
     spending_type = request.GET.get('spending_type', '')
     categories = Categories.objects.filter(
@@ -273,10 +273,10 @@ def view_spendings(request):
     end_date = request.GET.get('end_date')
 
     if start_date and end_date:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        start_date = dt.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = dt.datetime.strptime(end_date, '%Y-%m-%d').date()
         spending = Spending.objects.filter(spending_owner=request.user,
-                                           date__range=[start_date, end_date]).order_by('date')
+                                           date__range=[start_date, end_date]).order_by('-date')
     else:
         spending = Spending.objects.filter(
             spending_owner=request.user).order_by('date')
@@ -371,7 +371,7 @@ def delete_spending_categories(request, category_id):
         category.delete()
     else:
         messages.add_message(request, messages.ERROR,
-                                "You can not delete default category!")
+                             "You can not delete default category!")
     return redirect('view_spending_categories')
 
 
@@ -433,6 +433,7 @@ def spending_report(request):
     expenditures_data = expenditures.values(
         'spending_category__name').annotate(exp_amount=Sum('amount'))
     return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
+
 
 @login_required
 def set_budget(request):
@@ -545,6 +546,7 @@ def personal_forum(request):
 
     return render(request, 'personal_forum.html', {'page_obj': page_obj})
 
+
 @login_required
 def personal_forum_reply(request):
     reply_page_number = request.GET.get('reply_page')
@@ -553,7 +555,6 @@ def personal_forum_reply(request):
     reply_page_obj = reply_paginator.get_page(reply_page_number)
 
     return render(request, 'personal_forum_reply.html', {'reply_page_obj': reply_page_obj})
-
 
 
 @login_required
@@ -721,8 +722,9 @@ def view_settings(request):
     form = BudgetForm()
     return render(request, 'setting_page.html', {'form': form})
 
+
 @login_required
 # Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
-    context = get_spending_calendar_context(request, year, month)   
+    context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
