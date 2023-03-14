@@ -127,8 +127,7 @@ class SpendingFile(models.Model):
     )
 
 class Budget(models.Model):
-    name = models.CharField(max_length=100)
-    limit = models.DecimalField(max_digits=10, decimal_places=2)
+    limit = models.PositiveIntegerField()
     # start_date = models.DateField()
     # end_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -147,6 +146,17 @@ class RewardPoint(models.Model):
 class Reward(models.Model):
     name = models.CharField(max_length=50)
     points_required = models.IntegerField(default=0)
+    image = models.FileField(
+        null=True,
+        blank=True,
+        upload_to='rewards/'
+    )
+    default_image = models.FileField(upload_to='rewards/', default='rewards/default_reward_image.jpg')
 
     def __str__(self):
         return f"{self.name} ({self.points_required} points)"
+
+class DeliveryAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    address = models.CharField(max_length=200, blank=True)
+    phone_number = models.IntegerField(blank=True)

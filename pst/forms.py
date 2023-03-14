@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type, Budget
+from pst.models import User, Spending, Categories, Spending_type, Budget, DeliveryAddress
 from django.forms import ClearableFileInput
 from django.contrib import messages
 
@@ -127,4 +127,9 @@ class AddSpendingForm(forms.ModelForm):
 class BudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
-        fields = ['name', 'limit']
+        fields = ['limit']
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = DeliveryAddress
+        fields = ['address', 'phone_number']

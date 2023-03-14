@@ -40,6 +40,7 @@ urlpatterns = [
     path('update_spending_categories/<int:category_id>/', views.update_spending_categories, name = 'update_spending_categories'),
     path('shopping_mall/index/', views.index, name = 'index'),
     path('redeem/<int:reward_id>/', views.redeem, name='redeem'),
+    path('add_address/', views.add_address, name='add_address'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
