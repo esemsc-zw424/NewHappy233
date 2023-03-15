@@ -42,7 +42,6 @@ from django.db.models import Sum
 
 # Create your views here.
 
-
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
@@ -832,12 +831,53 @@ def view_post_user(request, user_id, post_id):
 
 @login_required
 def view_settings(request):
+    form = TotalBudgetForm(request.user)
     form = BudgetForm()
     return render(request, 'setting_page.html', {'form': form})
-
+   
 
 @login_required
 # Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
     context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
+
+def set_specific_budget(request):
+    if request.method == 'POST':
+        form = BudgetForm(request.user, request.POST)
+        if form.is_valid():
+            budget = form.save(commit=False)
+            budget.budget_owner = request.user
+            budget.save()
+            return redirect('budget_show')
+    else:
+        form = BudgetForm(request.user)
+    return render(request, 'specific_budget_set.html', {'form': form})
+
+
+@login_required
+def view_friends_page(request):
+    return render(request, 'friends_page.html')
+
+
+@login_required
+def view_friends_list(request):
+    users = User.objects.all()
+    return render(request, 'view_friends_list.html', {'users': users})
+
+@login_required
+def show_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        posts = Post.objects.filter(author=user)
+        following = request.user.is_following(user)
+        followable = (request.user != user)
+    except ObjectDoesNotExist:
+        return redirect('user_list')
+    else:
+        return render(request, 'show_user.html',
+            {'user': user,
+             'posts': posts,
+             'following': following,
+             'followable': followable}
+        )

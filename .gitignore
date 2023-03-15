@@ -356,3 +356,8 @@ pst/__pycache__/forms.cpython-310.pyc
 pst/__pycache__/models.cpython-310.pyc
 pst/__pycache__/views.cpython-310.pyc
 pst/helpers/__pycache__/auth.cpython-310.pyc
+pst/__pycache__/models.cpython-310.pyc
+.gitignore
+NewHappy/__pycache__/wsgi.cpython-310.pyc
+pst/__pycache__/models.cpython-310.pyc
+pst/__pycache__/views.cpython-310.pyc
