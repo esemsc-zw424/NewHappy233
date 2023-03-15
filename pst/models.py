@@ -158,7 +158,7 @@ class Budget(models.Model):
     end_date = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    budget_owner = models.ForeignKey(  # user which this budget belongs to
+    budget_owner = models.ForeignKey(  # user which this budget belongs to 
         User, on_delete=models.CASCADE
     )
     spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='budget_spending_category', blank=True)
