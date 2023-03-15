@@ -39,6 +39,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+
+
     username = None
     email = models.EmailField(unique=True, blank=False)
     first_name = models.CharField(blank=False, unique=False, max_length=50)
@@ -56,10 +58,10 @@ class User(AbstractUser):
     phone_number = models.CharField(validators=[phone_regex], max_length=15, blank=True)
     address = models.CharField(max_length=100, blank=True)
 
-    reward_points = models.IntegerField(default=0)
     consecutive_login_days = models.IntegerField(default=1)
     logged_in_once_daily = models.BooleanField(default = False)
-    
+    reward_points = models.IntegerField(default=0)
+
     objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -72,6 +74,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+
+
+
 
 class Categories(models.Model):
 
@@ -103,6 +110,52 @@ class Categories(models.Model):
         return self.name
 
 
+class Day(models.Model):
+    number = models.IntegerField(unique=True)
+
+    def __str__(self):
+        return f"Day {self.number}"
+
+
+class DailyRewards(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    days = models.ManyToManyField(Day, through='DailyRewardStatus')
+
+    def mark_received(self, day, task_type='login'):
+        status = DailyRewardStatus.objects.get(reward=self, day=day, task_type=task_type)
+        status.received = True
+        status.save()
+
+    def set_reward_points(self, day, points, task_type='login'):
+        status = DailyRewardStatus.objects.get(reward=self, day=day, task_type=task_type)
+        status.points = points
+        status.save()
+
+    def get_reward_status(self, day, task_type='login'):
+        status = DailyRewardStatus.objects.get(reward=self, day=day, task_type=task_type)
+        return status.received
+
+    def get_reward_points(self, day, task_type='login'):
+        status = DailyRewardStatus.objects.get(reward=self, day=day, task_type=task_type)
+        return status.points
+
+    def __str__(self):
+        return f"{self.user.email}'s Daily Rewards"
+
+
+class DailyRewardStatus(models.Model):
+    TASK_TYPES = (
+        ('login', 'Login'),
+        ('other', 'Other')
+    )
+    reward = models.ForeignKey(DailyRewards, on_delete=models.CASCADE)
+    day = models.ForeignKey(Day, on_delete=models.CASCADE)
+    received = models.BooleanField(default=False)
+    task_points = models.IntegerField(default=0)
+    task_type = models.CharField(choices=TASK_TYPES, default='login', max_length=10)
+
+    class Meta:
+        unique_together = ('reward', 'day', 'task_type')
 
 class Spending(models.Model):
 
@@ -163,6 +216,9 @@ class Budget(models.Model):
     budget_owner = models.ForeignKey(  # user which this budget belongs to
         User, on_delete=models.CASCADE
     )
+
+
+
 
 
 class Reward(models.Model):

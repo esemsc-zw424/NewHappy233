@@ -17,7 +17,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 
-from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like
+from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyReward,DailyRewardStatus,Day
 
 from .forms import *
 from django.views import View
@@ -79,7 +79,10 @@ def add_consecutive_login_days(request):
 
 def get_reward_points(request):
     user = request.user
-    
+    reward = DailyReward.objects.create(user=user)
+    day1 = Day.objects.get(number=1)
+    reward.mark_received(day1)
+    reward.set_reward_points(day1, 10)
     # give user extra reward if user has login consecutive for seven days
     if user.consecutive_login_days > 7:
         user.reward_points += high_reward_points
