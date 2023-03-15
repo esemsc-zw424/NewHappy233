@@ -41,6 +41,8 @@ from nltk.stem import WordNetLemmatizer
 from django.db.models import Sum
 
 # Create your views here.
+
+
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
@@ -830,24 +832,12 @@ def view_post_user(request, user_id, post_id):
 
 @login_required
 def view_settings(request):
-    form = TotalBudgetForm(request.user)
+    form = BudgetForm()
     return render(request, 'setting_page.html', {'form': form})
+
 
 @login_required
 # Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
     context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
-
-def set_specific_budget(request):
-    if request.method == 'POST':
-        form = BudgetForm(request.user, request.POST)
-        if form.is_valid():
-            budget = form.save(commit=False)
-            budget.budget_owner = request.user
-            budget.save()
-            return redirect('budget_show')
-    else:
-        form = BudgetForm(request.user)
-    return render(request, 'specific_budget_set.html', {'form': form})
-

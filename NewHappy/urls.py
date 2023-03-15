@@ -53,6 +53,11 @@ urlpatterns = [
          views.delete_spending, name='delete_spending'),
     path('shopping_mall/index/', views.index, name='index'),
 
+    path('view_friends_list/', views.view_friends_list,
+         name='view_friends_list'),
+
+    path('user/<int:user_id>', views.show_user, name='show_user'),
+
     path('redeem/<int:reward_id>/', views.redeem, name='redeem'),
     path('user_profile/', views.user_profile, name='user_profile'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
@@ -78,6 +83,8 @@ urlpatterns = [
          views.view_post_user, name='view_post_user'),
 
     path('view_settings/', views.view_settings, name='view_settings'),
+
+    path('view_friends_page/', views.view_friends_page, name='view_friends_page'),
 
     path('get_categories_by_type/', views.get_categories_by_type, name='get_categories_by_type'),
 

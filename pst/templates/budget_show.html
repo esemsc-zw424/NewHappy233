@@ -49,7 +49,7 @@
 
 <div class="container">
     {% if budget == None %}
-        <h1>You have not set budget yet</h1>
+        <h1>You have not set a budget yet</h1>
         <h3>Click the button below to set your budget</h3>
         <a href ='{% url 'budget_set' %}' class = 'btn btn-lg btn-primary' data-bs-toggle="modal" data-bs-target="#set_budget_modal">Set Budget</a>
         <a href='{% url 'home' %}'class="btn btn-lg btn-primary">Return</a>

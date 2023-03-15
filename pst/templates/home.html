@@ -180,6 +180,15 @@
                   </div>
                 </div>
               </a>
+
+              <a href ='{% url 'view_friends_page' %}' class = 'sidebar-button' name="friends_btn">
+                <div class="sidebar-list-inactive-5 sidebar-list-inactive-7">
+                  <img class="vector-3" src="{% static 'img/frame-3.svg' %}" alt="Vector" />
+                  <div class="title-7 title-9 outfit-normal-bunker-24px">
+                    Friends
+                  </div>
+                </div>
+              </a>
            
 
               <a href ='{% url 'index' %}' class = 'sidebar-button' name="reward_btn">
@@ -226,8 +235,8 @@
               <img class="image" src="{% static 'img/image-1@2x.png' %}" alt="Image" />
               <div class="group-2">
                 <div class="overlap-group1">
-                  <div class="mothly-expenses poppins-medium-bunker-24px">
-                    Mothly Revenue
+                  <div class="monthly-expenses poppins-medium-bunker-24px">
+                    Monthly Revenue
                   </div>
                   <div class="price poppins-medium-bunker-32px">£{{ revenue }}</div>
                 </div>
@@ -291,8 +300,8 @@
               <img class="image" src="{% static 'img/image-6@2x.png' %}" alt="Image" />
               <div class="group-2">
                 <div class="overlap-group1">
-                  <div class="mothly-expenses poppins-medium-bunker-24px">
-                    Mothly Expenses
+                  <div class="monthly-expenses poppins-medium-bunker-24px">
+                    Monthly Expenses
                   </div>
                   <div class="price poppins-medium-bunker-32px">£{{ expense }}</div>
                 </div>
@@ -302,7 +311,6 @@
               </div>
             </div>
           </div>
-          
           <!-- end of three small windows showing revenue, expenditure, and plan -->
           
           <div class ="container" style="margin-top:37%; margin-left:16%">
