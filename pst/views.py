@@ -17,7 +17,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 
-from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyReward,DailyRewardStatus,Day
+from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyRewards,DailyRewardStatus,Day
 
 from .forms import *
 from django.views import View
@@ -66,20 +66,19 @@ def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
 
 
-def add_consecutive_login_days(request):
-    user = request.user
-    if current_datetime - user.last_login < timedelta(hours=24):
-        user.consecutive_login_days += 1
-            
-        # user has not logged in consecutively
-    else:
-        user.consecutive_login_days = 1
-    user.save()
 
 
 def get_reward_points(request):
+    # if request.method == 'POST':
+    #     content_id = request.POST.get('rewardPos')
+    #     new_content = request.POST.get('newContent')
+    #
+    #     # Update the content in the database
+    #     obj = YourModel.objects.get(id=content_id)
+    #     obj.content = new_content
+    #     obj.save()
     user = request.user
-    reward = DailyReward.objects.create(user=user)
+    reward = DailyRewards.objects.create(user=user)
     day1 = Day.objects.get(number=1)
     reward.mark_received(day1)
     reward.set_reward_points(day1, 10)
@@ -123,8 +122,15 @@ def get_super_reward_position(request):
     return cur_pos + days_need
 
 
+def add_consecutive_login_days(request):
+    user = request.user
+    if current_datetime - user.last_login < timedelta(hours=24):
+        user.consecutive_login_days += 1
 
-
+        # user has not logged in consecutively
+    else:
+        user.consecutive_login_days = 1
+    user.save()
 
 
 @login_required
