@@ -126,6 +126,7 @@ class LoginForm(Form):
 
 class AddSpendingForm(forms.ModelForm):
 
+    
     spending_category = forms.ModelChoiceField(
         queryset=Categories.objects.none(), empty_label=None)
 
@@ -152,6 +153,8 @@ class AddSpendingForm(forms.ModelForm):
         required=False,
     )
 
+    
+
 
 class EditSpendingForm(forms.ModelForm):
 
@@ -169,8 +172,8 @@ class EditSpendingForm(forms.ModelForm):
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
     )
-    
-    # delete_file = forms.BooleanField(label='Delete file', required=False)
+
+    delete_file = forms.BooleanField(label='Delete file', required=False)
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -196,16 +199,18 @@ class EditSpendingForm(forms.ModelForm):
                     'spending_category': self.cleaned_data.get('spending_category'),
                 }
             )
-            # if self.cleaned_data['delete_file']:
-            #     SpendingFile.objects.filter(spending=spending).delete()
+
             return spending
 
+
 class BudgetForm(forms.ModelForm):
-    spending_category = forms.ModelChoiceField(queryset=Categories.objects.none())
+    spending_category = forms.ModelChoiceField(
+        queryset=Categories.objects.none())
 
     class Meta:
         model = Budget
-        fields = ['name','limit', 'spending_category', 'start_date', 'end_date']
+        fields = ['name', 'limit', 'spending_category',
+                  'start_date', 'end_date']
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -219,7 +224,8 @@ class BudgetForm(forms.ModelForm):
         cleaned_data = super().clean()
         limit = cleaned_data.get('limit')
         spending_category = cleaned_data.get('spending_category')
-        total_spent_category = Budget.objects.filter(budget_owner=self.user, spending_category=spending_category).last()
+        total_spent_category = Budget.objects.filter(
+            budget_owner=self.user, spending_category=spending_category).last()
         if total_spent_category:
             category_value = total_spent_category.limit
         else:
@@ -229,7 +235,8 @@ class BudgetForm(forms.ModelForm):
         if total_budget is None:
             raise forms.ValidationError("You need to set a total budget first")
         # Check if the limit for this budget exceeds the remaining amount in the total budget
-        total_spent = Budget.objects.filter(budget_owner=self.user).aggregate(Sum('limit'))['limit__sum'] or 0
+        total_spent = Budget.objects.filter(
+            budget_owner=self.user).aggregate(Sum('limit'))['limit__sum'] or 0
         remaining_amount = total_budget.limit - total_spent + category_value
         if limit > remaining_amount:
             raise forms.ValidationError(
@@ -255,24 +262,17 @@ class ReplyForm(forms.ModelForm):
         fields = ['content', 'parent_reply']
         widgets = {'parent_reply': forms.HiddenInput()}
 
+
 class AddressForm(forms.ModelForm):
     class Meta:
         model = DeliveryAddress
         fields = ['address', 'phone_number']
 
-# class TotalBudgetForm(forms.ModelForm):
-#     class Meta:
-#         model = TotalBudget
-#         fields = ['name','limit', 'start_date', 'end_date']
-#
-#     def __init__(self, user, *args, **kwargs):
-#         self.user = user
-#         super().__init__(*args, **kwargs)
 
 class TotalBudgetForm(forms.ModelForm):
     class Meta:
         model = TotalBudget
-        fields = ['name','limit', 'start_date', 'end_date']
+        fields = ['name', 'limit', 'start_date', 'end_date']
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
