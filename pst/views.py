@@ -330,7 +330,6 @@ def edit_spending(request, spending_id):
                     )
             if form.cleaned_data['delete_file']:
                 SpendingFile.objects.filter(spending=spending).delete()
-
             messages.success(request, 'Change made successfully')
             return redirect('view_spendings')
     else:
@@ -563,11 +562,6 @@ def show_budget(request):
         'form': form,
         'specific_form': specific_form,
     })
-
-# @login_required
-# def cal_spending():
-#      spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
-#      return spending_total
 
 
 @login_required

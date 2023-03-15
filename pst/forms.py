@@ -199,7 +199,7 @@ class EditSpendingForm(forms.ModelForm):
                     'spending_category': self.cleaned_data.get('spending_category'),
                 }
             )
-   
+
             return spending
 
 
@@ -230,9 +230,8 @@ class BudgetForm(forms.ModelForm):
             category_value = total_spent_category.limit
         else:
             category_value = 0
-
-        total_budget = TotalBudget.objects.filter(
-            budget_owner=self.user).last()
+ 
+        total_budget = TotalBudget.objects.filter(budget_owner=self.user).last()
         if total_budget is None:
             raise forms.ValidationError("You need to set a total budget first")
         # Check if the limit for this budget exceeds the remaining amount in the total budget
@@ -244,7 +243,6 @@ class BudgetForm(forms.ModelForm):
                 "You exceeded the total budget")
 
         return cleaned_data
-
 
 class PostForm(forms.ModelForm):
     class Meta:
@@ -269,15 +267,6 @@ class AddressForm(forms.ModelForm):
     class Meta:
         model = DeliveryAddress
         fields = ['address', 'phone_number']
-
-# class TotalBudgetForm(forms.ModelForm):
-#     class Meta:
-#         model = TotalBudget
-#         fields = ['name','limit', 'start_date', 'end_date']
-#
-#     def __init__(self, user, *args, **kwargs):
-#         self.user = user
-#         super().__init__(*args, **kwargs)
 
 
 class TotalBudgetForm(forms.ModelForm):
