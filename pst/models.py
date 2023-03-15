@@ -9,6 +9,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 import os
 
 
@@ -140,7 +142,6 @@ class Spending(models.Model):
                                           blank=False)  # this refers to the category of the spending
 
 
-
 class SpendingFile(models.Model):
     spending = models.ForeignKey(
         Spending, on_delete=models.CASCADE, related_name='files')
@@ -149,6 +150,8 @@ class SpendingFile(models.Model):
         blank=True,
         upload_to='user_files/'
     )
+
+
 
 
 class Budget(models.Model):
@@ -232,6 +235,17 @@ class PostImage(models.Model):
         upload_to='post_images/',
         validators=[validate_file_extension],
     )
+
+@receiver(pre_delete, sender=SpendingFile)
+@receiver(pre_delete, sender=Spending)
+@receiver(pre_delete, sender=Post)
+def delete_file(sender, instance, **kwargs):
+    # delete the file when the SpendingFile object is deleted
+    if instance.file:
+        path = instance.file.path
+        if os.path.exists(path):
+            os.remove(path)
+
 
 # this model is for replies under a post
 class Reply(models.Model):
