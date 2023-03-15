@@ -9,6 +9,11 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 import os
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+from django.conf import settings
+from NewHappy.settings import MEDIA_ROOT
+
 
 class Spending_type(models.TextChoices):
     EXPENDITURE = "Expenditure"

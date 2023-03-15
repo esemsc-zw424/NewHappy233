@@ -28,6 +28,9 @@ from pst.helpers.auth import login_prohibited
 from django.contrib.auth import authenticate, login, logout
 
 import os
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+from django.conf import settings
 from NewHappy.settings import MEDIA_ROOT
 from django.http import HttpResponse
 import random
@@ -37,8 +40,6 @@ nltk.download('wordnet')
 
 
 # Create your views here.
-
-
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
@@ -301,14 +302,22 @@ def edit_spending(request, spending_id):
         return render(request, 'view_spendings.html')
 
     if request.method == 'POST':
-        form = EditSpendingForm(request.user, request.POST, instance=spending)
+        form = EditSpendingForm(request.user, request.POST, request.FILES, instance=spending)
 
         if form.is_valid():
             form.save()
+            file_list= request.FILES.getlist('file')
+            if file_list:
+                SpendingFile.objects.filter(spending=spending).delete()
+                for file in file_list:
+                    SpendingFile.objects.create(
+                        spending=spending,
+                        file=file
+                    )
             messages.success(request, 'Change made successfully')
             return redirect('view_spendings')
     else:
-        form = EditSpendingForm(user=request.user)
+        form = EditSpendingForm(request.user, instance=spending )
     return redirect('view_spendings')
 
 
@@ -728,3 +737,4 @@ def view_settings(request):
 def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
     context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
+
