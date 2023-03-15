@@ -8,7 +8,9 @@
       <div class="card">
         <h2 class="card-header container">
           <div class="row">
-            <a href="{% url 'spending_calendar' year=previous_year month=previous_month %}" class="btn btn-secondary col-2"><</a><div class="col flex-1 text-center">{{month}} {{year}}</div><a href="{% url 'spending_calendar' year=next_year month=next_month %}" class="btn btn-secondary col-2">></a>
+            <a href="{% url 'spending_calendar' year=previous_year month=previous_month %}" class="btn btn-secondary col-2"><</a>
+            <div class="col flex-1 text-center" style="font-size: 200%;">{{month}} {{year}}</div>
+            <a href="{% url 'spending_calendar' year=next_year month=next_month %}" class="btn btn-secondary col-2">></a>
           </div>
         </h2>
           <div class="class-body p-2">

@@ -140,7 +140,7 @@ class Spending(models.Model):
 
     spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category',
                                           blank=False)  # this refers to the category of the spending
-
+    
 
 class SpendingFile(models.Model):
     spending = models.ForeignKey(

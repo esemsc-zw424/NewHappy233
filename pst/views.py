@@ -68,7 +68,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
     month_calendar = calendar.Calendar()
     month_calendar_list = month_calendar.monthdays2calendar(year, month)
     month_name = calendar.month_name[month]
-    spendings = Spending.objects.all()
+    spendings = Spending.objects.filter(spending_owner=request.user)
     if month == 1:
         previous_month = 12
         previous_year = year - 1
@@ -298,8 +298,9 @@ def view_spendings(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    form = EditSpendingForm(user=request.user)
-    context = {'form': form, 'spending': spending, 'page_obj': page_obj}
+    add_form = AddSpendingForm(user=request.user)
+    edit_form = EditSpendingForm(user=request.user)
+    context = {'add_form': add_form, 'edit_form': edit_form, 'spending': spending, 'page_obj': page_obj}
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'spending_table.html', context)
     else:
@@ -327,6 +328,8 @@ def edit_spending(request, spending_id):
                         spending=spending,
                         file=file
                     )
+            if form.cleaned_data['delete_file']:
+                SpendingFile.objects.filter(spending=spending).delete()
 
             messages.success(request, 'Change made successfully')
             return redirect('view_spendings')
