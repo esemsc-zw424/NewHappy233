@@ -1,5 +1,6 @@
 from django.test import Client, TestCase
 
+
 class ChatBotTestCase(TestCase):
     def setUp(self):
         self.client = Client()
