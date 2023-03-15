@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from django.contrib.auth.decorators import login_required
@@ -18,6 +19,7 @@ from django.db.models import Max, Sum, Subquery, OuterRef
 
 import calendar
 from datetime import date, datetime
+import datetime as dt
 
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, DeliveryAddress, SpendingFile, PostImage, Like
 from .forms import *
@@ -36,11 +38,10 @@ import random
 import nltk
 nltk.download('punkt')
 nltk.download('wordnet')
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from django.db.models import Sum
 
 # Create your views here.
+
+
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
@@ -92,7 +93,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
             # adds each spending in the database to each date in the calendar
             for spending in spendings:
                 if spending.date.day == month_calendar_list[i][j][
-                    0] and spending.date.month == month and spending.date.year == year:
+                        0] and spending.date.month == month and spending.date.year == year:
                     spendings_daily.append(spending)
             # calculates the sum of expenditures and sums of all the spendings in a single day
             for spending_daily in spendings_daily:
@@ -101,7 +102,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
                 else:
                     income_sum += spending_daily.amount
             month_calendar_list[i][j] = (
-            month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
+                month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
 
     context = {'month_calendar_list': month_calendar_list,
                'year': year, 'month': month_name,
@@ -285,13 +286,13 @@ def view_spendings(request):
     end_date = request.GET.get('end_date')
 
     if start_date and end_date:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        start_date = dt.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = dt.datetime.strptime(end_date, '%Y-%m-%d').date()
         spending = Spending.objects.filter(spending_owner=request.user,
-                                           date__range=[start_date, end_date]).order_by('date')
+                                           date__range=[start_date, end_date]).order_by('-date')
     else:
         spending = Spending.objects.filter(
-            spending_owner=request.user).order_by('date')
+            spending_owner=request.user).order_by('-date')
 
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
@@ -313,11 +314,12 @@ def edit_spending(request, spending_id):
         return render(request, 'view_spendings.html')
 
     if request.method == 'POST':
-        form = EditSpendingForm(request.user, request.POST, request.FILES, instance=spending)
+        form = EditSpendingForm(
+            request.user, request.POST, request.FILES, instance=spending)
 
         if form.is_valid():
             form.save()
-            file_list= request.FILES.getlist('file')
+            file_list = request.FILES.getlist('file')
             if file_list:
                 SpendingFile.objects.filter(spending=spending).delete()
                 for file in file_list:
@@ -325,10 +327,11 @@ def edit_spending(request, spending_id):
                         spending=spending,
                         file=file
                     )
+
             messages.success(request, 'Change made successfully')
             return redirect('view_spendings')
     else:
-        form = EditSpendingForm(request.user, instance=spending )
+        form = EditSpendingForm(request.user, instance=spending)
     return redirect('view_spendings')
 
 
@@ -470,15 +473,8 @@ def set_budget(request):
         form = TotalBudgetForm(request.user)
     return render(request, 'budget_set.html', {'form': form})
 
-def calculate_budget(request):
-    # category_budgets = Budget.objects.filter(
-    #     budget_owner=request.user
-    # ).values(
-    #     'spending_category__name'
-    # ).annotate(
-    #     total_budget=Sum('limit')
-    # )
 
+def calculate_budget(request):
     total = Spending.objects.filter(
         spending_owner=request.user,
         spending_type=Spending_type.EXPENDITURE,
@@ -494,6 +490,7 @@ def calculate_budget(request):
     else:
         spending_percentage = int((total / budget.limit) * 100)
     return spending_percentage
+
 
 @login_required
 def show_budget(request):
@@ -561,7 +558,7 @@ def show_budget(request):
         'spending_percentage': percentage,
         'category_budgets': category_budgets,
         'form': form,
-        'specific_form':specific_form,
+        'specific_form': specific_form,
     })
 
 # @login_required
@@ -569,16 +566,21 @@ def show_budget(request):
 #      spending_total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
 #      return spending_total
 
+
 @login_required
 def index(request):
     address = DeliveryAddress.objects.filter(user=request.user).last()
     form = AddressForm()
 
     if Reward.objects.count() == 0:
-        Reward.objects.create(name='T-shirt', points_required=20, image='rewards/shirt.jpg')
-        Reward.objects.create(name='PlayStation Store 50 GBP Gift Card', points_required=50, image='rewards/playstation_gift_card.jpg')
-        Reward.objects.create(name="Xbox 10 GBP Gift Card", points_required=10, image='rewards/xbox_gift_card.jpg')
-        Reward.objects.create(name="Amazon 20 GBP Gift Card", points_required=20, image='rewards/amazon_gift_card.jpg')
+        Reward.objects.create(
+            name='T-shirt', points_required=20, image='rewards/shirt.jpg')
+        Reward.objects.create(name='PlayStation Store 50 GBP Gift Card',
+                              points_required=50, image='rewards/playstation_gift_card.jpg')
+        Reward.objects.create(name="Xbox 10 GBP Gift Card",
+                              points_required=10, image='rewards/xbox_gift_card.jpg')
+        Reward.objects.create(name="Amazon 20 GBP Gift Card",
+                              points_required=20, image='rewards/amazon_gift_card.jpg')
 
     rewards = Reward.objects.all()
     rewards_points = RewardPoint.objects.filter(user=request.user).first()
@@ -589,6 +591,7 @@ def index(request):
         'address': address,
     }
     return render(request, 'index.html', context)
+
 
 @login_required
 def redeem(request, reward_id):
@@ -602,21 +605,25 @@ def redeem(request, reward_id):
     if reward_points is None:
         # error_message = "You don't have enough reward points to redeem this reward."
         # return render(request, 'error.html', context)
-        messages.add_message(request, messages.INFO, "You don't have enough reward points to redeem this reward.")
+        messages.add_message(
+            request, messages.INFO, "You don't have enough reward points to redeem this reward.")
         return redirect('index')
     elif reward_points.points >= reward.points_required:
-            reward_points.points -= reward.points_required
-            reward_points.save()
-            messages.add_message(request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
-            return redirect('index')
+        reward_points.points -= reward.points_required
+        reward_points.save()
+        messages.add_message(
+            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
+        return redirect('index')
     else:
         # error_message = "You don't have enough reward points to redeem this reward."
         # context = {
         #     'error_message': error_message,}
         #
         # return render(request, 'error.html', context)
-        messages.add_message(request, messages.INFO, "You don't have enough reward points to redeem this reward.")
+        messages.add_message(
+            request, messages.INFO, "You don't have enough reward points to redeem this reward.")
         return redirect('index')
+
 
 def add_address(request):
     if request.method == 'POST':
@@ -657,6 +664,7 @@ def personal_forum(request):
 
     return render(request, 'personal_forum.html', {'page_obj': page_obj})
 
+
 @login_required
 def personal_forum_reply(request):
     reply_page_number = request.GET.get('reply_page')
@@ -665,7 +673,6 @@ def personal_forum_reply(request):
     reply_page_obj = reply_paginator.get_page(reply_page_number)
 
     return render(request, 'personal_forum_reply.html', {'reply_page_obj': reply_page_obj})
-
 
 
 @login_required
@@ -833,11 +840,13 @@ def view_settings(request):
     form = TotalBudgetForm(request.user)
     return render(request, 'setting_page.html', {'form': form})
 
+
 @login_required
 # Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
     context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
+
 
 def set_specific_budget(request):
     if request.method == 'POST':
@@ -850,4 +859,3 @@ def set_specific_budget(request):
     else:
         form = BudgetForm(request.user)
     return render(request, 'specific_budget_set.html', {'form': form})
-

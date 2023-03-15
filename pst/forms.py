@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply, DeliveryAddress, TotalBudget
+from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply, DeliveryAddress, TotalBudget, SpendingFile
 from django.forms import ClearableFileInput
 from django.contrib import messages
 from datetime import date
@@ -169,6 +169,8 @@ class EditSpendingForm(forms.ModelForm):
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
     )
+    
+    # delete_file = forms.BooleanField(label='Delete file', required=False)
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -194,6 +196,8 @@ class EditSpendingForm(forms.ModelForm):
                     'spending_category': self.cleaned_data.get('spending_category'),
                 }
             )
+            # if self.cleaned_data['delete_file']:
+            #     SpendingFile.objects.filter(spending=spending).delete()
             return spending
 
 class BudgetForm(forms.ModelForm):
@@ -220,39 +224,18 @@ class BudgetForm(forms.ModelForm):
             category_value = total_spent_category.limit
         else:
             category_value = 0
-        # Check if a total budget exists for the current user
-        try:
-            total_budget = TotalBudget.objects.filter(budget_owner=self.user).last()
-        except TotalBudget.DoesNotExist:
+ 
+        total_budget = TotalBudget.objects.filter(budget_owner=self.user).last()
+        if total_budget is None:
             raise forms.ValidationError("You need to set a total budget first")
-
         # Check if the limit for this budget exceeds the remaining amount in the total budget
         total_spent = Budget.objects.filter(budget_owner=self.user).aggregate(Sum('limit'))['limit__sum'] or 0
         remaining_amount = total_budget.limit - total_spent + category_value
         if limit > remaining_amount:
-            # raise forms.ValidationError(
-            #     "The total budget limit of {} has been exceeded for this category.".format(remaining_amount))
             raise forms.ValidationError(
                 "You exceeded the total budget")
 
         return cleaned_data
-
-
-# class BudgetForm(forms.ModelForm):
-#     spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), required=False)
-#
-#     class Meta:
-#         model = Budget
-#         fields = ['name', 'limit', 'spending_category', 'start_date', 'end_date']
-#
-#     def __init__(self, user, *args, **kwargs):
-#         self.user = user
-#         super(BudgetForm, self).__init__(*args, **kwargs)
-#         if user:
-#             self.fields['spending_category'].queryset = Categories.objects.filter(
-#                 owner=user)
-#             self.fields['spending_category'].empty_label = Categories.objects.create(name='Total', owner=user, categories_type=Spending_type.EXPENDITURE, default_category=False)
-
 
 class PostForm(forms.ModelForm):
     class Meta:
