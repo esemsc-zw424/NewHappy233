@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block head %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1440, maximum-scale=1.0" />
+    <meta name="og:type" content="website" />
+    <meta name="twitter:card" content="photo" />
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styleguide.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/globals.css' %}" />
+    {% include 'partials/navbar.html' %}
+<style>
+  .container-center-both {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .my-title {
+    color: #84b6d2;
+    font-family: var(--font-family-outfit);
+    font-size: 36px;
+    font-weight: 400;
+  }
+  
+  .my-plan {
+    color: #848cd2;
+    font-family: var(--font-family-outfit);
+    font-size: 36px;
+    font-weight: 400;
+  }
+  
+  .place {
+    color: #9d84d2;
+    font-family: var(--font-family-outfit);
+    font-size: 36px;
+    font-weight: 400;
+  }
+  
+  .other {
+    color: #9d84d2;
+    font-family: var(--font-family-outfit);
+    font-size: 36px;
+    font-weight: 400;
+  }
+
+  .spacing {
+    margin-bottom: 13%;
+  }
+
+  .my-settings a:visited {
+    color: inherit;
+  /* any other styles you want to apply to visited links */
+}
+
+
+
+</style>
+
+
+{% endblock %}
+  
+{% block body %}
+    <div class="container-center-both">
+      <div class="my-settings">
+        <h1 class="my-title spacing" >Friends</h1>
+        <p class="add-spending-catagory outfit-normal-bunker-24px spacing">
+         <a href="{% url "view_friends_list" %}">My Friends&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &gt;</a>
+
+        </p>
+        <p class="edit-current-spending edit-current outfit-normal-bunker-24px spacing">
+           <a href="{% url "view_spendings" %}">Add Friends&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;</a>
+        </p>
+        <p class="edit-current-catagory edit-current outfit-normal-bunker-24px spacing">
+           <a href='{% url 'view_spending_categories' %}'>Friends' Budget&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &gt;</a>
+        </p>
+        <p class="set-new-budget outfit-normal-bunker-24px spacing">
+          <a href ='{% url 'budget_set' %}'>View My Budget&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;</a>
+        </p>
+       
+      </div>
+    </div>
+{% endblock %}
