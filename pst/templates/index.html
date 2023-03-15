@@ -1,19 +1,78 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<p><a href='{% url 'home' %}'class="btn btn btn-primary">Return To Home</a></p>
-{% if reward_points %}
-<p>You have {{ reward_points.points }} reward points.</p>
-{% else %}
-<p>You don't have any reward points yet.</p>
-{% endif %}
+<p>{{ message }}</p>
+<style>
+.rewards-container {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
 
-<ul>
-{% for reward in rewards %}
-  <li>{{ reward.name }} - {{ reward.points_required }} points</li>
-  <form action="{% url 'redeem' reward.id %}" method="post">
-    {% csrf_token %}
-    <button type="submit">Redeem</button>
-  </form>
-{% endfor %}
-</ul>
+.reward {
+    display: inline-block;
+    text-align: center;
+    margin-right: 20px;
+}
+.rewards-container {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center; /* center horizontally */
+  align-items: center; /* center vertically */
+  overflow-x: auto;
+}
+
+</style>
+  <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return To Home</a>
+    <button type="button" class="btn btn-primary"
+                    data-bs-toggle="modal" data-bs-target="#address">
+    Address
+    </button>
+    <div class="modal fade" id="address" tabindex="-1" role="dialog" aria-labelledby="addAddress">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAddress">Add address</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{%url 'add_address'%}">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button class="btn btn-primary">Update</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+    </p>
+  {% if reward_points %}
+    <p>You have {{ reward_points.points }} reward points.</p>
+  {% else %}
+    <p>You don't have any reward points yet.</p>
+  {% endif %}
+    {% if not address %}
+        <p>Don't forget to add your address</p>
+    {% endif %}
+
+  <div class="rewards-container">
+    {% for reward in rewards %}
+      <div class="reward">
+        <h2>{{ reward.name }}</h2>
+        <p>Points Required: {{ reward.points_required }}</p>
+        {% if reward.image %}
+          <img src="{{ reward.image.url }}" alt="{{ reward.name }} Image">
+        {% else %}
+          <img src="{{ reward.default_image.url }}" alt="{{ reward.name }} Default Image">
+        {% endif %}
+        <form action="{% url 'redeem' reward.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit">Redeem</button>
+        </form>
+      </div>
+    {% endfor %}
+
+    </div>
 {% endblock %}

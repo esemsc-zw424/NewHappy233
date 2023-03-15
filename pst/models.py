@@ -8,6 +8,7 @@ from libgravatar import Gravatar
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 import os
 
 
@@ -151,15 +152,16 @@ class SpendingFile(models.Model):
 
 
 class Budget(models.Model):
-    name = models.CharField(max_length=100)
-    limit = models.DecimalField(max_digits=10, decimal_places=2)
-    # start_date = models.DateField()
-    # end_date = models.DateField()
+    name = models.CharField(max_length=100, default='')
+    limit = models.PositiveIntegerField()
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(  # user which this budget belongs to
         User, on_delete=models.CASCADE
     )
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='budget_spending_category', blank=True)
 
 class RewardPoint(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -171,6 +173,12 @@ class RewardPoint(models.Model):
 class Reward(models.Model):
     name = models.CharField(max_length=50)
     points_required = models.IntegerField(default=0)
+    image = models.FileField(
+        null=True,
+        blank=True,
+        upload_to='rewards/'
+    )
+    default_image = models.FileField(upload_to='rewards/', default='rewards/default_reward_image.jpg')
 
     def __str__(self):
         return f"{self.name} ({self.points_required} points)"
@@ -276,3 +284,20 @@ class Like(models.Model):
 
     class Meta:
         unique_together = [['user', 'content_type', 'object_id']]
+
+
+class DeliveryAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    address = models.CharField(max_length=200, blank=True)
+    phone_number = models.IntegerField(blank=True)
+
+class TotalBudget(models.Model):
+    name = models.CharField(max_length=100, default='')
+    limit = models.PositiveIntegerField()
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    budget_owner = models.ForeignKey(  # user which this budget belongs to
+        User, on_delete=models.CASCADE
+    )
