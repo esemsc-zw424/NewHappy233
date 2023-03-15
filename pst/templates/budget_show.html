@@ -11,7 +11,6 @@
 {#	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>#}
 {#	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
 </head>
-<body>
 
 <div class="container mt-5">
 <style>
@@ -34,7 +33,7 @@
 
 {% if budget != None %}
   <div class="mt-5">
-    <h1>Your budget is: &nbsp £ {{budget.limit}} </h1>  
+    <h1>Your total budget is: &nbsp £ {{budget.limit}} </h1>
     <h2>Current ratio:</h2>
   </div>
   <div class="progress">
@@ -42,9 +41,9 @@
       {{ spending_percentage }}%
     </div>
   </div>
-  <div class="text-center mt-5">
-    <a href='{% url 'home' %}'class="btn btn btn-primary">Return</a>
-  </div>
+{#  <div class="text-center mt-5">#}
+{#    <a href='{% url 'home' %}'class="btn btn btn-primary">Return</a>#}
+{#  </div>#}
 {% endif %}
 </div>
 
@@ -58,6 +57,48 @@
     <div class="text-center mt-5">
     </div>
 </div>
+
+<a href ='{% url 'set_specific_budget' %}' class = 'btn btn-lg btn-primary' data-bs-toggle="modal" data-bs-target="#set_specific_budget_modal">Set Specific Budget</a>
+<table class="table">
+
+    <thead>
+        <tr>
+            <th scope="col">category</th>
+            <th scope="col">budget</th>
+            <th scope="col">spending</th>
+            <th scope="col">start date</th>
+            <th scope="col">end date</th>
+            <th scope="col">percentage</th>
+            <th scope="col">exceed the budget?</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category_budget in category_budgets %}
+            <tr class="align-middle">
+                <td> {{ category_budget.name }} </td>
+                <td> {{ category_budget.budget }} </td>
+                <td> {{ category_budget.spending }} </td>
+                <td> {{ category_budget.start_date }} </td>
+                <td> {{ category_budget.end_date }} </td>
+                {% if category_budget.percentage %}
+                    <td>Percentage: {{ category_budget.percentage }}%</td>
+                {% else %}
+                    <td>No spending within the month or no budget yet</td>
+                {% endif %}
+                {% if category_budget.percentage >= 100 %}
+                    <td>Yes</td>
+                {% elif category_budget.percentage == None %}
+                    <td>Set a budget first</td>
+                {% else %}
+                    <td>No</td>
+                {% endif %}
+{#                {% if category_budget.percentage %}#}
+{#                    <p>Percentage: {{ category_budget.percentage }}%</p>#}
+{#                {% endif %}#}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 <!-- modal for setting new budget -->
       <div class="modal fade" id="set_budget_modal" tabindex="-1" role="dialog" aria-labelledby="set_budget_modal_label">
@@ -78,7 +119,34 @@
         </div>
     </div>
 
+<!-- modal for setting new specific budget -->
+      <div class="modal fade" id="set_specific_budget_modal" tabindex="-1" role="dialog" aria-labelledby="set_specific_budget_modal_label">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="set_budget_modal_label">Set New Specific Budget</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'set_specific_budget' %}" method="post">
+                      {% csrf_token %}
+                      {{ specific_form.as_p }}
+                      <input type="submit" value="Save Budget">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
+
+{#{% for category_budget in category_budgets %}#}
+{#    <h3>{{ category_budget.name }}</h3>#}
+{#    <p>Budget: ${{ category_budget.budget }}</p>#}
+{#    <p>Spending: ${{ category_budget.spending }}</p>#}
+{#    {% if category_budget.percentage %}#}
+{#        <p>Percentage: {{ category_budget.percentage }}%</p>#}
+{#    {% endif %}#}
+{#{% endfor %}#}
 
 </body>
 {% endblock %}

@@ -1,11 +1,12 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply, DeliveryAddress
-from pst.models import User, Spending, Categories, Spending_type, Budget, DeliveryAddress
+from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply, DeliveryAddress, TotalBudget
 from django.forms import ClearableFileInput
 from django.contrib import messages
 from datetime import date
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 
 
 class CategoriesForm(forms.ModelForm):
@@ -204,9 +205,61 @@ class EditSpendingForm(forms.ModelForm):
 
 
 class BudgetForm(forms.ModelForm):
+    spending_category = forms.ModelChoiceField(queryset=Categories.objects.none())
+
     class Meta:
         model = Budget
-        fields = ['name', 'limit']
+        fields = ['name','limit', 'spending_category', 'start_date', 'end_date']
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(BudgetForm, self).__init__(*args, **kwargs)
+        if user:
+            spending_type = self.data.get('spending_type', '')
+            self.fields['spending_category'].queryset = Categories.objects.filter(
+                owner=user)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        limit = cleaned_data.get('limit')
+        spending_category = cleaned_data.get('spending_category')
+        total_spent_category = Budget.objects.filter(budget_owner=self.user, spending_category=spending_category).last()
+        if total_spent_category:
+            category_value = total_spent_category.limit
+        else:
+            category_value = 0
+        # Check if a total budget exists for the current user
+        try:
+            total_budget = TotalBudget.objects.filter(budget_owner=self.user).last()
+        except TotalBudget.DoesNotExist:
+            raise forms.ValidationError("You need to set a total budget first")
+
+        # Check if the limit for this budget exceeds the remaining amount in the total budget
+        total_spent = Budget.objects.filter(budget_owner=self.user).aggregate(Sum('limit'))['limit__sum'] or 0
+        remaining_amount = total_budget.limit - total_spent + category_value
+        if limit > remaining_amount:
+            # raise forms.ValidationError(
+            #     "The total budget limit of {} has been exceeded for this category.".format(remaining_amount))
+            raise forms.ValidationError(
+                "You exceeded the total budget")
+
+        return cleaned_data
+
+
+# class BudgetForm(forms.ModelForm):
+#     spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), required=False)
+#
+#     class Meta:
+#         model = Budget
+#         fields = ['name', 'limit', 'spending_category', 'start_date', 'end_date']
+#
+#     def __init__(self, user, *args, **kwargs):
+#         self.user = user
+#         super(BudgetForm, self).__init__(*args, **kwargs)
+#         if user:
+#             self.fields['spending_category'].queryset = Categories.objects.filter(
+#                 owner=user)
+#             self.fields['spending_category'].empty_label = Categories.objects.create(name='Total', owner=user, categories_type=Spending_type.EXPENDITURE, default_category=False)
 
 
 class PostForm(forms.ModelForm):
@@ -227,9 +280,35 @@ class ReplyForm(forms.ModelForm):
         fields = ['content', 'parent_reply']
         widgets = {'parent_reply': forms.HiddenInput()}
 
-        fields = ['limit']
-
 class AddressForm(forms.ModelForm):
     class Meta:
         model = DeliveryAddress
         fields = ['address', 'phone_number']
+
+# class TotalBudgetForm(forms.ModelForm):
+#     class Meta:
+#         model = TotalBudget
+#         fields = ['name','limit', 'start_date', 'end_date']
+#
+#     def __init__(self, user, *args, **kwargs):
+#         self.user = user
+#         super().__init__(*args, **kwargs)
+
+class TotalBudgetForm(forms.ModelForm):
+    class Meta:
+        model = TotalBudget
+        fields = ['name','limit', 'start_date', 'end_date']
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Check if a total budget exists for the current user
+        specific_budget = Budget.objects.all()
+        if specific_budget:
+            specific_budget.delete()
+
+        return cleaned_data

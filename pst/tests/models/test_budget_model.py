@@ -1,18 +1,45 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from pst.models import Budget, User
+from pst.models import Budget, User, Categories
 
 class BudgetModelTestCase(TestCase):
-    fixtures = ['pst/tests/fixtures/users.json']
+    fixtures = ['pst/tests/fixtures/users.json'], ['pst/tests/fixtures/categories.json']
 
     def setUp(self):
         # Create a user to be the owner of the budget
         self.user = self.user = User.objects.get(email='lll@example.org')
+        self.category = Categories.objects.get(name='Food')
+        self.budget = Budget.objects.create(name='Test Budget', limit=1000, budget_owner=self.user, spending_category=self.category)
 
-        self.budget = Budget.objects.create(
-            limit=1000,
-            budget_owner=self.user
-        )
+    def test_budget_name_label(self):
+        budget = Budget.objects.get(id=1)
+        field_label = budget._meta.get_field('name').verbose_name
+        self.assertEqual(field_label, 'name')
+
+    def test_budget_limit_label(self):
+        budget = Budget.objects.get(id=1)
+        field_label = budget._meta.get_field('limit').verbose_name
+        self.assertEqual(field_label, 'limit')
+
+    def test_budget_start_date_label(self):
+        budget = Budget.objects.get(id=1)
+        field_label = budget._meta.get_field('start_date').verbose_name
+        self.assertEqual(field_label, 'start date')
+
+    def test_budget_end_date_label(self):
+        budget = Budget.objects.get(id=1)
+        field_label = budget._meta.get_field('end_date').verbose_name
+        self.assertEqual(field_label, 'end date')
+
+    def test_budget_budget_owner_label(self):
+        budget = Budget.objects.get(id=1)
+        field_label = budget._meta.get_field('budget_owner').verbose_name
+        self.assertEqual(field_label, 'budget owner')
+
+    def test_budget_spending_category_label(self):
+        budget = Budget.objects.get(id=1)
+        field_label = budget._meta.get_field('spending_category').verbose_name
+        self.assertEqual(field_label, 'spending category')
 
     def _assert_budget_is_valid(self):
         try:
