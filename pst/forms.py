@@ -155,7 +155,6 @@ class AddSpendingForm(forms.ModelForm):
 
 class EditSpendingForm(forms.ModelForm):
 
-    #spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), empty_label=None)
     class Meta:
         model = Spending
         fields = ['title', 'amount', 'descriptions',
@@ -196,13 +195,6 @@ class EditSpendingForm(forms.ModelForm):
                 }
             )
             return spending
-
-# class UserProfileForm(forms.ModelForm):
-#     class Meta:
-#         model = UserProfile
-#         fields = ['bio', 'location', 'birth_date',
-#                   'gender', 'phone_number', ]
-
 
 class BudgetForm(forms.ModelForm):
     spending_category = forms.ModelChoiceField(queryset=Categories.objects.none())

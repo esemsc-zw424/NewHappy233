@@ -11,6 +11,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 import os
 
+
+
 class Spending_type(models.TextChoices):
     EXPENDITURE = "Expenditure"
     INCOME = "Income"
