@@ -81,6 +81,7 @@ urlpatterns = [
 
     path('get_categories_by_type/', views.get_categories_by_type, name='get_categories_by_type'),
 
+    path('add_address/', views.add_address, name='add_address'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

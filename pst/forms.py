@@ -1,7 +1,8 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply
+from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply, DeliveryAddress
+from pst.models import User, Spending, Categories, Spending_type, Budget, DeliveryAddress
 from django.forms import ClearableFileInput
 from django.contrib import messages
 from datetime import date
@@ -134,7 +135,7 @@ class AddSpendingForm(forms.ModelForm):
             spending_type = self.data.get('spending_type', '')
             self.fields['spending_category'].queryset = Categories.objects.filter(
                 owner=user)  # this part filter out categories that belongs to current user
-        
+
     class Meta:
         model = Spending
         fields = ['title', 'amount', 'descriptions',
@@ -225,3 +226,10 @@ class ReplyForm(forms.ModelForm):
         model = Reply
         fields = ['content', 'parent_reply']
         widgets = {'parent_reply': forms.HiddenInput()}
+
+        fields = ['limit']
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = DeliveryAddress
+        fields = ['address', 'phone_number']

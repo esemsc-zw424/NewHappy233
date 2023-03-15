@@ -21,6 +21,7 @@ import datetime as dt
 from datetime import date, datetime
 from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, SpendingFile, PostImage, Like
 
+from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, DeliveryAddress
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -442,7 +443,6 @@ def set_budget(request):
         if form.is_valid():
             budget = form.save(commit=False)
             budget.budget_owner = request.user
-            print(budget.budget_owner_id)
             budget.save()
             return redirect('budget_show')
     else:
@@ -485,16 +485,22 @@ def show_budget(request):
 
 @login_required
 def index(request):
+    address = DeliveryAddress.objects.filter(user=request.user).last()
+    form = AddressForm()
+
     if Reward.objects.count() == 0:
-        Reward.objects.create(name='Discount coupon', points_required=10)
-        Reward.objects.create(name='Free T-shirt', points_required=20)
-        Reward.objects.create(name='Gift card', points_required=50)
+        Reward.objects.create(name='T-shirt', points_required=20, image='rewards/shirt.jpg')
+        Reward.objects.create(name='PlayStation Store 50 GBP Gift Card', points_required=50, image='rewards/playstation_gift_card.jpg')
+        Reward.objects.create(name="Xbox 10 GBP Gift Card", points_required=10, image='rewards/xbox_gift_card.jpg')
+        Reward.objects.create(name="Amazon 20 GBP Gift Card", points_required=20, image='rewards/amazon_gift_card.jpg')
 
     rewards = Reward.objects.all()
-    rewards_points = RewardPoint.objects.filter(user=request.user).filter()
+    rewards_points = RewardPoint.objects.filter(user=request.user).first()
     context = {
+        'form': form,
         'rewards': rewards,
         'reward_points': rewards_points,
+        'address': address,
     }
     return render(request, 'index.html', context)
 
@@ -509,18 +515,39 @@ def redeem(request, reward_id):
         'error_message': error_message, }
 
     if reward_points is None:
-        error_message = "You don't have enough reward points to redeem this reward."
-        return render(request, 'error.html', context)
-    elif reward_points.points >= reward.points_required:
-        reward_points.points -= reward.points_required
-        reward_points.save()
+        # error_message = "You don't have enough reward points to redeem this reward."
+        # return render(request, 'error.html', context)
+        messages.add_message(request, messages.INFO, "You don't have enough reward points to redeem this reward.")
         return redirect('index')
+    elif reward_points.points >= reward.points_required:
+            reward_points.points -= reward.points_required
+            reward_points.save()
+            messages.add_message(request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
+            return redirect('index')
     else:
-        error_message = "You don't have enough reward points to redeem this reward."
-        context = {
-            'error_message': error_message, }
+        # error_message = "You don't have enough reward points to redeem this reward."
+        # context = {
+        #     'error_message': error_message,}
+        #
+        # return render(request, 'error.html', context)
+        messages.add_message(request, messages.INFO, "You don't have enough reward points to redeem this reward.")
+        return redirect('index')
 
-        return render(request, 'error.html', context)
+def add_address(request):
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user
+            address.save()
+            messages.success(request, 'success')
+            return redirect('index')
+
+    else:
+        form = AddressForm()
+    return render(request, "index.html", {'form': form})
+
 
 
 @login_required
