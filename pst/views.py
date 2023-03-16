@@ -397,7 +397,6 @@ def spending_report(request):
     else:
         sorted_spendings = selected_spendings
 
-
     paginator = Paginator(sorted_spendings, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -409,12 +408,6 @@ def spending_report(request):
         'page_obj': page_obj
     }
     return render(request, 'spending_report.html', context)
-
-# @login_required
-# def copy_spending_report(request):
-#     expenditures = Spending.objects.filter(spending_owner=request.user, spending_type=Spending_type.EXPENDITURE)
-#     expenditures_data = expenditures.values('spending_category__name').annotate(exp_amount=Sum('amount'))
-#     return render(request, 'spending_report.html', {'expenditures': expenditures, 'expenditures_data': expenditures_data})
 
 @login_required
 def set_budget(request):
