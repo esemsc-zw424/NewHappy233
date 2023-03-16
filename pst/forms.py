@@ -126,6 +126,7 @@ class LoginForm(Form):
 
 class AddSpendingForm(forms.ModelForm):
 
+    
     spending_category = forms.ModelChoiceField(
         queryset=Categories.objects.none(), empty_label=None)
 
