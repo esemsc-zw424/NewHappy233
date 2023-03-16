@@ -203,103 +203,106 @@
                 account :
             </p>
 
-            <div class="overlap-group2">
-              
-              <div class="group-container">
-                <div class="group">
-                  <div class="flex-row">
-                    <div class="rectangle"></div>
-                    <div class="rectangle-1"></div>
-                  </div>
-                  <div class="rectangle-2"></div>
-                </div>
-                <div class="group-1">
-                  <div class="rectangle-2"></div>
-                  <div class="flex-row">
-                    <div class="rectangle-1"></div>
-                    <div class="rectangle"></div>
-                  </div>
-                </div>
-              </div>
-              <img class="image" src="{% static 'img/image-1@2x.png' %}" alt="Image" />
-              <div class="group-2">
-                <div class="overlap-group1">
-                  <div class="mothly-expenses poppins-medium-bunker-24px">
-                    Monthly Revenue
-                  </div>
-                  <div class="price poppins-medium-bunker-32px">£{{ revenue }}</div>
-                </div>
-                <div class="view-details poppins-normal-persian-blue-15px"> 
-
-                  <a href= '{% url 'spending_report' %}'>View Details</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="overlap-group3">
-              <div class="overlap-group1-1">
-                <div class="group-container-1">
+            <a href="{% url 'spending_report' %}?start_date=&end_date=&selected_categories=Income">
+              <div class="overlap-group2">
+                
+                <div class="group-container">
                   <div class="group">
                     <div class="flex-row">
-                      <div class="rectangle-3"></div>
-                      <div class="rectangle-4"></div>
+                      <div class="rectangle"></div>
+                      <div class="rectangle-1"></div>
                     </div>
-                    <div class="rectangle-5"></div>
+                    <div class="rectangle-2"></div>
                   </div>
                   <div class="group-1">
-                    <div class="rectangle-5"></div>
+                    <div class="rectangle-2"></div>
                     <div class="flex-row">
-                      <div class="rectangle-4"></div>
-                      <div class="rectangle-3"></div>
+                      <div class="rectangle-1"></div>
+                      <div class="rectangle"></div>
                     </div>
                   </div>
                 </div>
-                <img
-                  class="rectangle-126"
-                  src="{% static 'img/rectangle-126@2x.png' %}"
-                  alt="Rectangle 126"
-                />
-                <p class="my-plan poppins-medium-bunker-24px">
-                  &nbsp;&nbsp; My Plan
-                </p>
-                <div class="view-details-1 poppins-normal-persian-blue-15px">
-                  <a href= '{% url 'budget_show' %}'>View Details</a> 
+                
+                
+                <div class="group-2">
+                  
+                    <div class="overlap-group1">
+                      <img class="image" src="{% static 'img/image-1@2x.png' %}" alt="Image" style='top: 36%; left: 70%' />
+                      <div class="mothly-expenses poppins-medium-bunker-24px">
+                        Monthly Revenue
+                      </div>
+                      <div class="price poppins-medium-bunker-32px">£{{ revenue }}</div>
+                    </div>
+                  
                 </div>
               </div>
-              <div class="percent poppins-medium-bunker-32px">{{ percentage }}%</div>
-            </div>
+            </a>
+          <a href= '{% url 'budget_show' %}'>
+              <div class="overlap-group3">
+                <div class="overlap-group1-1">
+                  <div class="group-container-1">
+                    <div class="group">
+                      <div class="flex-row">
+                        <div class="rectangle-3"></div>
+                        <div class="rectangle-4"></div>
+                      </div>
+                      <div class="rectangle-5"></div>
+                    </div>
+                    
+                    <div class="group-1">
+                      <div class="rectangle-5"></div>
+                      <div class="flex-row">
+                        <div class="rectangle-4"></div>
+                        <div class="rectangle-3"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <img
+                    class="rectangle-126"
+                    src="{% static 'img/rectangle-126@2x.png' %}"
+                    alt="Rectangle 126"
+                  />
+                  <p class="my-plan poppins-medium-bunker-24px">
+                    &nbsp;&nbsp; My Plan
+                  </p>
+                </div>
+              <div class="percent poppins-medium-bunker-32px">{{ percentage }}%</div>            
+              </div>
+            </a> 
+            <a href="{% url 'spending_report' %}">
+              <div class="overlap-group4">
+                <div class="group-container">
+                  <div class="group">
+                    <div class="flex-row">
+                      <div class="rectangle"></div>
+                      <div class="rectangle-1"></div>
+                    </div>
+                    <div class="rectangle-2"></div>
+                  </div>
+                  <div class="group-1">
+                    <div class="rectangle-2"></div>
+                    <div class="flex-row">
+                      <div class="rectangle-1"></div>
+                      <div class="rectangle"></div>
+                    </div>
+                  </div>
+                </div>
 
-            <div class="overlap-group4">
-              <div class="group-container">
-                <div class="group">
-                  <div class="flex-row">
-                    <div class="rectangle"></div>
-                    <div class="rectangle-1"></div>
+                
+                  <img class="image" src="{% static 'img/image-6@2x.png' %}" alt="Image" />
+                
+                <div class="group-2">
+                  <div class="overlap-group1">
+                    <div class="mothly-expenses poppins-medium-bunker-24px">
+                      Monthly Expense
+                    </div>
+                    <div class="price poppins-medium-bunker-32px">£{{ expense }}</div>
                   </div>
-                  <div class="rectangle-2"></div>
-                </div>
-                <div class="group-1">
-                  <div class="rectangle-2"></div>
-                  <div class="flex-row">
-                    <div class="rectangle-1"></div>
-                    <div class="rectangle"></div>
-                  </div>
-                </div>
-              </div>
-              <img class="image" src="{% static 'img/image-6@2x.png' %}" alt="Image" />
-              <div class="group-2">
-                <div class="overlap-group1">
-                  <div class="mothly-expenses poppins-medium-bunker-24px">
-                    Monthly Expense
-                  </div>
-                  <div class="price poppins-medium-bunker-32px">£{{ expense }}</div>
-                </div>
-                <div class="view-details poppins-normal-persian-blue-15px">
-                  <a href= '{% url 'spending_report' %}'>View Details</a> 
+                  
                 </div>
               </div>
             </div>
-          </div>
+          </a>
           
           <!-- end of three small windows showing revenue, expenditure, and plan -->
           
@@ -351,8 +354,8 @@
                               
                                 <div class="d-none d-sm-block" style="color: #0293b3;">
                                   <br>
-                                  <p>expenditure: £<b>{{ day.2 }}</b></p>
-                                  <p>income: £<b>{{ day.3 }}</b></p>
+                                  <p>Exp: £<b>{{ day.2 }}</b></p>
+                                  <p>Inc: £<b>{{ day.3 }}</b></p>
                                 </div>
                             
                             {% endif %}
