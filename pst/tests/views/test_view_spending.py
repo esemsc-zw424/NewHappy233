@@ -10,7 +10,6 @@ class ViewSpendingTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.get(email = "johndoe@example.org")
-        self.factory = RequestFactory()
         self.url = reverse('view_spendings')
     
     def test_view_requests_success(self):
