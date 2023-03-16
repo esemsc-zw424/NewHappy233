@@ -35,13 +35,13 @@
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.2/dist/chart.min.js"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 
     <script>
     function selectSpending() {
         const start_date = document.getElementById('start_date').value;
         const end_date = document.getElementById('end_date').value;
         const selected_categories = document.getElementById('selected_categories').value;
+        // const selected_sort = document.getElementById('selected_sort').value;
 
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
@@ -51,7 +51,7 @@
                 document.getElementById('spending_list').innerHTML = this.responseText;
             }
         };
-        xhttp.open('GET', `/spendings?start_date=${start_date}&end_date=${end_date}&select_categories=${selected_categories}`, true);
+        xhttp.open('GET', `/spendings?start_date=${start_date}&end_date=${end_date}&selected_categories=${selected_categories}`, true);
         xhttp.send();
         return false;
     }
@@ -59,37 +59,13 @@
     function addSortUrl() {
         var url = new URL(window.location.href);
         var search_params = url.searchParams;
-        search_params.set('sorted', document.getElementById('selected_sort').value);
+        search_params.set('selected_sort', document.getElementById('spending_list').value);
         url.search = search_params.toString();
         var new_url = url.toString();
-        return new_url;
-    }
-
-    function get(name) {
-        if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
-            return decodeURIComponent(name[1]);
-    }
-
-    window.onload = function() {
-        if (get('sorted') == 'date') {
-            document.getElementById('empty_sort').innerHTML = "date";
-        } else if (get('sorted') == 'spending_category') {
-            document.getElementById('empty_sort').innerHTML = "category";
-        } else if (get('sorted') == 'amount') {
-            document.getElementById('empty_sort').innerHTML = "amount:low to high";
-        } else if (get('sorted') == '-amount') {
-            document.getElementById('empty_sort').innerHTML = "amount:high to low";
-        } else {
-            document.getElementById('empty_sort').innerHTML = "";
-        }
-
-        if (get('selected_categories') == 'Income') {
-            document.getElementById('empty_category').innerHTML = "Income";
-        } else {
-            document.getElementById('empty_category').innerHTML = "Expenditure";
-        }
+        return new_url
     }
     </script>
+
 </head>
 
 <body>
@@ -116,9 +92,8 @@
                 </div>
                 <div class="col col-lg-3">
                 <select id="selected_categories" name="selected_categories" style="height: 58px;font-size: 22px;">
-                    <option id="empty_category" value="" disabled selected hidden></option>
-                    <option id="selected_expenditure" value="Expenditure">Expenditure</option>
-                    <option id="selected_income" value="Income">Income</option>
+                    <option value = "Expenditure">Expenditure</option>
+                    <option value = "Income">Income</option>
                 </select>
                 </div>
                 <div class="col-md-auto">
@@ -239,12 +214,14 @@
                     <div class="col offset-md-9">
                         <label for="sorter">Sort by:</label>
                         <select id="selected_sort" name="selected_sort" onchange="location = addSortUrl();">
-                            <option id="empty_sort" value="" disabled selected hidden></option>
-                            <option id="spending_category" value="spending_category">category</option>
-                            <option id="amount" value="amount">amount:low to high</option>
-                            <option id="-amount" value="-amount">amount:high to low</option>
-                            <option id="date" value="date">date</option>
+                            <option id="category" value="category">category</option>
+                            <option id="amount:low to high" value="amount:low to high">amount:low to high</option>
+                            <option id="amount:high to low" value="amount:high to low">amount:high to low</option>
+                            <option id="date" value="date" selected>date</option>
                         </select>
+                    </div>
+                    <div class="col-md-auto">
+                        <button type="submit" id="apply-button" class="btn btn-primary btn-lg" style="font-size: 12px;" onclick="selectSpending">Apply filter</button>
                     </div>
                 </div>
             </form>

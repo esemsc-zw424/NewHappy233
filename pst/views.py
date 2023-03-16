@@ -376,7 +376,7 @@ def spending_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     selected_categories = request.GET.get('selected_categories')
-    selected_filter = request.GET.get('selected_filter')
+    selected_sort = request.GET.get('sorted')
     if start_date and end_date:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -392,18 +392,21 @@ def spending_report(request):
         selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
     spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
 
-    if selected_filter == 'amount':
-        filtered_spendings = selected_spendings.order_by('amount')
-    elif selected_filter == 'category':
-        filtered_spendings = selected_spendings.order_by('-spending_category')
+    if selected_sort:
+        sorted_spendings = selected_spendings.order_by(selected_sort)
     else:
-        filtered_spendings = selected_spendings.order_by('date')
+        sorted_spendings = selected_spendings
 
+
+    paginator = Paginator(sorted_spendings, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
         'report_type': report_type,
         'selected_spendings': selected_spendings,
         'spendings_data': spendings_data,
-        'filtered_spendings': filtered_spendings
+        'sorted_spendings': sorted_spendings,
+        'page_obj': page_obj
     }
     return render(request, 'spending_report.html', context)
 
