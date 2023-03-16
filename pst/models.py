@@ -229,7 +229,7 @@ def validate_file_extension(value):
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(
+    file = models.ImageField(
         null=True,
         blank=True,
         upload_to='post_images/',
@@ -238,7 +238,7 @@ class PostImage(models.Model):
 
 @receiver(pre_delete, sender=SpendingFile)
 @receiver(pre_delete, sender=Spending)
-@receiver(pre_delete, sender=Post)
+@receiver(pre_delete, sender=PostImage)
 def delete_file(sender, instance, **kwargs):
     # delete the file when the related object is deleted
     if instance.file:

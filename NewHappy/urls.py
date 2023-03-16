@@ -63,6 +63,7 @@ urlpatterns = [
     path('forum/', views.forum, name='forum'),
     path('add_post/', views.add_post, name='add_post'),
     path('delete_post/<int:post_id>/', views.delete_post, name = 'delete_post'),
+    path('delete_reply/<int:reply_id>', views.delete_reply, name = 'delete_reply'),
     path('post_detail/<int:post_id>/', views.post_detail, name='post_detail'),
     path('like_post/<int:post_id>/', views.like_post, name='like_post'),
     path('like_post_details/<int:post_id>/',

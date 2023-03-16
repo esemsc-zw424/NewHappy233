@@ -70,7 +70,7 @@ class PostAdmin(admin.ModelAdmin):
 @admin.register(PostImage)
 class PostImageAdmin(admin.ModelAdmin):
     list_display = [
-        'post', 'image',
+        'post', 'file',
     ]
 
 

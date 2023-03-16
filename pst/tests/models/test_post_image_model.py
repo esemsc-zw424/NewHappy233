@@ -26,26 +26,26 @@ class PostImageModelTestCase(TestCase):
             self.post_image.full_clean()
     
     def test_file_can_be_empty(self):
-        self.post_image.image = None
+        self.post_image.file = None
         self._assert_post_image_is_valid()
     
     def test_jpg_file_is_valid_format(self):
         image = SimpleUploadedFile("image.jpg", content=b"file_content", content_type="image/jpg")
-        self.post_image.image = image
+        self.post_image.file = image
         self._assert_post_image_is_valid()
     
     def test_jpeg_file_is_valid_format(self):
         image = SimpleUploadedFile("image.jpeg", content=b"file_content", content_type="image/jpeg")
-        self.post_image.image = image
+        self.post_image.file = image
         self._assert_post_image_is_valid()
 
     def test_png_file_is_valid_format(self):
         image = SimpleUploadedFile("image.png", content=b"file_content", content_type="image/png")
-        self.post_image.image = image
+        self.post_image.file = image
         self._assert_post_image_is_valid()
 
     def test_invalid_file_format(self):
-        file = SimpleUploadedFile("invalid_file.xyz", content=b"file_content", content_type="application/octet-stream")
-        self.post_image.image = file
+        test_file = SimpleUploadedFile("invalid_file.xyz", content=b"file_content", content_type="application/octet-stream")
+        self.post_image.file = test_file
         self._assert_post_image_is_invalid()
     

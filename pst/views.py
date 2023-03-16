@@ -683,7 +683,7 @@ def add_post(request):
             for file in request.FILES.getlist('image'):
                 PostImage.objects.create(
                     post=post,
-                    image=file
+                    file=file
                 )
             return redirect('forum')
     else:
@@ -696,7 +696,7 @@ def delete_post(request, post_id):
     delete_post = get_object_or_404(Post, id=post_id)
     delete_post.delete()
     messages.warning(request, "post has been deleted")
-    return personal_forum(request)
+    return redirect('personal_forum')
 
 
 @login_required
@@ -830,6 +830,14 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
 
     context = {'form': form, 'post': post, 'parent_reply': parent_reply}
     return render(request, 'add_reply_to_reply.html', context)
+
+@login_required
+def delete_reply(request, reply_id):
+
+    delete_reply = get_object_or_404(Reply, id=reply_id)
+    delete_reply.delete()
+    messages.warning(request, "reply has been deleted")
+    return redirect('personal_forum_reply')
 
 
 @login_required

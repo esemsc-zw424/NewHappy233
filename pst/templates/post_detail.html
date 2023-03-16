@@ -36,7 +36,7 @@
             <div class="content">Content: {{ post.content }}</div>
             <div class="images">
                 {% for i in post.images.all %}
-                <img src="{{ i.image.url }}" width="200" height="200">
+                <img src="{{ i.file.url }}" width="200" height="200">
                 {% endfor %}
             </div>
             <div class="info">{{ post.post_date|date:'d M Y, H:i'}}</div>
