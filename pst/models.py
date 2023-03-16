@@ -240,7 +240,7 @@ class PostImage(models.Model):
 @receiver(pre_delete, sender=Spending)
 @receiver(pre_delete, sender=Post)
 def delete_file(sender, instance, **kwargs):
-    # delete the file when the SpendingFile object is deleted
+    # delete the file when the related object is deleted
     if instance.file:
         path = instance.file.path
         if os.path.exists(path):
