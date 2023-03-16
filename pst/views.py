@@ -455,13 +455,41 @@ def user_guideline(request):
 
 @login_required
 def spending_report(request):
-    expenditures = Spending.objects.filter(
-        spending_type=Spending_type.EXPENDITURE)
-    expenditures_data = expenditures.values(
-        'spending_category__name').annotate(exp_amount=Sum('amount'))
-    return render(request, 'spending_report.html',
-                  {'expenditures': expenditures, 'expenditures_data': expenditures_data})
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    selected_categories = request.GET.get('selected_categories')
+    selected_sort = request.GET.get('sorted')
+    if start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        spendings = Spending.objects.filter(spending_owner=request.user, date__range=[start_date, end_date])
+    else:
+        spendings = Spending.objects.filter(spending_owner=request.user)
 
+    if selected_categories == 'Income':
+        report_type = 'Income'
+        selected_spendings = spendings.filter(spending_type=Spending_type.INCOME)
+    else:
+        report_type = 'Expenditure'
+        selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
+    spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
+
+    if selected_sort:
+        sorted_spendings = selected_spendings.order_by(selected_sort)
+    else:
+        sorted_spendings = selected_spendings
+
+    paginator = Paginator(sorted_spendings, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {
+        'report_type': report_type,
+        'selected_spendings': selected_spendings,
+        'spendings_data': spendings_data,
+        'sorted_spendings': sorted_spendings,
+        'page_obj': page_obj
+    }
+    return render(request, 'spending_report.html', context)
 
 @login_required
 def set_budget(request):
