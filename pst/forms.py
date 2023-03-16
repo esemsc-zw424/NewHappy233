@@ -137,6 +137,7 @@ class AddSpendingForm(forms.ModelForm):
             spending_type = self.data.get('spending_type', '')
             self.fields['spending_category'].queryset = Categories.objects.filter(
                 owner=user)  # this part filter out categories that belongs to current user
+        self.spending_owner = user
 
     class Meta:
         model = Spending
@@ -153,6 +154,12 @@ class AddSpendingForm(forms.ModelForm):
         required=False,
     )
 
+    def save(self, commit=True):
+        instance = super(AddSpendingForm, self).save(commit=False)
+        instance.spending_owner = self.spending_owner
+        if commit:
+            instance.save()
+        return instance
     
 
 
