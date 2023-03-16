@@ -564,6 +564,14 @@ def add_post(request):
         form = PostForm()
     return render(request, 'add_post.html',  {'form': form})
 
+@login_required
+def delete_post(request, post_id):
+
+    delete_post = get_object_or_404(Post, id=post_id)
+    delete_post.delete()
+    messages.warning(request, "post has been deleted")
+    return personal_forum(request)
+
 
 @login_required
 def post_detail(request, post_id):

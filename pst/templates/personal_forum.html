@@ -73,8 +73,8 @@
                         </div>
                     {% endif %}
                 </a>
-            
             </div>
+            <a href='{% url 'delete_post' post.id %}' class = 'btn btn-primary mb-3'>Delete Post</a>
         {% empty %}
             <p>No posts found.</p>
         {% endfor %}
