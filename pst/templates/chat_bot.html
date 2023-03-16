@@ -51,7 +51,7 @@
   <div class="card">
     <h1>Welcome to the Personal Spending Tracker!</h1>
     <p>
-      Hi there! My name is NiuHuanXi.
+      Hi there! My name is HuanXi.
       I'm here to assist you with any questions you may have and help you find the information you're looking for. 
       As a language model, I'm constantly learning and improving my knowledge to better assist you. 
       <br>
@@ -69,9 +69,10 @@
     <ul id="chat">
       {% for user_question, chatbot_answer in chat_history %}
       <li><b>You:</b> {{ user_question }}</li>
-      <li><b>NiuHuanXi:</b> {{ chatbot_answer }}</li>
+      <li><b>HuanXi:</b> {{ chatbot_answer }}</li>
       {% endfor %}
     </ul>
+    <br>
     <a href="{% url 'view_settings' %}" class="btn btn-primary-sm" id="return_setting_page">Return to setting page</a>
   </div>
 </div>
