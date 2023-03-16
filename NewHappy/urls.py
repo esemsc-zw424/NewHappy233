@@ -45,6 +45,8 @@ urlpatterns = [
          name='view_spending_categories'),
     path('update_spending_categories/<int:category_id>/',
          views.update_spending_categories, name='update_spending_categories'),
+    path('delete_spending_categories/<int:category_id>', views.delete_spending_categories, name='delete_spending_categories'),
+
     path('edit_spending/<int:spending_id>/',
          views.edit_spending, name='edit_spending'),
     path('delete_spending/<int:spending_id>/',
@@ -71,6 +73,7 @@ urlpatterns = [
     path('add_reply_to_reply/<int:post_id>/<int:parent_reply_id>/',
          views.add_reply_to_reply, name='add_reply_to_reply'),
     path('personal_forum/', views.personal_forum, name='personal_forum'),
+    path('personal_forum_reply/', views.personal_forum_reply, name='personal_forum_reply'),
     path('view_post_user/<user_id>/<post_id>/',
          views.view_post_user, name='view_post_user'),
 
@@ -78,6 +81,8 @@ urlpatterns = [
 
     path('get_categories_by_type/', views.get_categories_by_type, name='get_categories_by_type'),
 
+    path('add_address/', views.add_address, name='add_address'),
+    path('set_specific_budget/', views.set_specific_budget, name='set_specific_budget')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

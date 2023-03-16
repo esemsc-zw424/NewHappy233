@@ -1,103 +1,78 @@
+<head>
+  <style>
+    body {
+      background-image: linear-gradient(to right, #f8cdda, #a8c0ff);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-  <head>
-      <style>
-          body {
-              background-image: linear-gradient(to right, #f8cdda, #a8c0ff);
-              height: 100vh;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-          }
+    .container {
+      max-width: 900px;
+      text-align: center;
+    }
 
-      .container {
-        max-width: 900px;
-        text-align: center;
-      }
+    .card {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 2px 2px 8px #333;
+      margin-top: 50px;
+    }
 
-      .card {
-        background-color: #fff;
-        padding: 40px;
-        border-radius: 10px;
-        box-shadow: 2px 2px 8px #333;
-        margin-top: 50px;
-      }
+    .card h1 {
+      font-size: 36px;
+      margin-bottom: 30px;
+    }
 
-      .card h1 {
-        font-size: 36px;
-        margin-bottom: 30px;
-      }
+    .card h2 {
+      font-size: 28px;
+      margin-bottom: 30px;
+    }
 
-      .card h2 {
-        font-size: 28px;
-        margin-bottom: 30px;
-      }
+    .card p {
+      font-size: 20px;
+      margin-bottom: 50px;
+    }
 
-      .card p {
-        font-size: 20px;
-        margin-bottom: 50px;
-      }
-
-      .btn {
-        background-color: #333;
-        color: #fff;
-        padding: 10px 20px;
-        border-radius: 20px;
-        text-decoration: none;
-        margin-top: 30px;
-      }
-    </style>
-  </head>
+    .btn {
+      background-color: #333;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      text-decoration: none;
+      margin-top: 30px;
+    }
+  </style>
+</head>
 
 <div class="container">
-<div class="card">
-<h1>Welcome to the Personal Spending Tracker!</h1>
-     <p>
-     Hi there! My name is NiuHuanXi.
-     
-     I'm here to assist you with any questions you may have and help you find the information you're looking for. 
-    
-     As a language model, I'm constantly learning and improving my knowledge to better assist you. 
-     <br>
-     Please use some keywords[hello,pst,budget,expense,track,saving,finance,bye and etc] to get better communications.    
-    <br>
-    - I'm always here to help!
-    </p >
-<button id="open-chatbot">Open Chatbot</button>
-<div id="chatbot-section" style="display: none;">
+  <div class="card">
+    <h1>Welcome to the Personal Spending Tracker!</h1>
+    <p>
+      Hi there! My name is HuanXi.
+      I'm here to assist you with any questions you may have and help you find the information you're looking for. 
+      As a language model, I'm constantly learning and improving my knowledge to better assist you. 
+      <br>
+      Please use some keywords [hello, pst, budget, expense, track, saving, finance, bye and etc] to get better communications.    
+      <br>
+      - I'm always here to help!
+    </p>
+
     <form method="post">
-        {% csrf_token %}
-        <input type="text" name="user_input">
-        <input type="submit" value="Submit">
+      {% csrf_token %}
+      <input type="text" name="user_input">
+      <input type="submit" value="Submit">
     </form>
 
     <ul id="chat">
-        {% for user_question, chatbot_answer in chat_history %}
-        <li><b>You:</b> {{ user_question }}</li>
-        <li><b>NiuHuanXi:</b> {{ chatbot_answer }}</li>
-        {% endfor %}
+      {% for user_question, chatbot_answer in chat_history %}
+      <li><b>You:</b> {{ user_question }}</li>
+      <li><b>HuanXi:</b> {{ chatbot_answer }}</li>
+      {% endfor %}
     </ul>
-    <button id="close-chatbot">Close Chatbot</button>
     <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    
-</div>
-<a href="{% url 'view_settings' %}" class="btn btn-primary-sm" id="return_setting_page">Return to setting page</a>
-
-<script>
-    document.getElementById("open-chatbot").addEventListener("click", function() {
-        document.getElementById("chatbot-section").style.display = "block";
-    });
-    document.getElementById("close-chatbot").addEventListener("click", function() {
-        document.getElementById("chatbot-section").style.display = "none";
-    });
-</script>
-     </div>
+    <a href="{% url 'view_settings' %}" class="btn btn-primary-sm" id="return_setting_page">Return to setting page</a>
+  </div>
 </div>

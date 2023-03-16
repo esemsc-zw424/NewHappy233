@@ -1,11 +1,16 @@
 {% extends 'base_content.html' %}
 {% block content %}
 
+
+
 <head>
     <meta charset="utf-8">
     <title>Forum</title>
-    <!-- add the Bootstrap CSS file -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/8eaf89f6f3.js" crossorigin="anonymous"></script>
+    
 </head>
 <body>   
     <div class="container">
@@ -20,8 +25,9 @@
                 
                 <div class="card-header">
                     {% if post.user %}
-                        <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
-                        <a href="{% url 'view_post_user' post.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">{{ post.user.get_full_name }} </a>
+                        <a href="{% url 'view_post_user' post.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">
+                            <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
+                            {{ post.user.get_full_name }} </a>
                     {% endif %}
                 </div>
                 <a href="{% url 'post_detail' post.id %}" class="text-dark text-decoration-none" >

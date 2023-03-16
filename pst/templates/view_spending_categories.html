@@ -44,14 +44,32 @@
             <tr class="align-middle">
                 <td>{{ category.name }}</td>
                 <td>{{ category.categories_type }}</td>
+
                 <td>
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="category_id" value="{{ category.id }}">
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                        <a href='{% url 'update_spending_categories' category.id %}' class="btn btn btn-secondary">Update</a>
-                    </form>
+                    <input type="hidden" name="category_id" value="{{ category.id }}">
+                    <a href="{% url 'delete_spending_categories' category.id %}" class="btn btn-danger">Delete</a>
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#edit_expenditure_category_modal{{ category.id }}">update</button>         
                 </td>
+                <!-- modal for update expenditure category -->
+                <div class="modal fade" id="edit_expenditure_category_modal{{ category.id }}" tabindex="-1" role="dialog" aria-labelledby="edit_category_modal_label">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="edit_category_modal_label">Edit Category</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{% url 'update_spending_categories' category.id %}" method="post">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                
+                                    <input type="submit" value="Update category" class = 'btn btn-lg btn-primary'> 
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
             </tr>
             {% endfor %}
         </tbody>
@@ -73,17 +91,33 @@
                 <td>{{ category.name }}</td>
                 <td>{{ category.categories_type }}</td>
                 <td>
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="category_id" value="{{ category.id }}">
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                        <a href='{% url 'update_spending_categories' category.id %}' class="btn btn btn-secondary">Update</a>
-                    </form>
+                    <input type="hidden" name="category_id" value="{{ category.id }}">
+                    <a href="{% url 'delete_spending_categories' category.id %}" class="btn btn-danger">Delete</a>
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#edit_income_category_modal{{ category.id }}">update</button>
                 </td>
+                    <!-- modal for update income category -->
+                    <div class="modal fade" id="edit_income_category_modal{{ category.id }}" tabindex="-1" role="dialog" aria-labelledby="edit_category_modal_label">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="edit_category_modal_label">Edit Category</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="{% url 'update_spending_categories' category.id %}" method="post">
+                                        {% csrf_token %}
+                                        {{ form.as_p }}
+                                        <input type="submit" value="Update category" class = 'btn btn-lg btn-primary'> 
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
 
 
 </div>
