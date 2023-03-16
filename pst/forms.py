@@ -1,9 +1,12 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import ModelForm, Form
-from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply
+from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply, DeliveryAddress, TotalBudget, SpendingFile
 from django.forms import ClearableFileInput
 from django.contrib import messages
+from datetime import date
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 
 
 class CategoriesForm(forms.ModelForm):
@@ -123,7 +126,9 @@ class LoginForm(Form):
 
 class AddSpendingForm(forms.ModelForm):
 
-    spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), empty_label=None)
+    
+    spending_category = forms.ModelChoiceField(
+        queryset=Categories.objects.none(), empty_label=None)
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -132,6 +137,33 @@ class AddSpendingForm(forms.ModelForm):
             spending_type = self.data.get('spending_type', '')
             self.fields['spending_category'].queryset = Categories.objects.filter(
                 owner=user)  # this part filter out categories that belongs to current user
+        self.spending_owner = user
+
+    class Meta:
+        model = Spending
+        fields = ['title', 'amount', 'descriptions',
+                  'date', 'spending_type', 'spending_category']
+
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'value': date.today().strftime('%Y-%m-%d')}),
+        }
+
+    file = forms.FileField(
+        label='file',
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        required=False,
+    )
+
+    def save(self, commit=True):
+        instance = super(AddSpendingForm, self).save(commit=False)
+        instance.spending_owner = self.spending_owner
+        if commit:
+            instance.save()
+        return instance
+    
+
+
+class EditSpendingForm(forms.ModelForm):
 
     class Meta:
         model = Spending
@@ -148,29 +180,16 @@ class AddSpendingForm(forms.ModelForm):
         required=False,
     )
 
-class EditSpendingForm(forms.ModelForm):   
+    delete_file = forms.BooleanField(label='Delete file', required=False)
 
-    #spending_category = forms.ModelChoiceField(queryset=Categories.objects.none(), empty_label=None)
-    class Meta:
-        model = Spending
-        fields = ['title', 'amount', 'descriptions',
-                  'date', 'spending_type', 'spending_category']
-
-        widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-        }
-
-    file = forms.FileField(
-        label='file',
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),
-        required=False,
-    )
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super(EditSpendingForm, self).__init__(*args, **kwargs)
         if user:
             spending_type = self.data.get('spending_type', '')
-            self.fields['spending_category'].queryset = Categories.objects.filter(owner = user) # this part filter out categories that belongs to current user
+            self.fields['spending_category'].queryset = Categories.objects.filter(
+                owner=user)  # this part filter out categories that belongs to current user
+        self.fields['date'].initial = date.today()
 
     def save(self):
         if self.is_valid():
@@ -179,7 +198,7 @@ class EditSpendingForm(forms.ModelForm):
                 id=self.instance.id,
                 defaults={
                     'spending_owner': self.user,
-                    'title':self.cleaned_data.get('title'),
+                    'title': self.cleaned_data.get('title'),
                     'amount': self.cleaned_data.get('amount'),
                     'descriptions': self.cleaned_data.get('descriptions'),
                     'date': self.cleaned_data.get('date'),
@@ -187,18 +206,50 @@ class EditSpendingForm(forms.ModelForm):
                     'spending_category': self.cleaned_data.get('spending_category'),
                 }
             )
+
             return spending
-            
-# class UserProfileForm(forms.ModelForm):
-#     class Meta:
-#         model = UserProfile
-#         fields = ['bio', 'location', 'birth_date',
-#                   'gender', 'phone_number', ]
+
 
 class BudgetForm(forms.ModelForm):
+    spending_category = forms.ModelChoiceField(
+        queryset=Categories.objects.none())
+
     class Meta:
         model = Budget
-        fields = ['name', 'limit']
+        fields = ['name', 'limit', 'spending_category',
+                  'start_date', 'end_date']
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(BudgetForm, self).__init__(*args, **kwargs)
+        if user:
+            spending_type = self.data.get('spending_type', '')
+            self.fields['spending_category'].queryset = Categories.objects.filter(
+                owner=user)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        limit = cleaned_data.get('limit')
+        spending_category = cleaned_data.get('spending_category')
+        total_spent_category = Budget.objects.filter(
+            budget_owner=self.user, spending_category=spending_category).last()
+        if total_spent_category:
+            category_value = total_spent_category.limit
+        else:
+            category_value = 0
+ 
+        total_budget = TotalBudget.objects.filter(budget_owner=self.user).last()
+        if total_budget is None:
+            raise forms.ValidationError("You need to set a total budget first")
+        # Check if the limit for this budget exceeds the remaining amount in the total budget
+        total_spent = Budget.objects.filter(
+            budget_owner=self.user).aggregate(Sum('limit'))['limit__sum'] or 0
+        remaining_amount = total_budget.limit - total_spent + category_value
+        if limit > remaining_amount:
+            raise forms.ValidationError(
+                "You exceeded the total budget")
+
+        return cleaned_data
 
 class PostForm(forms.ModelForm):
     class Meta:
@@ -209,7 +260,8 @@ class PostForm(forms.ModelForm):
         label='image',
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
-    )   
+    )
+
 
 class ReplyForm(forms.ModelForm):
     class Meta:
@@ -218,3 +270,27 @@ class ReplyForm(forms.ModelForm):
         widgets = {'parent_reply': forms.HiddenInput()}
 
 
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = DeliveryAddress
+        fields = ['address', 'phone_number']
+
+
+class TotalBudgetForm(forms.ModelForm):
+    class Meta:
+        model = TotalBudget
+        fields = ['name', 'limit', 'start_date', 'end_date']
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Check if a total budget exists for the current user
+        specific_budget = Budget.objects.all()
+        if specific_budget:
+            specific_budget.delete()
+
+        return cleaned_data
