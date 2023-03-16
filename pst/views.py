@@ -358,6 +358,7 @@ def add_spending(request):
                     spending=spending,
                     file=file
                 )
+            messages.success(request, 'Spending added successfully')
             return redirect('view_spendings')
     else:
         form = AddSpendingForm()

@@ -104,15 +104,9 @@ class Categories(models.Model):
 
 
 class Spending(models.Model):
-
-    title = models.CharField(  # title for the spending
-        max_length=30,
-        blank=False
-    )
-
-    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') #this refers to the user when create this spending
-
-    amount = models.DecimalField(  # this refers to the amount this user spent or gained
+    title = models.CharField(max_length=30, blank=False)
+    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') 
+    amount = models.DecimalField(  
         blank=False,
         max_digits=8,
         decimal_places=2,
@@ -120,26 +114,15 @@ class Spending(models.Model):
             MinValueValidator(0),
         ]
     )
-
-    descriptions = models.CharField(  # comments for the spending
-        blank=True,
-        max_length=500,
-    )
-
-    date = models.DateField( # date of the spending
-        blank = False,
-    )
-
-    spending_type = models.CharField(  # this refers to the spending type
+    descriptions = models.CharField(blank=True, max_length=500)
+    date = models.DateField(blank = False)
+    spending_type = models.CharField(
         max_length=30,
         choices=Spending_type.choices,
         default=Spending_type.EXPENDITURE,
         blank=False,
     )
-
-
-    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category',
-                                          blank=False)  # this refers to the category of the spending
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  
 
 
 class SpendingFile(models.Model):
