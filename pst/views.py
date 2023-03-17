@@ -27,6 +27,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.hashers import check_password
 
 import os
 from django.db.models.signals import pre_delete
@@ -506,14 +507,15 @@ def set_budget(request):
 
 
 def calculate_budget(request):
+    # budget = sum(category_budgets.values_list('total_budget', flat=True))
+    budget = TotalBudget.objects.filter(budget_owner=request.user).last()
     total = Spending.objects.filter(
         spending_owner=request.user,
         spending_type=Spending_type.EXPENDITURE,
+        date__range=(budget.start_date, budget.end_date),
     ).aggregate(
         nums=Sum('amount')
     ).get('nums') or 0
-    # budget = sum(category_budgets.values_list('total_budget', flat=True))
-    budget = TotalBudget.objects.filter(budget_owner=request.user).last()
     if budget == None:
         spending_percentage = 0
     elif total == None:
@@ -885,3 +887,21 @@ def set_specific_budget(request):
     else:
         form = BudgetForm(request.user)
     return render(request, 'specific_budget_set.html', {'form': form})
+
+def password(request):
+    if request.user.is_authenticated:
+        current_user = request.user
+        if request.method == 'POST':
+            form = PasswordForm(data=request.POST)
+            if form.is_valid():
+                password = form.cleaned_data.get('password')
+                if check_password(password, current_user.password):
+                    new_password = form.cleaned_data.get('new_password')
+                    current_user.set_password(new_password)
+                    current_user.save()
+                    authenticated_user = authenticate(username=current_user.username, password=new_password)
+                    login(request, authenticated_user, backend='django.contrib.auth.backends.ModelBackend')
+                    messages.add_message(request, messages.SUCCESS, "Password updated!")
+                    return redirect('home')
+        form = PasswordForm()
+        return render(request, 'password.html', {'form': form})
