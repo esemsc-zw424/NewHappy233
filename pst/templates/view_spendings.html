@@ -25,6 +25,36 @@
         return false;
     }
 
+    function addSortUrl() {
+        var url = new URL(window.location.href);
+        var search_params = url.searchParams;
+        search_params.set('sorted', document.getElementById('selected_sort').value);
+        url.search = search_params.toString();
+        var new_url = url.toString();
+        return new_url;
+    }
+
+    function get(name) {
+        if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+    }
+
+
+    window.onload = function() {
+        if (get('sorted') == 'amount'){
+            console.log('sorted')
+            document.getElementById('empty_sort').innerHTML = "Amount: low to high";
+        }else if (get('sorted') == '-amount'){
+            document.getElementById('empty_sort').innerHTML = "Amount: high to low";
+        }else if (get('sorted') == 'Income'){
+            document.getElementById('empty_sort').innerHTML = "Income";
+        }else if(get('sorted')== 'Expenditure'){
+            document.getElementById('empty_sort').innerHTML = "Expenditure";
+        }else{
+            document.getElementById('empty_sort').innerHTML = "";
+        }
+    }
+
 </script>
 
 <div class="container">
@@ -54,9 +84,25 @@
                     </div>
                     <div class="col-md-auto" >
                         <a href='{% url 'home' %}' class="btn btn btn-primary btn-lg" style="font-size: 22px;">Return</a>
-                    </div>
-                    
+                    </div>            
                 </form>
+
+                <div class="col-md-auto">
+                    <form method="GET" action="{% url 'view_spendings' %}">
+                        <div class="row">
+                            <div class="d-flex ms-auto ">
+                                <label for="sorter" class="text-nowrap align-self-center">Filter By:</label>
+                                <select class="form-select" id="selected_sort" name="selected_sort" onchange="location = addSortUrl();">
+                                    <option id="empty_sort" value="" disabled selected hidden>Select an option</option>
+                                    <option id="Income" value="Income">Income</option>
+                                    <option id="Expenditure" value="Expenditure">Expenditure</option>
+                                    <option id="amount" value="amount">Amount: low to high</option>
+                                    <option id="-amount" value="-amount">Amount: high to low</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </p>
 

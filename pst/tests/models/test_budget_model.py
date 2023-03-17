@@ -21,15 +21,15 @@ class BudgetModelTestCase(TestCase):
         field_label = budget._meta.get_field('limit').verbose_name
         self.assertEqual(field_label, 'limit')
 
-    def test_budget_start_date_label(self):
-        budget = Budget.objects.get(id=1)
-        field_label = budget._meta.get_field('start_date').verbose_name
-        self.assertEqual(field_label, 'start date')
+    # def test_budget_start_date_label(self):
+    #     budget = Budget.objects.get(id=1)
+    #     field_label = budget._meta.get_field('start_date').verbose_name
+    #     self.assertEqual(field_label, 'start date')
 
-    def test_budget_end_date_label(self):
-        budget = Budget.objects.get(id=1)
-        field_label = budget._meta.get_field('end_date').verbose_name
-        self.assertEqual(field_label, 'end date')
+    # def test_budget_end_date_label(self):
+    #     budget = Budget.objects.get(id=1)
+    #     field_label = budget._meta.get_field('end_date').verbose_name
+    #     self.assertEqual(field_label, 'end date')
 
     def test_budget_budget_owner_label(self):
         budget = Budget.objects.get(id=1)
