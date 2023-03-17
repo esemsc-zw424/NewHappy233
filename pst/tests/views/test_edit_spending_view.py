@@ -124,10 +124,10 @@ class EditSpendingTestCase(TestCase):
         response = self.client.get(temp_url)
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
         
-    # def tearDown(self):
-    #     # Delete all spending files
-    #     for spending_file in SpendingFile.objects.filter(spending__in=[self.spending, self.spending_2]):
-    #         os.remove(spending_file.file.path)
-    #         spending_file.delete()
+    def tearDown(self):
+        # Delete all spending files
+        for spending_file in SpendingFile.objects.filter(spending__in=[self.spending, self.spending_2]):
+            os.remove(spending_file.file.path)
+            spending_file.delete()
         
-    #     super().tearDown()
+        super().tearDown()

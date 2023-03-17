@@ -187,6 +187,7 @@ def log_out(request):
 
 
 # Chatbot is a simple virtual help assistant that can answer user's question base on keywords
+@login_required
 def chat_bot(request):
     chat_history = []  # this is use to store all the chat history between user and chatbot
     if request.method == 'POST':
@@ -196,6 +197,7 @@ def chat_bot(request):
         return render(request, 'chat_bot.html', {'chat_history': chat_history})
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
 
+@login_required
 def respond(request, user_input):
     lemmatizer = WordNetLemmatizer()
     keywords = {
@@ -380,7 +382,7 @@ def add_spending_categories(request):
         form = CategoriesForm()
     return render(request, 'view_spending_categories.html', {'form': form})
 
-@login_prohibited
+@login_required
 def get_categories_by_type(request):
     spending_type = request.GET.get('spending_type', '')
     categories = Categories.objects.filter(

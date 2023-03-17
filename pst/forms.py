@@ -223,7 +223,7 @@ class BudgetForm(forms.ModelForm):
         if user:
             spending_type = self.data.get('spending_type', '')
             self.fields['spending_category'].queryset = Categories.objects.filter(
-                owner=user)
+                owner=user, categories_type=Spending_type.EXPENDITURE)
 
     def clean(self):
         cleaned_data = super().clean()
