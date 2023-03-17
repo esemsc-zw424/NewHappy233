@@ -294,7 +294,10 @@ class AddressForm(forms.ModelForm):
 class TotalBudgetForm(forms.ModelForm):
     class Meta:
         model = TotalBudget
-        fields = ['name','limit', 'start_date', 'end_date']
+        fields = ['name', 'limit', 'start_date', 'end_date']
+        widgets = {
+            'end_date': forms.DateInput(attrs={'placeholder': 'Default is 30 days later.'}),
+        }
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -307,6 +310,13 @@ class TotalBudgetForm(forms.ModelForm):
         specific_budget = Budget.objects.all()
         if specific_budget:
             specific_budget.delete()
+
+        # Set end_date to 30 days after start_date if it is not provided by user
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        if not end_date:
+            print(1)
+            cleaned_data['end_date'] = start_date + timedelta(days=30)
 
         return cleaned_data
 

@@ -224,6 +224,7 @@
       <workItem from="1679021983477" duration="153000" />
       <workItem from="1679022149912" duration="745000" />
       <workItem from="1679062063008" duration="644000" />
+      <workItem from="1678923736920" duration="17618000" />
     </task>
     <task id="LOCAL-00001" summary="fix a bug when show budget">
       <created>1677691736322</created>
@@ -246,7 +247,14 @@
       <option name="project" value="LOCAL" />
       <updated>1678923117335</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="add error messages when user input out of compliance credentials">
+      <created>1679015783063</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1679015783063</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -267,7 +275,8 @@
     <MESSAGE value="fix a bug when show budget" />
     <MESSAGE value="fix a bug when show items in the shopping mall" />
     <MESSAGE value="add password editing functionality" />
-    <option name="LAST_COMMIT_MESSAGE" value="add password editing functionality" />
+    <MESSAGE value="add error messages when user input out of compliance credentials" />
+    <option name="LAST_COMMIT_MESSAGE" value="add error messages when user input out of compliance credentials" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/NewHappy236$Test__pst_tests_views_test_view_spending_ViewSpendingTestCase.coverage" NAME="Test: pst.tests.views.test_view_spending.ViewSpendingTestCase Coverage Results" MODIFIED="1679014074973" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
