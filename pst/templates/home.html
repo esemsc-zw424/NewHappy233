@@ -65,6 +65,10 @@
                       <li><a class="dropdown-item" href="{% url 'edit_profile' %}"> Edit profile</a></li>
                       <li><a class="dropdown-item" href="{% url 'log_out' %}"> Log out</a></li>
                       <li><a class="dropdown-item" href="{% url 'view_settings' %}"> Settings</a></li>
+                      <li><a class="dropdown-item" href="{% url 'password' %}"> Edit password</a></li>
+{#                        {% if user.is_authenticated and user.first_name != "" and user.last_name != ""%}#}
+{#                            <li><a class="dropdown-item" href="{% url 'password' %}"> Edit password</a></li>#}
+{#                        {% endif %}#}
                     </ul>
                   </div>  
                 </div>
@@ -105,7 +109,7 @@
                     Bookkeeping
                   </div>
                 </div>
-              </button>
+              </a>
 
               <a href ='{% url 'spending_report' %}' class = 'sidebar-button' name="report_btn">
                 <div class="sidebar-list-inactive-1 sidebar-list-inactive-7">
@@ -147,6 +151,7 @@
                   </div>
                 </div>
               </button>
+              </a>
 
               <a href ='{% url 'user_profile' %}' class = 'sidebar-button' name="profile_btn">
                 <div class="sidebar-list-inactive-3 sidebar-list-inactive-7">
@@ -160,6 +165,7 @@
                   </div>
                 </div>
               </button>
+              </a>
 
               <a href ='{% url 'forum' %}' class = 'sidebar-button' name="forum_btn">
                 <div class="sidebar-list-inactive-4 sidebar-list-inactive-7">

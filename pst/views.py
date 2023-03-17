@@ -27,6 +27,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.hashers import check_password
 
 import os
 from django.db.models.signals import pre_delete
@@ -518,14 +519,18 @@ def set_budget(request):
 
 
 def calculate_budget(request):
-    total = Spending.objects.filter(
-        spending_owner=request.user,
-        spending_type=Spending_type.EXPENDITURE,
-    ).aggregate(
-        nums=Sum('amount')
-    ).get('nums') or 0
     # budget = sum(category_budgets.values_list('total_budget', flat=True))
     budget = TotalBudget.objects.filter(budget_owner=request.user).last()
+    if budget:
+        total = Spending.objects.filter(
+            spending_owner=request.user,
+            spending_type=Spending_type.EXPENDITURE,
+            date__range=(budget.start_date, budget.end_date),
+        ).aggregate(
+            nums=Sum('amount')
+        ).get('nums') or 0
+    else:
+        total = 0
     if budget == None:
         spending_percentage = 0
     elif total == None:
@@ -537,6 +542,18 @@ def calculate_budget(request):
 
 @login_required
 def show_budget(request):
+    selected_sort = request.GET.get('sorted')
+    # the budget will be refreshed automatically after the end date
+    # of your last budget
+    current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
+    if current_budget and current_budget.end_date < datetime.now().date():
+        TotalBudget.objects.create(
+            name=current_budget.name,
+            limit=current_budget.limit,
+            start_date=datetime.now().date(),
+            end_date=datetime.now().date() + timedelta(days=30),
+            budget_owner=request.user,
+        )
     current_month = datetime.now().month
     # total_spending = Spending.objects.filter(
     # spending_owner = request.user,
@@ -545,7 +562,6 @@ def show_budget(request):
     # ).aggregate(nums=Sum('amount')).get('nums')
     # total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
     total_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
-    # print(total_budget)
     percentage = calculate_budget(request)
     # check if a message with the INFO level already exists
     message_exists = False
@@ -558,48 +574,102 @@ def show_budget(request):
         messages.add_message(request, messages.INFO,
                              'you have exceeded the limit')
 
-    categories = Categories.objects.filter(owner=request.user)
+    categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
     category_budgets = []
     for category in categories:
         budget = Budget.objects.filter(spending_category=category).last()
         if budget:
+            # print(category.name + str(budget.limit))
             spending_sum = Spending.objects.filter(
                 spending_owner=request.user,
                 # date__month=current_month,
-                date__range=(budget.start_date, budget.end_date),
+                date__range=(total_budget.start_date, total_budget.end_date),
                 spending_type=Spending_type.EXPENDITURE,
                 spending_category=category,
             ).aggregate(nums=Sum('amount')).get('nums') or 0
 
-            print(budget.limit)
+            # print(budget.limit)
             category_budgets.append({
                 'name': category.name,
                 'budget': budget.limit,
                 'spending': spending_sum,
-                'percentage': spending_sum / budget.limit * 100 if budget.limit else None,
-                'start_date': budget.start_date,
-                'end_date': budget.end_date,
+                'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
+                # 'start_date': total_budget.start_date,
+                # 'end_date': total_budget.end_date,
             })
         else:
-            category_budgets.append({
-                'name': category.name,
-                'budget': 'Not set yet',
-                'spending': 'Set a budget first',
-                'percentage': None,
-                'start_date': None,
-                'end_date': None,
+            if total_budget:
+                spending_sum = Spending.objects.filter(
+                    spending_owner=request.user,
+                    # date__month=current_month,
+                    date__range=(total_budget.start_date, total_budget.end_date),
+                    spending_type=Spending_type.EXPENDITURE,
+                    spending_category=category,
+                ).aggregate(nums=Sum('amount')).get('nums') or 0
+                category_budgets.append({
+                    'name': category.name,
+                    'budget': 'Not set yet',
+                    'spending': spending_sum,
+                    'percentage': None,
+                    # 'start_date': None,
+                    # 'end_date': None,
+                })
+            else:
+                category_budgets.append({
+                    'name': category.name,
+                    'budget': 'Not set yet',
+                    'spending': 'Please set a total budget first',
+                    'percentage': None,
+                    # 'start_date': None,
+                    # 'end_date': None,
             })
-
-        # budget = Budget.objects.filter(spending_category=category).last()
-        # if budget:
-
+    print(selected_sort)
+    if selected_sort == '-budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            )
+        )
+    elif selected_sort == '-spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+        )
+    elif selected_sort == '':
+        sorted_category_budgets = category_budgets
+    else:
+        print(1)
+        sorted_category_budgets = category_budgets
     form = TotalBudgetForm(request.user)
     specific_form = BudgetForm(request.user)
 
     return render(request, 'budget_show.html', {
         'budget': total_budget,
         'spending_percentage': percentage,
-        'category_budgets': category_budgets,
+        'category_budgets': sorted_category_budgets,
         'form': form,
         'specific_form': specific_form,
     })
@@ -897,3 +967,27 @@ def set_specific_budget(request):
     else:
         form = BudgetForm(request.user)
     return render(request, 'specific_budget_set.html', {'form': form})
+
+def password(request):
+    if request.user.is_authenticated:
+        current_user = request.user
+        if request.method == 'POST':
+            form = PasswordForm(data=request.POST)
+            if form.is_valid():
+                password = form.cleaned_data.get('password')
+                if check_password(password, current_user.password):
+                    new_password = form.cleaned_data.get('new_password')
+                    current_user.set_password(new_password)
+                    current_user.save()
+                    authenticated_user = authenticate(username=current_user.username, password=new_password)
+                    login(request, authenticated_user, backend='django.contrib.auth.backends.ModelBackend')
+                    messages.add_message(request, messages.SUCCESS, "Password updated!")
+                    return redirect('password')
+                else:
+                    messages.add_message(request, messages.ERROR, "Make sure you input right current password.")
+
+            else:
+                messages.add_message(request, messages.ERROR, "Please ensure that you enter the same password twice, and it contains at least one uppercase letter, one lowercase letter, and one number.")
+
+        form = PasswordForm()
+        return render(request, 'password.html', {'form': form})

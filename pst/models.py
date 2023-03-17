@@ -140,8 +140,8 @@ class SpendingFile(models.Model):
 class Budget(models.Model):
     name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
-    start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)
+    # start_date = models.DateField(default=timezone.now)
+    # end_date = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(  # user which this budget belongs to
@@ -287,13 +287,24 @@ class DeliveryAddress(models.Model):
     address = models.CharField(max_length=200, blank=True)
     phone_number = models.IntegerField(blank=True)
 
+# class TotalBudget(models.Model):
+#     name = models.CharField(max_length=100, default='')
+#     limit = models.PositiveIntegerField()
+#     start_date = models.DateField(default=timezone.now)
+#     end_date = models.DateField(default=timezone.now)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     budget_owner = models.ForeignKey(  # user which this budget belongs to
+#         User, on_delete=models.CASCADE
+#     )
+
 class TotalBudget(models.Model):
     name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
     start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(blank=True, null=True)  # make end_date optional
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    budget_owner = models.ForeignKey(  # user which this budget belongs to
-        User, on_delete=models.CASCADE
+    budget_owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='total_budgets'  # add related name
     )
