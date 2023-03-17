@@ -5,6 +5,7 @@ from pst.models import User, Spending, Categories, SpendingFile, Spending_type
 from pst.forms import EditSpendingForm
 from django.contrib import messages
 from datetime import datetime
+import os
 from django.core.exceptions import ObjectDoesNotExist
 
 class EditSpendingTestCase(TestCase):
@@ -85,9 +86,7 @@ class EditSpendingTestCase(TestCase):
         self.assertEqual(updated_spending.spending_owner, self.user)
         self.assertEqual(updated_spending.files.count(), 1)
         self.assertEqual(updated_spending.files.first().file.read(), b'This is a test file')
-        #delete the uploaded file
-        updated_spending.files.first().file.delete()
-
+        
 
     
     def test_edit_spending_with_valid_data_with_delete_file_function(self):
@@ -116,10 +115,6 @@ class EditSpendingTestCase(TestCase):
         self.assertEqual(updated_spending.files.count(), 0)
     
     def test_spending_not_found(self):
-
-       
-
-        
         self.client.login(username=self.user.email, password="Password123")
         spending_id = 99999999999
         self.assertFalse(Spending.objects.filter(id=spending_id).exists())
@@ -129,4 +124,10 @@ class EditSpendingTestCase(TestCase):
         response = self.client.get(temp_url)
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
         
+    def tearDown(self):
+        # Delete all spending files
+        for spending_file in SpendingFile.objects.filter(spending__in=[self.spending, self.spending_2]):
+            os.remove(spending_file.file.path)
+            spending_file.delete()
         
+        super().tearDown()
