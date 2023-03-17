@@ -60,8 +60,30 @@ class ChatBotTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Our calendar feature can assist you in monitoring your income and expenses for the current month, allowing you to quickly determine your spending and effectively manage your financial plan with greater efficiency!', response.content)
 
+    def test_chat_bot_general_response_when_input_not_recognise(self):
+        response = self.client.post('/chat_bot/', {'user_input': 'cdawdasdwader'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Sorry, I do not understand what you mean.", response.content)
 
     def test_chat_bot_response_when_input_is_close(self):
         response = self.client.post('/chat_bot/', {'user_input': 'dates'})
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Our calendar feature can assist you in monitoring your income and expenses for the current month, allowing you to quickly determine your spending and effectively manage your financial plan with greater efficiency!', response.content)
+
+    def test_chat_bot_response_when_input_is_in_Capital_Letters(self):
+        response = self.client.post('/chat_bot/', {'user_input': 'DATE'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Our calendar feature can assist you in monitoring your income and expenses for the current month, allowing you to quickly determine your spending and effectively manage your financial plan with greater efficiency!', response.content)
+
+    def test_template_used_chat_bot_when_post_message(self):
+        response = self.client.post('/chat_bot/', {'user_input': 'DATE'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'chat_bot.html')
+
+    def test_template_used_chat_bot_when_get_request(self):
+        response = self.client.get('/chat_bot/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'chat_bot.html')
+
+
+        
