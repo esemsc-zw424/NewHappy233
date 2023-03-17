@@ -21,7 +21,9 @@ class AddSpendingCategoriesTestCase(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'view_spending_categories.html')
-        self.assertIsInstance(response.context['form'], CategoriesForm)
+        form = response.context['form']
+        self.assertIsInstance(form, CategoriesForm)
+        self.assertFalse(form.is_bound)
 
     # def test_access_add_categories_when_not_log_in(self):
     #     response = self.client.get(self.url)
