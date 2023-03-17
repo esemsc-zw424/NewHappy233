@@ -1,20 +1,33 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class="row content">
-    <div class="col-12">
-      <img src="{{ user.gravatar }}" class="rounded-circle profile-image" />
-      <div class="profile-text">
-        <h3 class="profile-title">First Name: {{user.first_name}}</h3>
-        <h3 class="profile-title">Last Name: {{user.last_name}}</h3>
-        <p class="profile-email">Email: {{ user.email }}</p>
-        <p class="profile-bio">Bio: {{ user.bio }}</p>
-        <p class="profile-gender">Gender: {{ user.gender }}</p>
-        <p class="profile-phone-number">Phone Number: {{ user.phone_number }}</p>
-        <p class="profile-address">Address: {{ user.address }}</p>
-  
-        <a href='{% url 'forum' %}' class = 'btn btn-primary mb-3'>Return Forum</a>
-        <a href='{% url 'post_detail' post.id %}' class = 'btn btn-primary mb-3'>Return Post Detail</a>
-      </div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 mt-5">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center">
+                            <img src="{{ user.gravatar }}" class="rounded-circle profile-image" />
+                        </div>
+                        <div class="col-md-8">
+                            <h3 class="profile-title">First Name: {{user.first_name}}</h3>
+                            <h3 class="profile-title">Last Name: {{user.last_name}}</h3>
+                            <p class="profile-email">Email: {{ user.email }}</p>
+                            <p class="profile-bio">Bio: {{ user.bio }}</p>
+                            <p class="profile-gender">Gender: {{ user.gender }}</p>
+                            <p class="profile-phone-number">Phone Number: {{ user.phone_number }}</p>
+                            <p class="profile-address">Address: {{ user.address }}</p>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <a href='{% url 'forum' %}' class = 'btn btn-primary mb-3'>Return Forum</a>
+                            <a href='{% url 'post_detail' post.id %}' class = 'btn btn-primary mb-3'>Return Post Detail</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
+</div>
 {% endblock %}

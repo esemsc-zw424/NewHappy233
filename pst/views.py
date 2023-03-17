@@ -187,19 +187,18 @@ def log_out(request):
 
 
 # Chatbot is a simple virtual help assistant that can answer user's question base on keywords
-
-
+@login_required
 def chat_bot(request):
     chat_history = []  # this is use to store all the chat history between user and chatbot
     if request.method == 'POST':
         user_input = request.POST['user_input']
-        chat_bot_response = respond(user_input)
+        chat_bot_response = respond(request, user_input)
         chat_history.append((user_input, chat_bot_response))
         return render(request, 'chat_bot.html', {'chat_history': chat_history})
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
 
-
-def respond(user_input):
+@login_required
+def respond(request, user_input):
     lemmatizer = WordNetLemmatizer()
     keywords = {
         "pst": ["personal spending tracker", "pst"],
@@ -240,46 +239,35 @@ def respond(user_input):
         "hello": ["Hello! How may I help you?"],
         "bye": ["Goodbye! Have a great day!"],
     }
+    if user_input:
+        for keyword, synonyms in keywords.items():
+            if user_input.lower() in [s.lower() for s in synonyms]:
+                return random.choice(responses[keyword])
 
-    for keyword, synonyms in keywords.items():
-        if user_input.lower() in [s.lower() for s in synonyms]:
-            return random.choice(responses[keyword])
+        tokens = word_tokenize(user_input)
+        tokens = [lemmatizer.lemmatize(token.lower()) for token in tokens]
 
-    tokens = word_tokenize(user_input)
-    tokens = [lemmatizer.lemmatize(token.lower()) for token in tokens]
+        possible_keywords = []
+        for keyword, synonyms in keywords.items():
+            for token in tokens:
+                if token in synonyms:
+                    possible_keywords.append(keyword)
+                    break
 
-    possible_keywords = []
-    for keyword, synonyms in keywords.items():
-        for token in tokens:
-            if token in synonyms:
-                possible_keywords.append(keyword)
+        if possible_keywords:
+            message = f"Did you mean {', '.join(possible_keywords)}?"
+        else:
+            message = "Sorry, I do not understand what you mean. You can type 'help' for a list of possible commands."
+
+        for keyword in possible_keywords:
+            if keyword in responses:
+                message = random.choice(responses[keyword])
                 break
 
-    if possible_keywords:
-        message = f"Did you mean {', '.join(possible_keywords)}?"
+        return message
     else:
-        message = "Sorry, I do not understand what you mean. You can type 'help' for a list of possible commands."
-
-    for keyword in possible_keywords:
-        if keyword in responses:
-            message = random.choice(responses[keyword])
-            break
-
-    return message
-
-
-def get_categories_by_type(request):
-    spending_type = request.GET.get('spending_type', '')
-    categories = Categories.objects.filter(
-        owner=request.user,
-        categories_type=spending_type
-    ).values('id', 'name')
-
-    data = {
-        'categories': list(categories)
-    }
-    return JsonResponse(data)
-
+        messages.add_message(request, messages.ERROR,
+                             "You can not submit empty space!!!")
 
 @login_required
 def view_spendings(request):
@@ -386,10 +374,27 @@ def add_spending_categories(request):
             category = form.save(commit=False)
             category.owner = request.user
             category.save()
+            messages.add_message(request, messages.SUCCESS,
+                             "Category successfully added")
             return redirect('view_spending_categories')
+
     else:
         form = CategoriesForm()
     return render(request, 'view_spending_categories.html', {'form': form})
+
+@login_required
+def get_categories_by_type(request):
+    spending_type = request.GET.get('spending_type', '')
+    categories = Categories.objects.filter(
+        owner=request.user,
+        categories_type=spending_type
+    ).values('id', 'name')
+
+    data = {
+        'categories': list(categories)
+    }
+    return JsonResponse(data)
+
 
 
 @login_required
@@ -409,6 +414,8 @@ def delete_spending_categories(request, category_id):
     category = Categories.objects.get(id=category_id)
     if category.default_category == False:
         category.delete()
+        messages.add_message(request, messages.SUCCESS,
+                             "Category successfully deleted")
     else:
         messages.add_message(request, messages.ERROR,
                              "You can not delete default category!")
@@ -801,6 +808,14 @@ def add_post(request):
         form = PostForm()
     return render(request, 'add_post.html',  {'form': form})
 
+@login_required
+def delete_post(request, post_id):
+
+    delete_post = get_object_or_404(Post, id=post_id)
+    delete_post.delete()
+    messages.warning(request, "post has been deleted")
+    return redirect('personal_forum')
+
 
 @login_required
 def post_detail(request, post_id):
@@ -933,6 +948,14 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
 
     context = {'form': form, 'post': post, 'parent_reply': parent_reply}
     return render(request, 'add_reply_to_reply.html', context)
+
+@login_required
+def delete_reply(request, reply_id):
+
+    delete_reply = get_object_or_404(Reply, id=reply_id)
+    delete_reply.delete()
+    messages.warning(request, "reply has been deleted")
+    return redirect('personal_forum_reply')
 
 
 @login_required

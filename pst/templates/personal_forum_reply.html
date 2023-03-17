@@ -1,50 +1,29 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <head>
+    {% load static %}
     <meta charset="utf-8">
     <title>Post detail</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/8eaf89f6f3.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/forum.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/post_details_and_personal_reply.css' %}" />
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
             background-color: #f5f5f5;
+            background-image: linear-gradient(to right, #f8cdda, #a8c0ff);
         }
-        .container {
-            padding: 1rem;
-        }
-        .btn-primary:hover,
-        .text-dark:hover {
-            background-color: rgba(180, 230, 255, 0.5);
-            color: #333;
-        }
-        .profile-image {
-            margin-right: 0.5rem;
-        }
+
         .reply {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
             margin-bottom: 20px;
-            word-wrap: break-word;
-        }
-        .reply .author {
-            margin-bottom: 10px;
-        }
-        .reply .info {
-            color: #666;
-            font-size: 14px;
-        }
-        .reply .parent-reply {
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
-            border-radius: 5px;
             padding: 10px;
-            margin-bottom: 10px;
-            word-wrap: break-word;
+            border: 1px solid #ccc;
+            background-color: #f5f5f5;
         }
+        
     </style>
 </head>
 <body>
@@ -72,6 +51,7 @@
                     </div>
                 </div>
             </a>
+            <a href='{% url 'delete_reply' r.id %}' class = 'btn btn-primary mb-3'>Delete Reply</a>
         {% endfor%}
         <div class="pagination">
             <nav aria-label="Page navigation example">
