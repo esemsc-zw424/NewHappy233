@@ -330,6 +330,7 @@ class TotalBudgetForm(forms.ModelForm):
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
         if not end_date:
+            print(1)
             cleaned_data['end_date'] = start_date + timedelta(days=30)
 
         return cleaned_data
