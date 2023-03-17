@@ -1,9 +1,29 @@
 {% extends 'base_content.html' %}
 {% block content %}
-    
-<div class="text-center mt-5">
-    
-</div>
+<script>
+    function addSortUrl() {
+        var url = new URL(window.location.href);
+        var search_params = url.searchParams;
+        search_params.set('sorted', document.getElementById('selected_sort').value);
+        url.search = search_params.toString();
+        var new_url = url.toString();
+        return new_url;
+    }
+    window.onload = function() {
+        if (get('sorted') == 'budget'){
+            document.getElementById('empty_sort').innerHTML = "Budget: low to high";
+        }else if (get('sorted') == '-budget'){
+            document.getElementById('empty_sort').innerHTML = "Budget: high to low";
+        }else if (get('sorted') == 'spending'){
+            document.getElementById('empty_sort').innerHTML = "Spending: low to high";
+        }else if (get('sorted') == '-spending'){
+            document.getElementById('empty_sort').innerHTML = "Spending: high to low";
+        }
+        else{
+            document.getElementById('empty_sort').innerHTML = "";
+        }
+    }
+</script>
 <head>
 	<meta charset="utf-8">
 	<title>Progress Bar</title>
@@ -24,7 +44,6 @@
   border-radius: 5px;
   overflow: hidden;
 }
-
 </style>
 
 
@@ -52,7 +71,24 @@
     </div>
 </div>
 
+<div class="container">
 <a href ='{% url 'set_specific_budget' %}' class = 'btn btn-lg btn-primary' data-bs-toggle="modal" data-bs-target="#set_specific_budget_modal">Set Specific Budget</a>
+    <div class="col-md-auto">
+                    <form method="GET" action="{% url 'view_spendings' %}">
+                        <div class="row">
+                            <div class="d-flex ms-auto ">
+                                <label for="sorter" class="text-nowrap align-self-center">Filter By:</label>
+                                <select class="form-select" id="selected_sort" name="selected_sort" onchange="location = addSortUrl();">
+                                    <option id="empty_sort" value="" disabled selected hidden>Select an option</option>
+                                    <option id="budget" value="budget">Budget: low to high</option>
+                                    <option id="-budget" value="-budget">Budget: high to low</option>
+                                    <option id="spending" value="spending">Spending: low to high</option>
+                                    <option id="-spending" value="-spending">Spending: high to low</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
 <table class="table">
 
     <thead>
@@ -86,6 +122,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 
 <!-- modal for setting new budget -->
       <div class="modal fade" id="set_budget_modal" tabindex="-1" role="dialog" aria-labelledby="set_budget_modal_label">

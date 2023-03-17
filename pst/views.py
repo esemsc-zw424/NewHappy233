@@ -540,6 +540,7 @@ def calculate_budget(request):
 
 @login_required
 def show_budget(request):
+    selected_sort = request.GET.get('sorted')
     # the budget will be refreshed automatically after the end date
     # of your last budget
     current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
@@ -571,7 +572,7 @@ def show_budget(request):
         messages.add_message(request, messages.INFO,
                              'you have exceeded the limit')
 
-    categories = Categories.objects.filter(owner=request.user)
+    categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
     category_budgets = []
     for category in categories:
         budget = Budget.objects.filter(spending_category=category).last()
@@ -620,17 +621,53 @@ def show_budget(request):
                     # 'start_date': None,
                     # 'end_date': None,
             })
-
-        # budget = Budget.objects.filter(spending_category=category).last()
-        # if budget:
-
+    print(selected_sort)
+    if selected_sort == '-budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            )
+        )
+    elif selected_sort == '-spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+        )
+    elif selected_sort == '':
+        sorted_category_budgets = category_budgets
+    else:
+        print(1)
+        sorted_category_budgets = category_budgets
     form = TotalBudgetForm(request.user)
     specific_form = BudgetForm(request.user)
 
     return render(request, 'budget_show.html', {
         'budget': total_budget,
         'spending_percentage': percentage,
-        'category_budgets': category_budgets,
+        'category_budgets': sorted_category_budgets,
         'form': form,
         'specific_form': specific_form,
     })

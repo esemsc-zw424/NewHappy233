@@ -66,6 +66,9 @@
                       <li><a class="dropdown-item" href="{% url 'log_out' %}"> Log out</a></li>
                       <li><a class="dropdown-item" href="{% url 'view_settings' %}"> Settings</a></li>
                       <li><a class="dropdown-item" href="{% url 'password' %}"> Edit password</a></li>
+{#                        {% if user.is_authenticated and user.first_name != "" and user.last_name != ""%}#}
+{#                            <li><a class="dropdown-item" href="{% url 'password' %}"> Edit password</a></li>#}
+{#                        {% endif %}#}
                     </ul>
                   </div>  
                 </div>
