@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+
 from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -17,7 +19,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 
-from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyRewards,DailyRewardStatus,Day
+from .models import TaskType, User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyTask,DailyTaskStatus,Day
 
 from .forms import *
 from django.views import View
@@ -66,9 +68,55 @@ def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
 
 
+def get_login_task_status(request):
+    pos = int(request.GET.get("pos", 0))
+    task_statuses = DailyTaskStatus.objects.filter(day__number__lte=pos)
+
+    data = {
+        "task_statuses": [
+            {
+                "day": task_status.day.number,
+                "completed": task_status.completed,
+            }
+            for task_status in task_statuses
+        ]
+    }
+
+    return JsonResponse(data)
 
 
-def get_reward_points(request):
+@login_required
+@csrf_exempt
+def add_login_task_points(request):
+    user = request.user
+    login_task = DailyTask.objects.create(user=user)
+    current_day = get_number_days_from_register(request)
+    day = Day.objects.get(number=current_day)
+    daily_task_status = DailyTaskStatus.objects.create(
+        task=login_task,
+        day=day,
+        completed=True,
+        task_points=10,
+        task_type=TaskType.LOGIN
+    )
+    if request.method == 'POST':
+        task_id = request.POST.get('taskID')
+        task_completed = request.POST.get('task_completed') == 'true'
+
+        reward = Reward.objects.get(id=task_id)
+        user_profile = UserProfile.objects.get(user=request.user)
+
+        if reward_collected:
+            user_profile.rewards_collected.add(reward)
+        else:
+            user_profile.rewards_collected.remove(reward)
+        user_profile.save()
+
+        return JsonResponse({'status': 'success', 'reward_id': reward_id, 'reward_collected': reward_collected})
+    else:
+        return JsonResponse({'status': 'error'})
+
+def add_login_task_points(request):
     # if request.method == 'POST':
     #     content_id = request.POST.get('rewardPos')
     #     new_content = request.POST.get('newContent')
@@ -77,11 +125,9 @@ def get_reward_points(request):
     #     obj = YourModel.objects.get(id=content_id)
     #     obj.content = new_content
     #     obj.save()
-    user = request.user
-    reward = DailyRewards.objects.create(user=user)
-    day1 = Day.objects.get(number=1)
-    reward.mark_received(day1)
-    reward.set_reward_points(day1, 10)
+
+    # task.mark_received(day1)
+    # reward.set_reward_points(day1, 10)
     # give user extra reward if user has login consecutive for seven days
     if user.consecutive_login_days > 7:
         user.reward_points += high_reward_points
@@ -114,11 +160,9 @@ def get_position_in_daily_reward(request):
     return pos % 35
 
 
-def get_super_reward_position(request):
+def get_super_task_point_position(request):
     cur_pos = get_position_in_daily_reward(request)
     days_need = 8 - request.user.consecutive_login_days
-    print(cur_pos + days_need)
-    print(request.user.consecutive_login_days)
     return cur_pos + days_need
 
 
@@ -133,6 +177,18 @@ def add_consecutive_login_days(request):
     user.save()
 
 
+
+@login_required
+def get_reward_statuses(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+    rewards_collected = user_profile.rewards_collected.all()
+
+    reward_statuses = []
+    for reward in rewards_collected:
+        reward_statuses.append(reward.id)
+
+    return JsonResponse({'reward_statuses': reward_statuses})
+
 @login_required
 def home(request):
     user = request.user
@@ -142,8 +198,8 @@ def home(request):
     weekday_list = [1,2,3,4,5,6,7]
     current_day = str(timezone.now().day)
     pos = get_position_in_daily_reward(request)
-    super_reward_pos = get_super_reward_position(request)
-    context = {"pos":pos,"super_reward_pos":super_reward_pos, "week_list": week_list, "weekday_list": weekday_list,"current_datetime":current_day,
+    super_task_point_pos = get_super_task_point_position(request)
+    context = {"pos":pos,"super_task_point_pos":super_task_point_pos, "week_list": week_list, "weekday_list": weekday_list,"current_datetime":current_day,
                "high_reward_points": high_reward_points, "normal_reward_points": normal_reward_points}
     return render(request, 'home.html', context)
 

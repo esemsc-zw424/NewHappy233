@@ -1,3 +1,5 @@
+from enum import Enum
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
@@ -78,8 +80,6 @@ class User(AbstractUser):
 
 
 
-
-
 class Categories(models.Model):
 
 
@@ -117,45 +117,51 @@ class Day(models.Model):
         return f"Day {self.number}"
 
 
-class DailyRewards(models.Model):
+class DailyTask(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    days = models.ManyToManyField(Day, through='DailyRewardStatus')
+    days = models.ManyToManyField(Day, through='DailyTaskStatus')
 
-    def mark_received(self, day, task_type='login'):
-        status = DailyRewardStatus.objects.get(reward=self, day=day, task_type=task_type)
+    def mark_received(self, day):
+        status = DailyTaskStatus.objects.get(task=self, day=day)
         status.received = True
         status.save()
 
-    def set_reward_points(self, day, points, task_type='login'):
-        status = DailyRewardStatus.objects.get(reward=self, day=day, task_type=task_type)
+    def set_task_points(self, day, points):
+        status = DailyTaskStatus.objects.get(task=self, day=day)
         status.points = points
         status.save()
 
-    def get_reward_status(self, day, task_type='login'):
-        status = DailyRewardStatus.objects.get(reward=self, day=day, task_type=task_type)
+    def get_task_status(self, day):
+        status = DailyTaskStatus.objects.get(task=self, day=day)
         return status.received
 
-    def get_reward_points(self, day, task_type='login'):
-        status = DailyRewardStatus.objects.get(reward=self, day=day, task_type=task_type)
+    def get_task_points(self, day):
+        status = DailyTaskStatus.objects.get(task=self, day=day)
         return status.points
 
     def __str__(self):
-        return f"{self.user.email}'s Daily Rewards"
+        return f"{self.user.email}'s daily tasks"
 
 
-class DailyRewardStatus(models.Model):
-    TASK_TYPES = (
-        ('login', 'Login'),
-        ('other', 'Other')
-    )
-    reward = models.ForeignKey(DailyRewards, on_delete=models.CASCADE)
+class TaskType(Enum):
+    LOGIN = 'Login'
+    POST = 'Post'
+
+    @classmethod
+    def choices(cls):
+        return [(choice.name, choice.value) for choice in cls]
+
+
+class DailyTaskStatus(models.Model):
+    task = models.ForeignKey(DailyTask, on_delete=models.CASCADE)
     day = models.ForeignKey(Day, on_delete=models.CASCADE)
-    received = models.BooleanField(default=False)
+    completed = models.BooleanField(default=False)
     task_points = models.IntegerField(default=0)
-    task_type = models.CharField(choices=TASK_TYPES, default='login', max_length=10)
+    task_type = models.CharField(choices=TaskType.choices(), default=TaskType.LOGIN.name, max_length=10)
 
     class Meta:
-        unique_together = ('reward', 'day', 'task_type')
+        unique_together = ('task', 'day', 'task_type')
+
 
 class Spending(models.Model):
 
