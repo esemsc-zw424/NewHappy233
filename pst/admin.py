@@ -1,6 +1,6 @@
 
 from django.contrib import admin
-from .models import User, Spending, SpendingFile, Categories, Post, PostImage, Reply, Like
+from .models import DailyTaskStatus, Day, DailyTask, Spending, SpendingFile, Categories, Post, PostImage, Reply, Like, User
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 
@@ -85,3 +85,21 @@ class LikeAdmin(admin.ModelAdmin):
         'user', 'content_type', 'object_id'
     ]
 
+@admin.register(DailyTaskStatus)
+class DailyTaskStatusAdmin(admin.ModelAdmin):
+    list_display = [
+      'task', 'day', 'completed',  'task_type',
+    ]
+
+# @admin.register(DailyTask)
+# class DailyTaskAdmin(admin.ModelAdmin):
+#     list_display = [
+#         'user', 'days',
+#     ]
+#
+#
+# @admin.register(Day)
+# class DayAdmin(admin.ModelAdmin):
+#     list_display = [
+#         'number',
+#     ]

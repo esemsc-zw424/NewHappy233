@@ -1,7 +1,6 @@
 {% extends 'base_content.html' %}
 {% block content %}
-
-
+{% load mathfilters %}
 <div>
     <h1>home page placeholder</h1>
     <a href ='{% url 'add_spending' %}' class = 'btn btn-lg btn-primary'>Add spending</a>
@@ -30,30 +29,35 @@
           <div class="modal-body">
             <table id="reward-table">
                 <tbody>
+
                     {% for i in week_list %}
                       <tr>
                         {% for j in weekday_list %}
                             <!-- day from 1 to 35 (total 35 squares on the daily login task table) -->
-                          {% with day = forloop.counter %}
+                           {% with within_bracket=i|sub:1 %}
+                                {% with mul=within_bracket|mul:7 %}
+                                    {% with day=mul|add:j %}
 
                             {% if day == pos %}
-                                 <td class="square" id="task_point-pos-{{ day.name }}"  name= "task_point_pos" >
-                                     <button  onclick="task_point_pos_click_handler({{ task_point.id }}, this)" >
+                                 <td class="square" id="task_point-pos-{{ day }}"  name= "task_point_pos" >
+                                     <button  onclick="task_point_pos_click_handler({{ day }})" >
                                          day{{pos}}<i class="bi bi-cart-check"></i></button> </td>
                             {% elif day == super_task_point_pos %}
-                                <td class = "square" id="task_point-super-{{ day.name }}"style="color: rgb(255, 24, 7);">
-                                    day{{day}}  <br>
+                                <td class = "square" id="task_point-super-{{ day }}"style="color: rgb(255, 24, 7);">
+                                    day{{day}} <br>
                                     <i class="fa-solid fa-gem"></i>
                                     {{high_reward_points}}</td>
                             {% else %}
-                                 <td class = "square"  id="task_point-normal-{{ day.name }}"> day{{day}}  <br>
+                                 <td class = "square"  id="task_point-normal-{{ day }}"> day{{day}}  <br>
                                  <i class="fa-solid fa-sack-dollar"></i>
 
                                     {{normal_reward_points}}</td>
                             {% endif %}
 
+                            {% endwith %}
                           {% endwith %}
-                        {% endfor %}
+                        {% endwith %}
+                       {% endfor %}
                       </tr>
                     {% endfor %}
                </tbody>

@@ -41,8 +41,8 @@ from django.db.models import Sum
 
 # Create your views here.
 
-high_reward_points = 3
-normal_reward_points = 1
+high_reward_points = 30
+normal_reward_points = 10
 current_datetime = timezone.now()
 @login_required
 def user_feed(request):
@@ -88,55 +88,33 @@ def get_login_task_status(request):
 @login_required
 @csrf_exempt
 def add_login_task_points(request):
-    user = request.user
-    login_task = DailyTask.objects.create(user=user)
-    current_day = get_number_days_from_register(request)
-    day = Day.objects.get(number=current_day)
-    daily_task_status = DailyTaskStatus.objects.create(
-        task=login_task,
-        day=day,
-        completed=True,
-        task_points=10,
-        task_type=TaskType.LOGIN
-    )
     if request.method == 'POST':
-        task_id = request.POST.get('taskID')
-        task_completed = request.POST.get('task_completed') == 'true'
+        user = request.user
+        login_task = DailyTask.objects.create(user=user)
+        current_day = get_number_days_from_register(request)
+        day = Day.objects.create(number=current_day)
 
-        reward = Reward.objects.get(id=task_id)
-        user_profile = UserProfile.objects.get(user=request.user)
-
-        if reward_collected:
-            user_profile.rewards_collected.add(reward)
+        # give user extra points if user has login consecutive for seven days
+        if user.consecutive_login_days > 7:
+            daily_task_status = DailyTaskStatus.objects.create(
+                task=login_task,
+                day=day,
+                completed=True,
+                task_points=high_reward_points,
+                task_type=TaskType.LOGIN
+            )
         else:
-            user_profile.rewards_collected.remove(reward)
-        user_profile.save()
+            daily_task_status = DailyTaskStatus.objects.create(
+                task=login_task,
+                day=day,
+                completed=True,
+                task_points=normal_reward_points,
+                task_type=TaskType.LOGIN
+            )
 
-        return JsonResponse({'status': 'success', 'reward_id': reward_id, 'reward_collected': reward_collected})
-    else:
-        return JsonResponse({'status': 'error'})
 
-def add_login_task_points(request):
-    # if request.method == 'POST':
-    #     content_id = request.POST.get('rewardPos')
-    #     new_content = request.POST.get('newContent')
-    #
-    #     # Update the content in the database
-    #     obj = YourModel.objects.get(id=content_id)
-    #     obj.content = new_content
-    #     obj.save()
+        return JsonResponse({"status": "success"})
 
-    # task.mark_received(day1)
-    # reward.set_reward_points(day1, 10)
-    # give user extra reward if user has login consecutive for seven days
-    if user.consecutive_login_days > 7:
-        user.reward_points += high_reward_points
-    else:
-        user.reward_points += normal_reward_points
-    user.save()
-    
-    return JsonResponse({"status": "success"})
-    
 
 def check_already_logged_in_once_daily(request):
     user = request.user
@@ -162,7 +140,7 @@ def get_position_in_daily_reward(request):
 
 def get_super_task_point_position(request):
     cur_pos = get_position_in_daily_reward(request)
-    days_need = 8 - request.user.consecutive_login_days
+    days_need = 7 - request.user.consecutive_login_days
     return cur_pos + days_need
 
 
@@ -177,17 +155,6 @@ def add_consecutive_login_days(request):
     user.save()
 
 
-
-@login_required
-def get_reward_statuses(request):
-    user_profile = UserProfile.objects.get(user=request.user)
-    rewards_collected = user_profile.rewards_collected.all()
-
-    reward_statuses = []
-    for reward in rewards_collected:
-        reward_statuses.append(reward.id)
-
-    return JsonResponse({'reward_statuses': reward_statuses})
 
 @login_required
 def home(request):

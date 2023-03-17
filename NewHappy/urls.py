@@ -57,8 +57,8 @@ urlpatterns = [
     path('personal_forum/', views.personal_forum, name ='personal_forum'),
     path('view_post_user/<user_id>/<post_id>/', views.view_post_user, name='view_post_user'),
 
-    path('home/add_login_task_points/', views.add_login_task_points, name='add_login_task_points'),
-    path('home/get_login_task_status/', views.get_login_task_status,name='get_login_task_status')
+    path('add_login_task_points/', views.add_login_task_points, name='add_login_task_points'),
+    path('get_login_task_status/', views.get_login_task_status,name='get_login_task_status')
 
 ]
 
