@@ -127,7 +127,6 @@ class EditSpendingTestCase(TestCase):
     def tearDown(self):
         # Delete all spending files
         for spending_file in SpendingFile.objects.filter(spending__in=[self.spending, self.spending_2]):
-            os.remove(spending_file.file.path)
             spending_file.delete()
         
-        super().tearDown()
+   

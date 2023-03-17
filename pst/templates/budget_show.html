@@ -72,11 +72,14 @@
 </div>
 
 <div class="container">
-<a href ='{% url 'set_specific_budget' %}' class = 'btn btn-lg btn-primary' data-bs-toggle="modal" data-bs-target="#set_specific_budget_modal">Set Specific Budget</a>
-    <div class="col-md-auto">
-                    <form method="GET" action="{% url 'view_spendings' %}">
+
+
                         <div class="row">
-                            <div class="d-flex ms-auto ">
+                            <div class="col-6">
+                                <a href ='{% url 'set_specific_budget' %}' class = 'btn btn-lg btn-primary' data-bs-toggle="modal" data-bs-target="#set_specific_budget_modal">Set Specific Budget</a>
+                            </div>
+                            <div class="col-6">
+                                
                                 <label for="sorter" class="text-nowrap align-self-center">Filter By:</label>
                                 <select class="form-select" id="selected_sort" name="selected_sort" onchange="location = addSortUrl();">
                                     <option id="empty_sort" value="" disabled selected hidden>Select an option</option>
@@ -87,8 +90,7 @@
                                 </select>
                             </div>
                         </div>
-                    </form>
-                </div>
+                
 <table class="table">
 
     <thead>
