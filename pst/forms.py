@@ -58,21 +58,21 @@ class VisitorSignupForm(PasswordValidationForm):
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'bio', 'gender']
-        widgets = {'bio': forms.Textarea()}
+        fields = ['email', 'first_name', 'last_name']
+        # widgets = {'bio': forms.Textarea()}
 
-    def save(self, commit=False):
+    def save(self):
         """Create a new user"""
 
-        super().save(commit)
+        super().save(commit=False)
         data = self.cleaned_data
         user = User.objects.create_user(
-            first_name=data.get('first_name'),
-            last_name=data.get('last_name'),
-            email=data.get('email'),
-            password=data.get('password'),
-            bio=data.get('bio'),
-            gender=data.get('gender'),
+                first_name=data.get('first_name'),
+                last_name=data.get('last_name'),
+                email=data.get('email'),
+                password=data.get('password'),
+                # bio=data.get('bio'),
+                # gender=data.get('gender'),
         )
 
         categories = [
@@ -277,20 +277,24 @@ class ReplyForm(forms.ModelForm):
         fields = ['content', 'parent_reply']
         widgets = {'parent_reply': forms.HiddenInput()}
 
-
 class AddressForm(forms.ModelForm):
     class Meta:
         model = DeliveryAddress
         fields = ['address', 'phone_number']
 
+# class TotalBudgetForm(forms.ModelForm):
+#     class Meta:
+#         model = TotalBudget
+#         fields = ['name','limit', 'start_date', 'end_date']
+#
+#     def __init__(self, user, *args, **kwargs):
+#         self.user = user
+#         super().__init__(*args, **kwargs)
 
 class TotalBudgetForm(forms.ModelForm):
     class Meta:
         model = TotalBudget
-        fields = ['name', 'limit', 'start_date', 'end_date']
-        widgets = {
-            'end_date': forms.DateInput(attrs={'placeholder': 'Default is 30 days later.'}),
-        }
+        fields = ['name','limit', 'start_date', 'end_date']
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -303,12 +307,6 @@ class TotalBudgetForm(forms.ModelForm):
         specific_budget = Budget.objects.all()
         if specific_budget:
             specific_budget.delete()
-
-        # Set end_date to 30 days after start_date if it is not provided by user
-        start_date = cleaned_data.get('start_date')
-        end_date = cleaned_data.get('end_date')
-        if not end_date:
-            cleaned_data['end_date'] = start_date + timedelta(days=30)
 
         return cleaned_data
 

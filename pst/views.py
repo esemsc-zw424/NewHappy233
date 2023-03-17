@@ -549,9 +549,7 @@ def show_budget(request):
     # ).aggregate(nums=Sum('amount')).get('nums')
     # total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
     total_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
-    # print(total_budget)
     percentage = calculate_budget(request)
-    print(percentage)
     # check if a message with the INFO level already exists
     message_exists = False
     for message in messages.get_messages(request):
@@ -568,6 +566,7 @@ def show_budget(request):
     for category in categories:
         budget = Budget.objects.filter(spending_category=category).last()
         if budget:
+            # print(category.name + str(budget.limit))
             spending_sum = Spending.objects.filter(
                 spending_owner=request.user,
                 # date__month=current_month,
@@ -576,12 +575,12 @@ def show_budget(request):
                 spending_category=category,
             ).aggregate(nums=Sum('amount')).get('nums') or 0
 
-            print(budget.limit)
+            # print(budget.limit)
             category_budgets.append({
                 'name': category.name,
                 'budget': budget.limit,
                 'spending': spending_sum,
-                'percentage': spending_sum / budget.limit * 100 if budget.limit else None,
+                'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
                 # 'start_date': total_budget.start_date,
                 # 'end_date': total_budget.end_date,
             })

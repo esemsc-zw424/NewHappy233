@@ -7,9 +7,6 @@
 <head>
 	<meta charset="utf-8">
 	<title>Progress Bar</title>
-{#	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">#}
-{#	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>#}
-{#	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
 </head>
 
 <div class="container mt-5">
@@ -41,9 +38,6 @@
       {{ spending_percentage }}%
     </div>
   </div>
-{#  <div class="text-center mt-5">#}
-{#    <a href='{% url 'home' %}'class="btn btn btn-primary">Return</a>#}
-{#  </div>#}
 {% endif %}
 </div>
 
@@ -51,7 +45,7 @@
     {% if budget == None %}
         <h1>You have not set budget yet</h1>
         <h3>Click the button below to set your budget</h3>
-        <a href ='{% url 'budget_set' %}' class = 'btn btn-lg btn-primary' data-bs-toggle="modal" data-bs-target="#set_budget_modal">Set Budget</a>
+        <a href ='{% url 'budget_set' %}' class = 'btn btn-lg btn-primary' data-bs-toggle="modal" data-bs-target="#set_budget_modal">Set Total Budge in a timeframe</a>
         <a href='{% url 'home' %}'class="btn btn-lg btn-primary">Return</a>
         {% endif %}
     <div class="text-center mt-5">
@@ -66,10 +60,8 @@
             <th scope="col">category</th>
             <th scope="col">budget</th>
             <th scope="col">spending within the selected timeframe</th>
-{#            <th scope="col">start date</th>#}
-{#            <th scope="col">end date</th>#}
             <th scope="col">percentage</th>
-            <th scope="col">exceed the budget?</th>
+            <th scope="col">exceed the category budget?</th>
         </tr>
     </thead>
     <tbody>
@@ -78,12 +70,10 @@
                 <td> {{ category_budget.name }} </td>
                 <td> {{ category_budget.budget }} </td>
                 <td> {{ category_budget.spending }} </td>
-{#                <td> {{ budget.start_date }} </td>#}
-{#                <td> {{ budget.end_date }} </td>#}
                 {% if category_budget.percentage %}
                     <td>Percentage: {{ category_budget.percentage }}%</td>
                 {% else %}
-                    <td>No spending within the month or no budget yet</td>
+                    <td>We need to include both spending and non-zero category budget to calculate the percentage accurately.</td>
                 {% endif %}
                 {% if category_budget.percentage >= 100 %}
                     <td>Yes</td>
@@ -92,9 +82,6 @@
                 {% else %}
                     <td>No</td>
                 {% endif %}
-{#                {% if category_budget.percentage %}#}
-{#                    <p>Percentage: {{ category_budget.percentage }}%</p>#}
-{#                {% endif %}#}
             </tr>
         {% endfor %}
     </tbody>
@@ -152,16 +139,5 @@
             </div>
         </div>
     </div>
-
-
-{#{% for category_budget in category_budgets %}#}
-{#    <h3>{{ category_budget.name }}</h3>#}
-{#    <p>Budget: ${{ category_budget.budget }}</p>#}
-{#    <p>Spending: ${{ category_budget.spending }}</p>#}
-{#    {% if category_budget.percentage %}#}
-{#        <p>Percentage: {{ category_budget.percentage }}%</p>#}
-{#    {% endif %}#}
-{#{% endfor %}#}
-
 </body>
 {% endblock %}
