@@ -319,15 +319,17 @@ def view_spendings(request):
 
 @login_required
 def edit_spending(request, spending_id):
-    try:
+   
+    try: 
         spending = Spending.objects.get(id=spending_id)
     except ObjectDoesNotExist:
-        return render(request, 'view_spendings.html')
+        return redirect('view_spendings')
+        
 
     if request.method == 'POST':
         form = EditSpendingForm(
             request.user, request.POST, request.FILES, instance=spending)
-
+        
         if form.is_valid():
             form.save()
             file_list = request.FILES.getlist('file')
@@ -344,7 +346,7 @@ def edit_spending(request, spending_id):
             return redirect('view_spendings')
     else:
         form = EditSpendingForm(request.user, instance=spending)
-    return redirect('view_spendings')
+    return render(request, 'view_spendings.html', {'form': form})
 
 
 @login_required
