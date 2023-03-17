@@ -285,15 +285,25 @@ def get_categories_by_type(request):
 def view_spendings(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    selected_sort = request.GET.get('sorted')
 
     if start_date and end_date:
         start_date = dt.datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = dt.datetime.strptime(end_date, '%Y-%m-%d').date()
-        spending = Spending.objects.filter(spending_owner=request.user,
+        unsorted_spending = Spending.objects.filter(spending_owner=request.user,
                                            date__range=[start_date, end_date]).order_by('-date')
     else:
-        spending = Spending.objects.filter(
+        unsorted_spending = Spending.objects.filter(
             spending_owner=request.user).order_by('-date')
+
+    if selected_sort == 'Income':
+        spending = unsorted_spending.filter(spending_type=Spending_type.INCOME)
+    elif selected_sort == 'Expenditure':
+        spending = unsorted_spending.filter(spending_type=Spending_type.EXPENDITURE)
+    elif selected_sort:
+        spending = unsorted_spending.order_by(selected_sort)
+    else:
+        spending = unsorted_spending
 
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
