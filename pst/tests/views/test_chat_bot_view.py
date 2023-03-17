@@ -1,9 +1,16 @@
 from django.test import Client, TestCase
-
+from django.contrib import messages
+from pst.models import User
+from django.urls import reverse
 
 class ChatBotTestCase(TestCase):
+
     def setUp(self):
+        self.url = reverse('chat_bot')
         self.client = Client()
+
+    def test_add_categories_url(self):
+        self.assertEqual(self.url, '/chat_bot/')
 
     def test_chat_bot_response(self):
         response = self.client.post('/chat_bot/', {'user_input': 'hi'})
@@ -84,6 +91,12 @@ class ChatBotTestCase(TestCase):
         response = self.client.get('/chat_bot/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'chat_bot.html')
+
+    def test_error_message_when_submit_empty_string(self):
+        response = self.client.post('/chat_bot/', {'user_input': ''})
+        self.assertEqual(response.status_code, 200)
+        messages_list = list(response.context['messages'])
+        self.assertEqual(messages_list[0].level, messages.ERROR)
 
 
         
