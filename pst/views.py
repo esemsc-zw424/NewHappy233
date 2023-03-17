@@ -712,7 +712,7 @@ def add_post(request):
             for file in request.FILES.getlist('image'):
                 PostImage.objects.create(
                     post=post,
-                    image=file
+                    file=file
                 )
             return redirect('forum')
     else:
