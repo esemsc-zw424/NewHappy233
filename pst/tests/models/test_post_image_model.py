@@ -45,7 +45,7 @@ class PostImageModelTestCase(TestCase):
         self._assert_post_image_is_valid()
 
     def test_invalid_file_format(self):
-        test_file = SimpleUploadedFile("invalid_file.xyz", content=b"file_content", content_type="application/octet-stream")
-        self.post_image.file = test_file
+        file = SimpleUploadedFile("invalid_file.xyz", content=b"file_content", content_type="application/octet-stream")
+        self.post_image.file = file
         self._assert_post_image_is_invalid()
     

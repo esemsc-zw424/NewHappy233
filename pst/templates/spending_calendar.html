@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class ="container">
-  <p class="fs-1">Hello, {{ request.user.first_name }}, this is your spending calendar!</p>
+  <p class="fs-1">This is your spending calendar!</p>
   <div class ="row">
     <div class="col">
       <div class="card">
@@ -47,8 +47,8 @@
                   {% if day.2 != 0 or day.3 != 0 %}
                    
                       <div class="d-none d-sm-block" style="color: #268598;">
-                        <p>expenditure: £<b>{{ day.2 }}</b></p>
-                        <p>income: £<b>{{ day.3 }}</b></p>
+                        <p>Expenditure: £<b>{{ day.2 }}</b></p>
+                        <p>Income: £<b>{{ day.3 }}</b></p>
                       </div>
                     
                   {% endif %}

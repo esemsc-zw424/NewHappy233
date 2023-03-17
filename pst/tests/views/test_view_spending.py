@@ -10,7 +10,6 @@ class ViewSpendingTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.get(email = "johndoe@example.org")
-        self.factory = RequestFactory()
         self.url = reverse('view_spendings')
     
     def test_view_requests_success(self):
@@ -25,7 +24,7 @@ class ViewSpendingTestCase(TestCase):
         self.assertEqual(response.context['spending'].count(), 0)
         self.assertEqual(response.context['page_obj'].number, 1)
 
-    def test_view_spendings_with_data(self):
+    def test_view_spendings_with_valid_data(self):
         Spending.objects.create(
             title='Test Spending',
             amount=100,
