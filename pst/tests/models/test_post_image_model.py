@@ -26,7 +26,7 @@ class PostImageModelTestCase(TestCase):
             self.post_image.full_clean()
     
     def test_file_can_be_empty(self):
-        self.post_image.image = None
+        self.post_image.file = None
         self._assert_post_image_is_valid()
     
     def test_jpg_file_is_valid_format(self):

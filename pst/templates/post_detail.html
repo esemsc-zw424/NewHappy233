@@ -1,15 +1,25 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <head>
+    {% load static %}
     <meta charset="utf-8">
     <title>Post detail</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/8eaf89f6f3.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/forum.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/post_details_and_personal_reply.css' %}" />
+    <style>
+        .container_post {
+            margin: 20px auto;
+            max-width: 800px;
+          }
+          
+    </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container_post">
         <h1>Post details</h1>
         <hr>
         <a href="{% url 'add_reply_to_post' post.id %}" class="btn btn-primary mb-3">Add reply to the post</a>
@@ -26,7 +36,7 @@
             <div class="content">Content: {{ post.content }}</div>
             <div class="images">
                 {% for i in post.images.all %}
-                <img src="{{ i.image.url }}" width="200" height="200">
+                <img src="{{ i.file.url }}" width="200" height="200">
                 {% endfor %}
             </div>
             <div class="info">{{ post.post_date|date:'d M Y, H:i'}}</div>
@@ -73,7 +83,7 @@
                 </div>
                 <div class="content">{{ r.content }}</div>
                 <div class="info">in {{ r.reply_date|date:'d M Y, H:i' }}</div>
-                <div>
+                <div class="reply-actions d-flex justify-content-between">
                     {% if request.user.is_authenticated %}
                         {% if request.user in r.likes.all %}
                             <form method="post" action="{% url 'like_reply' r.id post.id %}">
