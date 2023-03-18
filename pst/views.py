@@ -492,12 +492,18 @@ def spending_report(request):
         selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
     spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
 
-    if sorted:
-        sorted_spendings = selected_spendings.order_by(sorted)
+    if sorted == 'spending_category':
+        sorted_spendings = selected_spendings.order_by('spending_category')
+    elif sorted == 'amount':
+        sorted_spendings = selected_spendings.order_by('amount')
+    elif sorted == '-amount':
+        sorted_spendings = selected_spendings.order_by('-amount')
+    elif sorted == 'date':
+        sorted_spendings = selected_spendings.order_by('date')
     else:
         sorted_spendings = selected_spendings
 
-    paginator = Paginator(sorted_spendings, 10)
+    paginator = Paginator(sorted_spendings, 3)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
