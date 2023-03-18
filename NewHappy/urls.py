@@ -34,6 +34,7 @@ urlpatterns = [
     path('budget_show/', views.show_budget, name='budget_show'),
     path('user_guideline/', views.user_guideline, name='user_guideline'),
     path('log_in/', views.log_in, name='log_in'),
+    path('accounts/login/', views.log_in, name='log_in'),
     path('chat_bot/', views.chat_bot, name='chat_bot'),
     path('log_out/', views.log_out, name='log_out'),
     path('accounts/', include('allauth.urls')),

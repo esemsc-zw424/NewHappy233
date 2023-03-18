@@ -1,37 +1,9 @@
+{% extends 'base.html' %}
 {% load mathfilters %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1440, maximum-scale=1.0" />
-    {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}"/>
-    
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'css/style.css' %}"
-    />
 
-    
-    <meta name="og:type" content="website" />
-    <meta name="twitter:card" content="photo" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/home-page.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styleguide.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/globals.css' %}" />
-    
+{% load static %}
+{% block body %}
 
-  </head>
   <body style="margin: 0; background: #d0e6fd">
 
     <div class="container-center-horizontal">
@@ -448,18 +420,9 @@
     </div>
     
 </div>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
-            integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.min.js"
-            integrity="sha384-PsUw7Xwds7x08Ew3exXhqzbhuEYmA2xnwc8BuD6SEr+UmEHlX8/MCltYEodzWA4u"
-            crossorigin="anonymous"></script>
-    
-   
-   
-  
+
+    {% endblock %}
 
     
 
-  </body>
-</html>
+

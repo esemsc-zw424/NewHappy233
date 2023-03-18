@@ -274,7 +274,8 @@ def home(request):
 
     calendar_context = get_spending_calendar_context(request)
 
-    context.update(calendar_context).update(daily_reward_context)
+    context.update(calendar_context)
+    context.update(daily_reward_context)
 
     return render(request, 'home.html', context)
 
