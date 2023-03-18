@@ -9,6 +9,8 @@ class CategoriesModelTestCase(TestCase):
     def setUp(self):
         self.categories = Categories.objects.get(name = 'Food')
         self.spending_owner = User.objects.get(email = "johndoe@example.org")
+        
+        
 
     def _assert_categories_is_valid(self):
         try:
@@ -34,7 +36,7 @@ class CategoriesModelTestCase(TestCase):
     def test_name_can_be_100_characters(self):
         self.categories.name = 'x' * 100
         self._assert_categories_is_valid()
-
+    
     def test_spending_owner_cannot_be_blank(self):
         self.categories.owner = None
         self._assert_categories_is_invalid()
@@ -67,4 +69,5 @@ class CategoriesModelTestCase(TestCase):
         self.categories.default_category == True
         self._assert_categories_is_valid()
 
+    
     

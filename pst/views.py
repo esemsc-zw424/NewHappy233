@@ -1,9 +1,14 @@
 from audioop import reverse
 import datetime
-from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Sum
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from django.shortcuts import render,redirect,get_object_or_404
+
+from django.urls import reverse
+from django.http import HttpResponseNotFound
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 
@@ -17,37 +22,43 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Sum
 from datetime import timedelta
 from django.utils import timezone
+from django.db.models import Max, Sum, Subquery, OuterRef
 
+import calendar
+from datetime import date, datetime
+import datetime as dt
 
-from .models import TaskType, User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyTask,DailyTaskStatus,Day
+from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType, DeliveryAddress
 
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.hashers import check_password
 
 import os
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+from django.conf import settings
 from NewHappy.settings import MEDIA_ROOT
 from django.http import HttpResponse
 import random
 import nltk
 nltk.download('punkt')
 nltk.download('wordnet')
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from django.db.models import Sum
 
 
-# Create your views here.
 
-high_reward_points = 30
-normal_reward_points = 10
+high_task_points = 30
+normal_task_points = 10
 current_datetime = timezone.now()
+
 @login_required
 def user_feed(request):
     return render(request, 'user_feed.html')
-    
+
+
 @login_prohibited
 def visitor_signup(request):
     if request.method == 'POST':
@@ -63,10 +74,56 @@ def visitor_signup(request):
         return render(request, 'visitor_signup.html', {'form': form})
 
 
-@login_prohibited
-def visitor_introduction(request):
-    return render(request, 'visitor_introduction.html')
+# Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
+def get_spending_calendar_context(request, year=datetime.now().year, month=datetime.now().month):
+    month_calendar = calendar.Calendar()
+    month_calendar_list = month_calendar.monthdays2calendar(year, month)
+    month_name = calendar.month_name[month]
+    spendings = Spending.objects.filter(spending_owner=request.user)
+    if month == 1:
+        previous_month = 12
+        previous_year = year - 1
+        next_month = 2
+        next_year = year
+    elif month == 12:
+        previous_month = 11
+        previous_year = year
+        next_month = 1
+        next_year = year + 1
+    else:
+        previous_month = month - 1
+        next_month = month + 1
+        next_year = year
+        previous_year = year
 
+    for i in range(0, len(month_calendar_list)):
+        for j in range(0, len(month_calendar_list[i])):
+            spendings_daily = []
+            exp_sum = 0
+            income_sum = 0
+            # adds each spending in the database to each date in the calendar
+            for spending in spendings:
+                if spending.date.day == month_calendar_list[i][j][
+                        0] and spending.date.month == month and spending.date.year == year:
+                    spendings_daily.append(spending)
+            # calculates the sum of expenditures and sums of all the spendings in a single day
+            for spending_daily in spendings_daily:
+                if spending_daily.spending_type == Spending_type.EXPENDITURE:
+                    exp_sum += spending_daily.amount
+                else:
+                    income_sum += spending_daily.amount
+            month_calendar_list[i][j] = (
+                month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
+
+    context = {'month_calendar_list': month_calendar_list,
+               'year': year, 'month': month_name,
+               'previous_month': previous_month,
+               'previous_year': previous_year,
+               'next_month': next_month,
+               'next_year': next_year,
+               'exp_amount': exp_sum,
+               'income_amount': income_sum}
+    return context
 
 def get_login_task_status(request):
     pos = int(request.GET.get("pos", 0))
@@ -99,7 +156,6 @@ def get_login_task_status(request):
 
     return JsonResponse(data)
 
-
 @login_required
 @csrf_exempt
 def add_login_task_points(request):
@@ -115,7 +171,7 @@ def add_login_task_points(request):
             daily_task_status = DailyTaskStatus.objects.create(
                 task=login_task,
                 day=day,
-                task_points=high_reward_points,
+                task_points=high_task_points,
                 task_type=TaskType.LOGIN.name
             )
 
@@ -124,7 +180,7 @@ def add_login_task_points(request):
             daily_task_status = DailyTaskStatus.objects.create(
                 task=login_task,
                 day=day,
-                task_points=normal_reward_points,
+                task_points=normal_task_points,
                 task_type=TaskType.LOGIN.name
             )
 
@@ -137,10 +193,10 @@ def check_already_logged_in_once_daily(request):
     user = request.user
     # if over a day since last login
     if current_datetime - user.last_login > timedelta(hours=24):
-        user.logged_in_once_daily = False 
+        user.logged_in_once_daily = False
         user.save()
     else:
-        user.logged_in_once_daily = True 
+        user.logged_in_once_daily = True
         user.save()
 
 
@@ -178,17 +234,55 @@ def add_consecutive_login_days(request):
 
 @login_required
 def home(request):
-    user = request.user
-    #if user.is_authenticated & user.login_daily == False:
-        #show_calendar(request)
     week_list = [1,2,3,4,5]
     weekday_list = [1,2,3,4,5,6,7]
     current_day = str(timezone.now().day)
     pos = get_position_in_daily_reward(request)
-    super_task_point_pos = get_super_task_point_position(request)
-    context = {"pos":pos,"super_task_point_pos":super_task_point_pos, "week_list": week_list, "weekday_list": weekday_list,"current_datetime":current_day,
-               "high_reward_points": high_reward_points, "normal_reward_points": normal_reward_points}
+    super_task_pos = get_super_task_point_position(request)
+
+    user = request.user
+    percentage = calculate_budget(request)
+    month = datetime.now().month
+    revenue = Spending.objects.filter(
+        spending_owner=request.user,
+        date__month=month,
+        spending_type=Spending_type.INCOME,
+    )
+
+    if (not revenue):
+        monthly_revenue = 0
+    else:
+        monthly_revenue = revenue.aggregate(nums=Sum('amount')).get('nums')
+
+    expense = Spending.objects.filter(
+        spending_owner=request.user,
+        date__month=month,
+        spending_type=Spending_type.EXPENDITURE,
+    )
+
+    if (not expense):
+        monthly_expense = 0
+    else:
+        monthly_expense = expense.aggregate(nums=Sum('amount')).get('nums')
+
+    context = {'user': user, 'percentage': percentage,
+               'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
+
+    daily_reward_context = {"pos": pos, "super_task_pos": super_task_pos, "week_list": week_list,
+                            "weekday_list": weekday_list, "current_datetime": current_day,
+                            "high_task_points": high_task_points, "normal_task_points": normal_task_points}
+
+    calendar_context = get_spending_calendar_context(request)
+
+    context.update(calendar_context).update(daily_reward_context)
+
     return render(request, 'home.html', context)
+
+
+@login_prohibited
+def visitor_introduction(request):
+    return render(request, 'visitor_introduction.html')
+
 
 
 @login_required
@@ -200,7 +294,6 @@ def edit_spending(request, spending_id):
         spending = Spending.objects.get(id = spending_id)
     except ObjectDoesNotExist:
         return render(request, 'view_spendings.html')
-    
 
     if request.method == 'POST':
         form = EditSpendingForm(request.POST, instance=spending)
@@ -212,8 +305,6 @@ def edit_spending(request, spending_id):
     else:
         form = EditSpendingForm(instance=spending)
     return render(request, "edit_spending.html", {'form': form, 'spending': spending})
-
-
 
 
 @login_prohibited
@@ -252,100 +343,125 @@ def log_out(request):
     logout(request)
     return redirect('visitor_introduction')
 
+
 # Chatbot is a simple virtual help assistant that can answer user's question base on keywords
-
-
+@login_required
 def chat_bot(request):
     chat_history = []  # this is use to store all the chat history between user and chatbot
     if request.method == 'POST':
         user_input = request.POST['user_input']
-        chat_bot_response = respond(user_input)
+        chat_bot_response = respond(request, user_input)
         chat_history.append((user_input, chat_bot_response))
         return render(request, 'chat_bot.html', {'chat_history': chat_history})
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
 
-
-def respond(user_input):
+@login_required
+def respond(request, user_input):
     lemmatizer = WordNetLemmatizer()
     keywords = {
         "pst": ["personal spending tracker", "pst"],
-        "budget": ["budget", "spending budget", "financial budget"],
+        "category": ["category", "categories", "spending category"],
+        "budget": ["budget", "spending budget", "financial budget", "myplan"],
         "expense": ["expense", "spending", "financial expense"],
         "track": ["track", "record", "keep track"],
-        "saving": ["saving", "save", "financial saving"],
-        "finance": ["finance", "financial management", "money management"],
+        "forum": ["forum", "discussion board", "message board", "online community", "bulletin board", "chat room"],
+        "report": ["report", "chart"],
+        "reward": ["reward", "shop", "points"],
+        "calender": ["calender", "date"],
+
+        "help": ["help"],
         "hello": ["hi", "hello", "hey", "greetings", "heya", "hola", "what's up", "sup"],
         "bye": ["bye", "goodbye", "see you later", "adios", "later", "farewell"]
     }
 
     responses = {
         "pst": ["Our Personal Spending Tracker helps you keep track of your daily expenses and budget."],
+        "category": [
+            "While we offer default categories for both income and expenses, you always have the option to customize them to fit your personal preferences and needs in the settings!"],
         "budget": ["You can use our Personal Spending Tracker to set budgets for different categories of expenses."],
-        "expense": ["You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent. Would you like help tracking an expense?"],
-        "track": ["Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."],
-        "saving": ["Our Personal Spending Tracker can help you track your savings and keep you on track to reach your financial goals."],
-        "finance": ["With the PSC, you can take control of your personal finances and make informed decisions about your spending and saving."],
+        "expense": [
+            "You can log all your expenses on our Personal Spending Tracker, including the date, category, and amount spent."],
+        "track": [
+            "Our Personal Spending Tracker is designed to help you keep track of your daily expenses, budget, and savings."],
+        "forum": [
+            "Our online forum is a great place to connect with other users, share tips and advice, and discuss personal finance topics. You can join the forum by simply clicking on the Forum button on the home page."],
+        "report": [
+            "Our report feature can create a chart of your expenses and provide a detailed list of your spending."],
+        "reward": [
+            "By using our Personal Spending Tracker consistently, you can earn points which can be redeemed for various rewards in our reward shop."],
+        "calender": [
+            "Our calendar feature can assist you in monitoring your income and expenses for the current month, allowing you to quickly determine your spending and effectively manage your financial plan with greater efficiency!"],
+
+        "help": [
+            "you can try asking about pst, budget, expense, track, forum, report, rewards, category, calender for more information."],
         "hello": ["Hello! How may I help you?"],
         "bye": ["Goodbye! Have a great day!"],
     }
-
-    for keyword, synonyms in keywords.items():
-        if user_input.lower() in [s.lower() for s in synonyms]:
-            return random.choice(responses[keyword])
-
-    tokens = word_tokenize(user_input)
-    tokens = [lemmatizer.lemmatize(token.lower()) for token in tokens]
-
-    for keyword, synonyms in keywords.items():
-        for token in tokens:
-            if token in synonyms:
+    if user_input:
+        for keyword, synonyms in keywords.items():
+            if user_input.lower() in [s.lower() for s in synonyms]:
                 return random.choice(responses[keyword])
-    return "Sorry, I do not understand what you mean."
 
-@login_required
-def add_spending(request):
-    if request.method == 'POST':
-        
-        form = AddSpendingForm(request.POST, request.FILES, user=request.user)
-        if form.is_valid():
-            spending = form.save(commit=False)
-            spending.spending_owner = request.user
-            spending.save()
-            for file in request.FILES.getlist('file'):
-                SpendingFile.objects.create(
-                    spending=spending,
-                    file=file
-                )
-            return redirect('home')
+        tokens = word_tokenize(user_input)
+        tokens = [lemmatizer.lemmatize(token.lower()) for token in tokens]
+
+        possible_keywords = []
+        for keyword, synonyms in keywords.items():
+            for token in tokens:
+                if token in synonyms:
+                    possible_keywords.append(keyword)
+                    break
+
+        if possible_keywords:
+            message = f"Did you mean {', '.join(possible_keywords)}?"
+        else:
+            message = "Sorry, I do not understand what you mean. You can type 'help' for a list of possible commands."
+
+        for keyword in possible_keywords:
+            if keyword in responses:
+                message = random.choice(responses[keyword])
+                break
+
+        return message
     else:
-        form = AddSpendingForm(user=request.user)
-    return render(request, 'add_spending.html',  {'form': form})
-
+        messages.add_message(request, messages.ERROR,
+                             "You can not submit empty space!!!")
 
 @login_required
 def view_spendings(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    selected_sort = request.GET.get('sorted')
 
     if start_date and end_date:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
-        spending = Spending.objects.filter(date__range=[start_date, end_date]).order_by('date')
+        start_date = dt.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = dt.datetime.strptime(end_date, '%Y-%m-%d').date()
+        unsorted_spending = Spending.objects.filter(spending_owner=request.user,
+                                           date__range=[start_date, end_date]).order_by('-date')
     else:
-        spending = Spending.objects.all().order_by('date')
+        unsorted_spending = Spending.objects.filter(
+            spending_owner=request.user).order_by('-date')
+
+    if selected_sort == 'Income':
+        spending = unsorted_spending.filter(spending_type=Spending_type.INCOME)
+    elif selected_sort == 'Expenditure':
+        spending = unsorted_spending.filter(spending_type=Spending_type.EXPENDITURE)
+    elif selected_sort:
+        spending = unsorted_spending.order_by(selected_sort)
+    else:
+        spending = unsorted_spending
 
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    spendings = Spending.objects.filter(spending_owner=request.user)
 
-    form = EditSpendingForm(user=request.user)
-    context = {'form': form, 'spending': spending, 'page_obj': page_obj}
+    add_form = AddSpendingForm(user=request.user)
+    edit_form = EditSpendingForm(user=request.user)
+    context = {'add_form': add_form, 'edit_form': edit_form, 'spending': spending, 'page_obj': page_obj}
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'spending_table.html', context)
     else:
         return render(request, 'view_spendings.html', context)
-
 
 
 @login_required
@@ -353,14 +469,26 @@ def edit_spending(request, spending_id):
     try:
         spending = Spending.objects.get(id = spending_id)
     except ObjectDoesNotExist:
-        return render(request, 'view_spendings.html')
+        return redirect('view_spendings')
+        
 
     if request.method == 'POST':
-        form = EditSpendingForm(request.user, request.POST, instance=spending)
-
+        form = EditSpendingForm(
+            request.user, request.POST, request.FILES, instance=spending)
+        
         if form.is_valid():
             form.save()
-            messages.success(request, 'success')
+            file_list = request.FILES.getlist('file')
+            if file_list:
+                SpendingFile.objects.filter(spending=spending).delete()
+                for file in file_list:
+                    SpendingFile.objects.create(
+                        spending=spending,
+                        file=file
+                    )
+            if form.cleaned_data['delete_file']:
+                SpendingFile.objects.filter(spending=spending).delete()
+            messages.success(request, 'Change made successfully')
             return redirect('view_spendings')
     else:
         form = EditSpendingForm(user=request.user)
@@ -376,44 +504,80 @@ def delete_spending(request, spending_id):
     return redirect('view_spendings') 
    
 
+@login_required
+def add_spending(request):
+    if request.method == 'POST':
+        form = AddSpendingForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            spending = form.save(commit=False)
+            spending.spending_owner = request.user
+            spending.save()
+            for file in request.FILES.getlist('file'):
+                SpendingFile.objects.create(
+                    spending=spending,
+                    file=file
+                )
+            messages.success(request, 'Spending added successfully')
+            return redirect('view_spendings')
+    else:
+        form = AddSpendingForm()
+    return render(request, 'view_spendings.html', {'form': form})
+
 
 @login_required
 def add_spending_categories(request):
     if request.method == 'POST':
-        form = CategoriesForm(request.POST, request.FILES)
+        form = CategoriesForm(request.POST)
         if form.is_valid():
             category = form.save(commit=False)
             category.owner = request.user
             category.save()
-            return redirect('home')
+            messages.add_message(request, messages.SUCCESS,
+                             "Category successfully added")
+            return redirect('view_spending_categories')
+
     else:
         form = CategoriesForm()
-    return render(request, 'add_spending_categories.html',  {'form': form})
+    return render(request, 'view_spending_categories.html', {'form': form})
+
+@login_required
+def get_categories_by_type(request):
+    spending_type = request.GET.get('spending_type', '')
+    categories = Categories.objects.filter(
+        owner=request.user,
+        categories_type=spending_type
+    ).values('id', 'name')
+
+    data = {
+        'categories': list(categories)
+    }
+    return JsonResponse(data)
+
 
 
 @login_required
 def view_spending_categories(request):
-
-    if request.method == 'POST':
-        delete_spending_categories(request)
+    form = CategoriesForm()
     categories_expenditure = Categories.objects.filter(
         categories_type=Spending_type.EXPENDITURE, owner=request.user)
     categories_income = Categories.objects.filter(
         categories_type=Spending_type.INCOME, owner=request.user)
-    return render(request, 'view_spending_categories.html', {'categories_expenditure': categories_expenditure, 'categories_income': categories_income})
+    return render(request, 'view_spending_categories.html',
+                  {'categories_expenditure': categories_expenditure, 'categories_income': categories_income,
+                   'form': form})
 
 
 @login_required
-def delete_spending_categories(request):
-    if request.method == 'POST':
-        category_id = request.POST.get('category_id')
-        category = Categories.objects.get(id=category_id)
-        if category.default_category == False:
-            category.delete()
-        else:
-            messages.add_message(request, messages.ERROR,
-                                 "You can not delete default category!")
-        return redirect('view_spending_categories')
+def delete_spending_categories(request, category_id):
+    category = Categories.objects.get(id=category_id)
+    if category.default_category == False:
+        category.delete()
+        messages.add_message(request, messages.SUCCESS,
+                             "Category successfully deleted")
+    else:
+        messages.add_message(request, messages.ERROR,
+                             "You can not delete default category!")
+    return redirect('view_spending_categories')
 
 
 @login_required
@@ -425,6 +589,7 @@ def update_spending_categories(request, category_id):
             if form.is_valid():
                 form = CategoriesForm(request.POST, instance=category)
                 form.save()
+                messages.success(request, 'Change made successfully')
                 return redirect('view_spending_categories')
         else:
             messages.add_message(request, messages.ERROR,
@@ -433,7 +598,8 @@ def update_spending_categories(request, category_id):
     else:
         category = Categories.objects.get(id=category_id)
         form = CategoriesForm(instance=category)
-    return render(request, 'update_spending_categories.html', {'form': form, 'category': category})
+    return redirect('view_spending_categories')
+
 
 @login_required
 def user_profile(request):
@@ -459,50 +625,218 @@ def edit_profile(request):
         form = EditProfileForm(instance=user)
     return render(request, 'edit_profile.html', {'form': form})
 
+
 @login_required
 def user_guideline(request):
     return render(request, 'user_guideline.html')
-    
-@login_required
-def sum_expenditures(request):
-    expenditures = Spending.objects.filter(spending_type=Spending_type.EXPENDITURE).order_by('-spending_category')
-    expenditures_amount = expenditures.values('spending_category').annotate(exp_amount=Sum('amount'))
-    return render(request, 'expenditure_report.html', {'expenditures': expenditures, 'expenditures_amount': expenditures_amount})
+
 
 @login_required
-def sum_incomes(request):
-    incomes = Spending.objects.filter(spending_type=Spending_type.INCOME).order_by('-spending_category')
-    incomes_amount = incomes.values('spending_category').annotate(income_amount=Sum('amount'))
-    return render(request, 'income_report.html', {'incomes': incomes, 'incomes_amount': incomes_amount})
+def spending_report(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    selected_categories = request.GET.get('selected_categories')
+    selected_sort = request.GET.get('sorted')
+    if start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        spendings = Spending.objects.filter(spending_owner=request.user, date__range=[start_date, end_date])
+    else:
+        spendings = Spending.objects.filter(spending_owner=request.user)
+
+    if selected_categories == 'Income':
+        report_type = 'Income'
+        selected_spendings = spendings.filter(spending_type=Spending_type.INCOME)
+    else:
+        report_type = 'Expenditure'
+        selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
+    spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
+
+    if selected_sort:
+        sorted_spendings = selected_spendings.order_by(selected_sort)
+    else:
+        sorted_spendings = selected_spendings
+
+    paginator = Paginator(sorted_spendings, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {
+        'report_type': report_type,
+        'selected_spendings': selected_spendings,
+        'spendings_data': spendings_data,
+        'sorted_spendings': sorted_spendings,
+        'page_obj': page_obj
+    }
+    return render(request, 'spending_report.html', context)
 
 @login_required
 def set_budget(request):
     if request.method == 'POST':
-        form = BudgetForm(request.POST)
+        form = TotalBudgetForm(request.user, request.POST)
         if form.is_valid():
             budget = form.save(commit=False)
             budget.budget_owner = request.user
-            print(budget.budget_owner_id)
             budget.save()
             return redirect('budget_show')
     else:
-        form = BudgetForm()
+        form = TotalBudgetForm(request.user)
     return render(request, 'budget_set.html', {'form': form})
 
-@login_required
-def show_budget(request):
-    total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
-    budget = Budget.objects.filter(budget_owner=request.user).last()
+
+def calculate_budget(request):
+    # budget = sum(category_budgets.values_list('total_budget', flat=True))
+    budget = TotalBudget.objects.filter(budget_owner=request.user).last()
+    if budget:
+        total = Spending.objects.filter(
+            spending_owner=request.user,
+            spending_type=Spending_type.EXPENDITURE,
+            date__range=(budget.start_date, budget.end_date),
+        ).aggregate(
+            nums=Sum('amount')
+        ).get('nums') or 0
+    else:
+        total = 0
     if budget == None:
         spending_percentage = 0
     elif total == None:
-        messages.add_message(request, messages.INFO, 'you have not spent yet')
         spending_percentage = 0
     else:
         spending_percentage = int((total / budget.limit) * 100)
-        if spending_percentage >= 100:
-            messages.add_message(request, messages.INFO, 'you have exceeded the limit')
-    return render(request, 'budget_show.html', {'budget': budget, 'spending_percentage': spending_percentage})
+    return spending_percentage
+
+
+@login_required
+def show_budget(request):
+    selected_sort = request.GET.get('sorted')
+    # the budget will be refreshed automatically after the end date
+    # of your last budget
+    current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
+    if current_budget and current_budget.end_date < datetime.now().date():
+        TotalBudget.objects.create(
+            name=current_budget.name,
+            limit=current_budget.limit,
+            start_date=datetime.now().date(),
+            end_date=datetime.now().date() + timedelta(days=30),
+            budget_owner=request.user,
+        )
+    current_month = datetime.now().month
+    # total_spending = Spending.objects.filter(
+    # spending_owner = request.user,
+    # date__month = current_month,
+    #  spending_type = Spending_type.EXPENDITURE,
+    # ).aggregate(nums=Sum('amount')).get('nums')
+    # total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
+    total_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
+    percentage = calculate_budget(request)
+    # check if a message with the INFO level already exists
+    message_exists = False
+    for message in messages.get_messages(request):
+        if message.level == messages.INFO:
+            message_exists = True
+            break
+
+    if percentage >= 100 and not message_exists:
+        messages.add_message(request, messages.INFO,
+                             'you have exceeded the limit')
+
+    categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
+    category_budgets = []
+    for category in categories:
+        budget = Budget.objects.filter(spending_category=category).last()
+        if budget:
+            # print(category.name + str(budget.limit))
+            spending_sum = Spending.objects.filter(
+                spending_owner=request.user,
+                # date__month=current_month,
+                date__range=(total_budget.start_date, total_budget.end_date),
+                spending_type=Spending_type.EXPENDITURE,
+                spending_category=category,
+            ).aggregate(nums=Sum('amount')).get('nums') or 0
+
+            # print(budget.limit)
+            category_budgets.append({
+                'name': category.name,
+                'budget': budget.limit,
+                'spending': spending_sum,
+                'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
+                # 'start_date': total_budget.start_date,
+                # 'end_date': total_budget.end_date,
+            })
+        else:
+            if total_budget:
+                spending_sum = Spending.objects.filter(
+                    spending_owner=request.user,
+                    # date__month=current_month,
+                    date__range=(total_budget.start_date, total_budget.end_date),
+                    spending_type=Spending_type.EXPENDITURE,
+                    spending_category=category,
+                ).aggregate(nums=Sum('amount')).get('nums') or 0
+                category_budgets.append({
+                    'name': category.name,
+                    'budget': 'Not set yet',
+                    'spending': spending_sum,
+                    'percentage': None,
+                    # 'start_date': None,
+                    # 'end_date': None,
+                })
+            else:
+                category_budgets.append({
+                    'name': category.name,
+                    'budget': 'Not set yet',
+                    'spending': 'Please set a total budget first',
+                    'percentage': None,
+                    # 'start_date': None,
+                    # 'end_date': None,
+            })
+    if selected_sort == '-budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            )
+        )
+    elif selected_sort == '-spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+        )
+    elif selected_sort == '':
+        sorted_category_budgets = category_budgets
+    else:
+        print(1)
+        sorted_category_budgets = category_budgets
+    form = TotalBudgetForm(request.user)
+    specific_form = BudgetForm(request.user)
+
+    return render(request, 'budget_show.html', {
+        'budget': total_budget,
+        'spending_percentage': percentage,
+        'category_budgets': sorted_category_budgets,
+        'form': form,
+        'specific_form': specific_form,
+    })
 
 
 # @login_required
@@ -512,36 +846,72 @@ def show_budget(request):
 #         Reward.objects.create(name='Free T-shirt', points_required=20)
 #         Reward.objects.create(name='Gift card', points_required=50)
 
-#     rewards = Reward.objects.all()
-#     rewards_points = RewardPoint.objects.filter(user=request.user).filter()
-#     context = {
-#         'rewards': rewards,
-#         'reward_points': rewards_points,
-#     }
-#     return render(request, 'index.html', context)
 
-# @login_required
-# def redeem(request, reward_id):
-#     reward = Reward.objects.get(id=reward_id)
-#     reward_points = RewardPoint.objects.filter(user=request.user).first()
 
-#     error_message = "You don't have enough reward points to redeem this reward."
-#     context = {
-#         'error_message': error_message, }
+@login_required
+def index(request):
+    address = DeliveryAddress.objects.filter(user=request.user).last()
+    form = AddressForm()
 
-#     if reward_points is None:
-#         error_message = "You don't have enough reward points to redeem this reward."
-#         return render(request, 'error.html', context)
-#     elif reward_points.points >= reward.points_required:
-#             reward_points.points -= reward.points_required
-#             reward_points.save()
-#             return redirect('index')
-#     else:
-#         error_message = "You don't have enough reward points to redeem this reward."
-#         context = {
-#             'error_message': error_message,}
+    if Reward.objects.count() == 0:
+        Reward.objects.create(
+            name='T-shirt', points_required=20, image='rewards/shirt.jpg')
+        Reward.objects.create(name='PlayStation Store 50 GBP Gift Card',
+                              points_required=50, image='rewards/playstation_gift_card.jpg')
+        Reward.objects.create(name="Xbox 10 GBP Gift Card",
+                              points_required=10, image='rewards/xbox_gift_card.jpg')
+        Reward.objects.create(name="Amazon 20 GBP Gift Card",
+                              points_required=20, image='rewards/amazon_gift_card.jpg')
 
-#         return render(request, 'error.html', context)
+#
+    rewards = Reward.objects.all()
+    context = {
+        'form': form,
+        'rewards': rewards,
+        'task_points': request.user.total_task_points,
+        'address': address,
+    }
+    return render(request, 'index.html', context)
+
+
+@login_required
+def redeem(request, reward_id):
+    user = request.user
+    total_task_points = user.total_task_points
+    reward = Reward.objects.get(id=reward_id)
+
+    if total_task_points is None:
+
+        messages.add_message(
+            request, messages.INFO, "You don't have enough reward points to redeem this reward.")
+        return redirect('index')
+    elif total_task_points >= reward.points_required:
+        user.decrease_total_task_points(reward.points_required)
+        messages.add_message(
+            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
+        return redirect('index')
+    else:
+
+        messages.add_message(
+            request, messages.INFO, "You don't have enough reward points to redeem this reward.")
+        return redirect('index')
+
+
+def add_address(request):
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user
+            address.save()
+            messages.success(request, 'success')
+            return redirect('index')
+
+    else:
+        form = AddressForm()
+    return render(request, "index.html", {'form': form})
+
 
 @login_required
 def forum(request):
@@ -554,6 +924,7 @@ def forum(request):
 
     return render(request, 'forum.html', {'page_obj': page_obj})
 
+
 @login_required
 def personal_forum(request):
     posts = Post.objects.filter(user=request.user).order_by('-post_date')
@@ -563,31 +934,45 @@ def personal_forum(request):
     for post in page_obj:
         post.replies = Reply.objects.filter(parent_post=post)
 
+    return render(request, 'personal_forum.html', {'page_obj': page_obj})
+
+
+@login_required
+def personal_forum_reply(request):
     reply_page_number = request.GET.get('reply_page')
     replies = Reply.objects.filter(user=request.user).order_by('-reply_date')
     reply_paginator = Paginator(replies, 5)
     reply_page_obj = reply_paginator.get_page(reply_page_number)
 
-    
-    return render(request, 'personal_forum.html', {'page_obj': page_obj, 'reply_page_obj': reply_page_obj})
+    return render(request, 'personal_forum_reply.html', {'reply_page_obj': reply_page_obj})
+
 
 @login_required
 def add_post(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-            post = form.save(commit = False)
+            post = form.save(commit=False)
             post.user = request.user
             post.save()
             for file in request.FILES.getlist('image'):
                 PostImage.objects.create(
-                    post = post,
-                    image = file
+                    post=post,
+                    file=file
                 )
             return redirect('forum')
     else:
         form = PostForm()
     return render(request, 'add_post.html',  {'form': form})
+
+@login_required
+def delete_post(request, post_id):
+
+    delete_post = get_object_or_404(Post, id=post_id)
+    delete_post.delete()
+    messages.warning(request, "post has been deleted")
+    return redirect('personal_forum')
+
 
 @login_required
 def post_detail(request, post_id):
@@ -597,11 +982,12 @@ def post_detail(request, post_id):
     except Post.DoesNotExist:
         return HttpResponseNotFound()
     replies = Reply.objects.filter(parent_post=post)
-    paginator = Paginator(replies, 2)
+    paginator = Paginator(replies, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {'post': post, 'replies': replies, 'page_obj': page_obj}
     return render(request, 'post_detail.html', context)
+
 
 @login_required
 def like_post(request, post_id):
@@ -624,7 +1010,7 @@ def like_post(request, post_id):
         )
         created = True
     like_count = post.likes.count()
-    
+
     return redirect(request.META.get('HTTP_REFERER', reverse('forum')))
 
 
@@ -649,9 +1035,11 @@ def like_post_details(request, post_id):
         )
         created = True
     like_count = post.likes.count()
-    
-    redirect_url = request.META.get('HTTP_REFERER', reverse('post_detail', args=[post_id]))
+
+    redirect_url = request.META.get(
+        'HTTP_REFERER', reverse('post_detail', args=[post_id]))
     return redirect(redirect_url)
+
 
 @login_required
 def like_reply(request, reply_id, post_id):
@@ -675,8 +1063,10 @@ def like_reply(request, reply_id, post_id):
         )
         created = True
     like_count = reply.likes.count()
-    redirect_url = request.META.get('HTTP_REFERER', reverse('post_detail', args=[post_id]))
+    redirect_url = request.META.get(
+        'HTTP_REFERER', reverse('post_detail', args=[post_id]))
     return redirect(redirect_url)
+
 
 @login_required
 def add_reply_to_post(request, post_id):
@@ -695,6 +1085,7 @@ def add_reply_to_post(request, post_id):
 
     context = {'form': form, 'post': post}
     return render(request, 'add_reply_to_post.html', context)
+
 
 @login_required
 def add_reply_to_reply(request, post_id, parent_reply_id):
@@ -716,8 +1107,67 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
     return render(request, 'add_reply_to_reply.html', context)
 
 @login_required
+def delete_reply(request, reply_id):
+
+    delete_reply = get_object_or_404(Reply, id=reply_id)
+    delete_reply.delete()
+    messages.warning(request, "reply has been deleted")
+    return redirect('personal_forum_reply')
+
+
+@login_required
 def view_post_user(request, user_id, post_id):
     user = User.objects.get(id=user_id)
     post = Post.objects.get(id=post_id)
     context = {'user': user, 'post': post}
     return render(request, 'view_post_user.html', context)
+
+
+@login_required
+def view_settings(request):
+    form = TotalBudgetForm(request.user)
+    return render(request, 'setting_page.html', {'form': form})
+
+
+@login_required
+# Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
+def spending_calendar(request, year=datetime.now().year, month=datetime.now().month):
+    context = get_spending_calendar_context(request, year, month)
+    return render(request, 'spending_calendar.html', context)
+
+
+def set_specific_budget(request):
+    if request.method == 'POST':
+        form = BudgetForm(request.user, request.POST)
+        if form.is_valid():
+            budget = form.save(commit=False)
+            budget.budget_owner = request.user
+            budget.save()
+            return redirect('budget_show')
+    else:
+        form = BudgetForm(request.user)
+    return render(request, 'specific_budget_set.html', {'form': form})
+
+def password(request):
+    if request.user.is_authenticated:
+        current_user = request.user
+        if request.method == 'POST':
+            form = PasswordForm(data=request.POST)
+            if form.is_valid():
+                password = form.cleaned_data.get('password')
+                if check_password(password, current_user.password):
+                    new_password = form.cleaned_data.get('new_password')
+                    current_user.set_password(new_password)
+                    current_user.save()
+                    authenticated_user = authenticate(username=current_user.username, password=new_password)
+                    login(request, authenticated_user, backend='django.contrib.auth.backends.ModelBackend')
+                    messages.add_message(request, messages.SUCCESS, "Password updated!")
+                    return redirect('password')
+                else:
+                    messages.add_message(request, messages.ERROR, "Make sure you input right current password.")
+
+            else:
+                messages.add_message(request, messages.ERROR, "Please ensure that you enter the same password twice, and it contains at least one uppercase letter, one lowercase letter, and one number.")
+
+        form = PasswordForm()
+        return render(request, 'password.html', {'form': form})

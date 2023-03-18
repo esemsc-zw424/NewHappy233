@@ -1,19 +1,393 @@
-{% extends 'base_content.html' %}
-{% block content %}
 {% load mathfilters %}
-<div>
-    <h1>home page placeholder</h1>
-    <a href ='{% url 'add_spending' %}' class = 'btn btn-lg btn-primary'>Add spending</a>
-    <a href ='{% url 'view_spendings' %}' class = 'btn btn-lg btn-primary'>View spending</a>
-    <a href ='{% url 'add_spending_categories' %}' class = 'btn btn-lg btn-primary'>Add Spending Categories</a>
-    <a href ='{% url 'view_spending_categories' %}' class = 'btn btn-lg btn-primary'>View Spending Categories</a>
-    <a href ='{% url 'user_profile' %}' class = 'btn btn-lg btn-primary'>Show Profile</a>
-    <a href ='{% url 'budget_set' %}' class = 'btn btn-lg btn-primary'>Set Budget</a>
-    <a href ='{% url 'budget_show' %}' class = 'btn btn-lg btn-primary'>Show Budget</a>
-    <a href ='{% url 'user_guideline' %}' class = 'btn btn-lg btn-primary'>Helper</a>
-    <button class = 'btn btn-lg btn-primary' onclick="show_login_task_modal()">Show Reward</button>
-    <a href ='{% url 'forum' %}' class = 'btn btn-lg btn-primary'>Forum</a>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1440, maximum-scale=1.0" />
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}"/>
+    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/style.css' %}"
+    />
+
+    
+    <meta name="og:type" content="website" />
+    <meta name="twitter:card" content="photo" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/home-page.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styleguide.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/globals.css' %}" />
+    
+
+  </head>
+  <body style="margin: 0; background: #d0e6fd">
+
+    <div class="container-center-horizontal">
+      <div class="home-page screen">
+        <div class="overlap-group-container">
+          <!-- overlap-group5 is css for sidebar and top rectangle banner -->
+          <div class="overlap-group5">
+            <div class="rectangle-17"></div>
+            
+            <img
+              class="rectangle-9"
+              src="{% static 'img/rectangle-9.png' %}" 
+              alt="Rectangle 9"
+              id="welcome-rectangle"
+            />
+            
+            <h1 class="title">Welcome to your spending tracker</h1>
+
+            <div class="user-and-dropdown-menu">
+              <div class="group-3">
+                <div class="group-4">
+                  <div class="shaorunxinsbgmailcom">{{ user.email }}</div>
+                </div>
+                <div class="group-5">
+                  <!-- <img class="frame"  src="{% static 'img/frame-7.svg' %}" alt="Frame" /> -->
+                  <!-- <img class="image-3" src="{{ user.gravatar }}" alt="image 3" /> -->
+                  <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="user-account-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                      <span class="bi-person-circle"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="user-account-dropdown">
+                      <li><a class="dropdown-item" href="{% url 'edit_profile' %}"> Edit profile</a></li>
+                      <li><a class="dropdown-item" href="{% url 'log_out' %}"> Log out</a></li>
+                      <li><a class="dropdown-item" href="{% url 'view_settings' %}"> Settings</a></li>
+                      <li><a class="dropdown-item" href="{% url 'password' %}"> Edit password</a></li>
+{#                        {% if user.is_authenticated and user.first_name != "" and user.last_name != ""%}#}
+{#                            <li><a class="dropdown-item" href="{% url 'password' %}"> Edit password</a></li>#}
+{#                        {% endif %}#}
+                    </ul>
+                  </div>  
+                </div>
+              </div>
+            </div>
+            <!-- display user information and dropdown menu at the top -->
+        
+            
+      
+
+
+            <div class="sidebar-desktop">
+              <button class="sidebar-button">
+                <img
+                  class="button-image"
+                  src="{% static 'img/image-2@2x.png' %}"
+                  alt="image 2"
+                  onclick="show_login_task_modal()"
+                />
+              </button>
+
+              
+              <div class="sidebar-list-active sidebar-list">
+                <div class="selected"></div>
+                <a href='{% url 'home' %}' class="sidebar-button">
+                  <div class="overlap-group">
+                    <img class="frame-1" src="{% static 'img/frame.svg' %}" alt="Frame" />
+                    <div class="title-1 title-9 outfit-normal-bunker-24px">
+                      Overview
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <a href ='{% url 'view_spendings' %}' class = 'sidebar-button' name="bookkeep_btn">
+                <div class="sidebar-list-inactive sidebar-list">
+                  <img class="frame-2" src="{% static 'img/frame-1.svg' %}" alt="Frame" />
+                  <div class="title-2 title-9 outfit-normal-bunker-24px">
+                    Bookkeeping
+                  </div>
+                </div>
+              </a>
+
+              <a href ='{% url 'spending_report' %}' class = 'sidebar-button' name="report_btn">
+                <div class="sidebar-list-inactive-1 sidebar-list-inactive-7">
+                  <div class="frame-3">
+                    <div class="overlap-group-1">
+                      <img class="vector" src="{% static 'img/profile.svg' %}" alt="Vector" />
+                      <img
+                        class="vector-1"
+                        src="{% static 'img/vector-1.svg' %}"
+                        alt="Vector"
+                      />
+                      <img class="line" src="{% static 'img/line.svg' %}" alt="Line" />
+                      <img class="line-1" src="{% static 'img/line-1.svg' %}" alt="Line" />
+                      <img
+                        class="vector-2"
+                        src="{% static 'img/vector-3.svg' %}"
+                        alt="Vector"
+                      />
+                      <div class="ellipse"></div>
+                    </div>
+                  </div>
+                  <div class="title-3 title-9 outfit-normal-bunker-24px">
+                    Report
+                  </div>
+                </div>
+              </a>
+
+              <img
+                class="divider-line-horizontal"
+                src="{% static 'img/divider---line---horizontal.svg' %}"
+                alt="divider / line / horizontal"
+              />
+
+              <a href ='{% url 'budget_show' %}' class = 'sidebar-button' name="budget_btn">
+                <div class="sidebar-list-inactive-2 sidebar-list-inactive-7">
+                  <img class="frame-4" src="{% static 'img/frame-2.svg' %}" alt="Frame" />
+                  <div class="title-4 title-9 outfit-normal-bunker-24px">
+                    My Plan
+                  </div>
+                </div>
+              </button>
+              </a>
+
+              <a href ='{% url 'user_profile' %}' class = 'sidebar-button' name="profile_btn">
+                <div class="sidebar-list-inactive-3 sidebar-list-inactive-7">
+                  <img
+                    class="icon-user"
+                    src="{% static 'img/frame-3.svg' %}"
+                    alt="icon-user"
+                  />
+                  <div class="title-5 title-9 outfit-normal-bunker-24px">
+                    My Profile
+                  </div>
+                </div>
+              </button>
+              </a>
+
+              <a href ='{% url 'forum' %}' class = 'sidebar-button' name="forum_btn">
+                <div class="sidebar-list-inactive-4 sidebar-list-inactive-7">
+                  <img class="frame-5" src="{% static 'img/frame-4.svg' %}" alt="Frame" />
+                  <div class="title-6 title-9 outfit-normal-bunker-24px">
+                    Forum
+                  </div>
+                </div>
+              </a>
+
+              <a href ='{% url 'view_settings' %}' class = 'sidebar-button' name="setting_btn">
+                <div class="sidebar-list-inactive-5 sidebar-list-inactive-7">
+                  <img class="vector-3" src="{% static 'img/vector.svg' %}" alt="Vector" />
+                  <div class="title-7 title-9 outfit-normal-bunker-24px">
+                    Settings
+                  </div>
+                </div>
+              </a>
+           
+
+              <a href ='{% url 'index' %}' class = 'sidebar-button' name="reward_btn">
+                <div class="sidebar-list-inactive-6 sidebar-list-inactive-7">
+                  <img
+                    class="mdibank-transfer"
+                    src="{% static 'img/mdi-bank-transfer.svg' %}" 
+                    alt="mdi:bank-transfer"
+                  />
+                  <div class="title-8 title-9 outfit-normal-bunker-24px">
+                    Rewards
+                  </div>
+                </div>
+              </a>
+            </div>   
+            <!-- end of side bar -->
+          </div>
+
+
+          <div id="main-content">
+            <p class="hello-shao-run-xing">
+                Hello {{ user.first_name }} {{ user.last_name }}! Here&#39;s an overview of your
+                account :
+            </p>
+
+            <a href="{% url 'spending_report' %}?start_date=&end_date=&selected_categories=Income">
+              <div class="overlap-group2">
+                
+                <div class="group-container">
+                  <div class="group">
+                    <div class="flex-row">
+                      <div class="rectangle"></div>
+                      <div class="rectangle-1"></div>
+                    </div>
+                    <div class="rectangle-2"></div>
+                  </div>
+                  <div class="group-1">
+                    <div class="rectangle-2"></div>
+                    <div class="flex-row">
+                      <div class="rectangle-1"></div>
+                      <div class="rectangle"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                
+                <div class="group-2">
+                  
+                    <div class="overlap-group1">
+                      <img class="image" src="{% static 'img/image-1@2x.png' %}" alt="Image" style='top: 36%; left: 70%' />
+                      <div class="mothly-expenses poppins-medium-bunker-24px">
+                        Monthly Revenue
+                      </div>
+                      <div class="price poppins-medium-bunker-32px">£{{ revenue }}</div>
+                    </div>
+                  
+                </div>
+              </div>
+            </a>
+          <a href= '{% url 'budget_show' %}'>
+              <div class="overlap-group3">
+                <div class="overlap-group1-1">
+                  <div class="group-container-1">
+                    <div class="group">
+                      <div class="flex-row">
+                        <div class="rectangle-3"></div>
+                        <div class="rectangle-4"></div>
+                      </div>
+                      <div class="rectangle-5"></div>
+                    </div>
+                    
+                    <div class="group-1">
+                      <div class="rectangle-5"></div>
+                      <div class="flex-row">
+                        <div class="rectangle-4"></div>
+                        <div class="rectangle-3"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <img
+                    class="rectangle-126"
+                    src="{% static 'img/rectangle-126@2x.png' %}"
+                    alt="Rectangle 126"
+                  />
+                  <p class="my-plan poppins-medium-bunker-24px">
+                    &nbsp;&nbsp; My Plan
+                  </p>
+                </div>
+              <div class="percent poppins-medium-bunker-32px">{{ percentage }}%</div>            
+              </div>
+            </a> 
+            <a href="{% url 'spending_report' %}">
+              <div class="overlap-group4">
+                <div class="group-container">
+                  <div class="group">
+                    <div class="flex-row">
+                      <div class="rectangle"></div>
+                      <div class="rectangle-1"></div>
+                    </div>
+                    <div class="rectangle-2"></div>
+                  </div>
+                  <div class="group-1">
+                    <div class="rectangle-2"></div>
+                    <div class="flex-row">
+                      <div class="rectangle-1"></div>
+                      <div class="rectangle"></div>
+                    </div>
+                  </div>
+                </div>
+
+                
+                  <img class="image" src="{% static 'img/image-6@2x.png' %}" alt="Image" />
+                
+                <div class="group-2">
+                  <div class="overlap-group1">
+                    <div class="mothly-expenses poppins-medium-bunker-24px">
+                      Monthly Expense
+                    </div>
+                    <div class="price poppins-medium-bunker-32px">£{{ expense }}</div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </a>
+          
+          <!-- end of three small windows showing revenue, expenditure, and plan -->
+          
+          <!-- display calendar -->
+          <div class ="container" style="margin-top:37%; margin-left:16%">
+            <div class ="row">
+              <div class="col">
+                <div class="card" style="max-width:90%; max-height:93%">
+                  <h2 class="card-header container">
+                 <div class="row justify-content-between align-items-center">            
+                  <div class="col-12 text-center" style="font-family: var(--font-family-outfit); font-size:150%">
+                    {{month}} {{year}} 
+                  </div>
+                  <a href="{% url 'spending_calendar' year month_in_number %} " class="underline-link" style="color: #9a572e;">Click to see all months' spending</a>
+              </div>
+                  </h2>
+                    <div class="card-body p-2" style="font-size: 100% ; overflow: auto;">
+                      <div class="row row-cols-7" style="font-family: var(--font-family-outfit); font-size: 120%">
+                        <div class="col text-truncate" >
+                          <h5 class="text-truncate">Monday</h5>
+                        </div>
+                        <div class="col text-truncate">
+                          <h5 class="text-truncate">Tuesday</h5>
+                        </div>
+                        <div class="col text-truncate">
+                          <h5 class="text-truncate">Wednesday</h5>
+                        </div>
+                        <div class="col text-truncate">
+                          <h5 class="text-truncate">Thursday</h5>
+                        </div>
+                        <div class="col text-truncate">
+                          <h5 class="text-truncate">Friday</h5>
+                        </div>
+                        <div class="col text-truncate">
+                          <h5 class="text-truncate">Saturday</h5>
+                        </div>
+                        <div class="col text-truncate">
+                          <h5 class="text-truncate">Sunday</h5>
+                        </div>
+                      </div>
+                      {% for week in month_calendar_list %}
+                      <div class="row">
+                        {% for day in week  %}
+                        <div class="col" style="min-height: 5rem;">
+                          {% if day.0 != 0 %}
+                          <h5>{{day.0}}</h5>
+                          <div>
+                            {% if day.2 != 0 or day.3 != 0 %}
+                              
+                                <div class="d-none d-sm-block" style="color: #0293b3;">
+                                  <br>
+                                  <p>Exp: £<b>{{ day.2 }}</b></p>
+                                  <p>Inc: £<b>{{ day.3 }}</b></p>
+                                </div>
+                            
+                            {% endif %}
+                          </div>
+                          {% endif %}
+                        </div>
+                        {% endfor %}
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          
+
+
+
+          
+        </div>
+      </div>
+    </div>
+
    
 <!-- used by js to retrieve pos variable from context-->
    <div id="pos_val" data-my-variable="{{ pos }}"></div>
@@ -46,12 +420,12 @@
                                 <td class = "square" id="task_point-super-{{ day }}"style="color: rgb(255, 24, 7);">
                                     day{{day}} <br>
                                     <i class="fa-solid fa-gem"></i>
-                                    {{high_reward_points}}</td>
+                                    {{high_task_points}}</td>
                             {% else %}
                                  <td class = "square"  id="task_point-normal-{{ day }}"> day{{day}}  <br>
                                  <i class="fa-solid fa-sack-dollar"></i>
 
-                                    {{normal_reward_points}}</td>
+                                    {{normal_task_points}}</td>
                             {% endif %}
 
                             {% endwith %}
@@ -74,8 +448,18 @@
     </div>
     
 </div>
-
-
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+            integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.min.js"
+            integrity="sha384-PsUw7Xwds7x08Ew3exXhqzbhuEYmA2xnwc8BuD6SEr+UmEHlX8/MCltYEodzWA4u"
+            crossorigin="anonymous"></script>
+    
+   
+   
   
-  
-{% endblock %}
+
+    
+
+  </body>
+</html>

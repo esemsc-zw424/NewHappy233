@@ -41,11 +41,13 @@ class SpendingAdmin(admin.ModelAdmin):
         'title', 'spending_owner', 'amount', 'descriptions', 'date', 'spending_type', 'spending_category',
     ]
 
+
 @admin.register(SpendingFile)
 class SpendingFileAdmin(admin.ModelAdmin):
     list_display = [
         'spending', 'file'
     ]
+
 
 @admin.register(Categories)
 class CategoriesAdmin(admin.ModelAdmin):
@@ -53,21 +55,24 @@ class CategoriesAdmin(admin.ModelAdmin):
         'name', 'owner', 'categories_type', 'default_category',
     ]
 
+
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = [
         'user', 'title', 'content', 'get_num_likes', 'post_date',
     ]
-    
+
     def get_num_likes(self, obj):
         return obj.likes.count()
     get_num_likes.short_description = 'Number of Likes'
 
+
 @admin.register(PostImage)
 class PostImageAdmin(admin.ModelAdmin):
     list_display = [
-        'post', 'image',
+        'post', 'file',
     ]
+
 
 @admin.register(Reply)
 class ReplyAdmin(admin.ModelAdmin):
@@ -78,6 +83,7 @@ class ReplyAdmin(admin.ModelAdmin):
     def get_num_likes(self, obj):
         return obj.likes.count()
     get_num_likes.short_description = 'Number of Likes'
+
 
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):

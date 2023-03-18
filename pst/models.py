@@ -2,6 +2,7 @@ from enum import Enum
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Sum
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser
@@ -10,7 +11,12 @@ from libgravatar import Gravatar
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 import os
+
+
 
 class Spending_type(models.TextChoices):
     EXPENDITURE = "Expenditure"
@@ -30,14 +36,13 @@ class UserManager(BaseUserManager):
         return user
 
 
+
     def create_superuser(self, first_name, last_name, email, password, **extra_fields):
         user = self.create_user(first_name, last_name, email, password)
         user.is_staff = True
         user.is_superuser = True
         user.save()
         return user
-
-
 
 
 class User(AbstractUser):
@@ -62,11 +67,29 @@ class User(AbstractUser):
 
     consecutive_login_days = models.IntegerField(default=1)
     logged_in_once_daily = models.BooleanField(default = False)
-    reward_points = models.IntegerField(default=0)
+
+
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    @property
+    def total_task_points(self):
+        total_points = 0
+        for daily_task in self.dailytask_set.all():
+            for status in daily_task.dailytaskstatus_set.all():
+                total_points += status.task_points
+        return total_points
+
+    def increase_total_task_points(self, value):
+        self.total_task_points += value
+        self.save()
+
+    def decrease_total_task_points(self, value):
+        self.total_task_points -= value
+        self.save()
+
 
     def gravatar(self, size=120):
         """Return a URL to the user's gravatar."""
@@ -74,14 +97,13 @@ class User(AbstractUser):
         gravatar_url = gravatar_object.get_image(size=size, default='mp')
         return gravatar_url
 
+    @property
+
     def __str__(self):
         return self.email
 
 
-
-
 class Categories(models.Model):
-
 
     name = models.CharField( # name of the category
         max_length=100
@@ -169,42 +191,25 @@ class DailyTaskStatus(models.Model):
 
 
 class Spending(models.Model):
-
-    title = models.CharField(  # title for the spending
-        max_length=30,
-        blank=False
-    )
-
-    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') #this refers to the user when create this spending
-
-    amount = models.IntegerField(  # this refers to the amount this user spent or gained
+    title = models.CharField(max_length=30, blank=False)
+    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') 
+    amount = models.DecimalField(  
         blank=False,
+        max_digits=8,
+        decimal_places=2,
         validators=[
-            MaxValueValidator(10000000),
             MinValueValidator(0),
         ]
     )
-
-    descriptions = models.CharField(  # comments for the spending
-        blank=True,
-        max_length=500,
-    )
-
-    date = models.DateField( # date of the spending
-        blank = False,
-    )
-
-    spending_type = models.CharField(  # this refers to the spending type
+    descriptions = models.CharField(blank=True, max_length=500)
+    date = models.DateField(blank=False)
+    spending_type = models.CharField(
         max_length=30,
         choices=Spending_type.choices,
         default=Spending_type.EXPENDITURE,
         blank=False,
     )
-
-
-    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category',
-                                          blank=False)  # this refers to the category of the spending
-
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  
 
 
 class SpendingFile(models.Model):
@@ -217,16 +222,19 @@ class SpendingFile(models.Model):
     )
 
 
+
+
 class Budget(models.Model):
-    name = models.CharField(max_length=100)
-    limit = models.DecimalField(max_digits=10, decimal_places=2)
-    # start_date = models.DateField()
-    # end_date = models.DateField()
+    name = models.CharField(max_length=100, default='')
+    limit = models.PositiveIntegerField()
+    # start_date = models.DateField(default=timezone.now)
+    # end_date = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(  # user which this budget belongs to
         User, on_delete=models.CASCADE
     )
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='budget_spending_category', blank=True)
 
 
 
@@ -235,6 +243,12 @@ class Budget(models.Model):
 class Reward(models.Model):
     name = models.CharField(max_length=50)
     points_required = models.IntegerField(default=0)
+    image = models.FileField(
+        null=True,
+        blank=True,
+        upload_to='rewards/'
+    )
+    default_image = models.FileField(upload_to='rewards/', default='rewards/default_reward_image.jpg')
 
     def __str__(self):
         return f"{self.name} ({self.points_required} points)"
@@ -282,12 +296,23 @@ def validate_file_extension(value):
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(
+    file = models.ImageField(
         null=True,
         blank=True,
         upload_to='post_images/',
         validators=[validate_file_extension],
     )
+
+@receiver(pre_delete, sender=SpendingFile)
+@receiver(pre_delete, sender=Spending)
+@receiver(pre_delete, sender=PostImage)
+def delete_file(sender, instance, **kwargs):
+    # delete the file when the related object is deleted
+    if instance.file:
+        path = instance.file.path
+        if os.path.exists(path):
+            os.remove(path)
+
 
 # this model is for replies under a post
 class Reply(models.Model):
@@ -340,3 +365,31 @@ class Like(models.Model):
 
     class Meta:
         unique_together = [['user', 'content_type', 'object_id']]
+
+
+class DeliveryAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    address = models.CharField(max_length=200, blank=True)
+    phone_number = models.IntegerField(blank=True)
+
+# class TotalBudget(models.Model):
+#     name = models.CharField(max_length=100, default='')
+#     limit = models.PositiveIntegerField()
+#     start_date = models.DateField(default=timezone.now)
+#     end_date = models.DateField(default=timezone.now)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     budget_owner = models.ForeignKey(  # user which this budget belongs to
+#         User, on_delete=models.CASCADE
+#     )
+
+class TotalBudget(models.Model):
+    name = models.CharField(max_length=100, default='')
+    limit = models.PositiveIntegerField()
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(blank=True, null=True)  # make end_date optional
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    budget_owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='total_budgets'  # add related name
+    )
