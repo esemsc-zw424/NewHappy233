@@ -70,17 +70,32 @@ def visitor_introduction(request):
 
 def get_login_task_status(request):
     pos = int(request.GET.get("pos", 0))
-    task_statuses = DailyTaskStatus.objects.filter(day__number__lte=pos)
+    task_statuses  = DailyTaskStatus.objects.filter(
+    day__number__lte=pos,
+    task_type=TaskType.LOGIN.name,
+    task__user=request.user,
 
+    )
+
+    # Create a dictionary with day numbers as keys and completed status as values
+    task_status_dict = {
+        task_status.day.number: True
+        for task_status in task_statuses
+    }
+
+    # Create a list of dictionaries for each day from 1 to pos, with their completion status
     data = {
         "task_statuses": [
             {
-                "day": task_status.day.number,
-                "completed": task_status.completed,
+                "day": day,
+                "completed": task_status_dict.get(day, False),
             }
-            for task_status in task_statuses
+            for day in range(1, pos + 1)
         ]
     }
+
+    if not task_status_dict.get(pos) and len(data['task_statuses']) > 0:
+        data['task_statuses'].pop()
 
     return JsonResponse(data)
 
@@ -99,7 +114,6 @@ def add_login_task_points(request):
             daily_task_status = DailyTaskStatus.objects.create(
                 task=login_task,
                 day=day,
-                completed=True,
                 task_points=high_reward_points,
                 task_type=TaskType.LOGIN
             )
@@ -107,7 +121,6 @@ def add_login_task_points(request):
             daily_task_status = DailyTaskStatus.objects.create(
                 task=login_task,
                 day=day,
-                completed=True,
                 task_points=normal_reward_points,
                 task_type=TaskType.LOGIN
             )
@@ -130,6 +143,9 @@ def check_already_logged_in_once_daily(request):
 def get_number_days_from_register(request):
     date_joined = request.user.date_joined
     num_days = (current_datetime - date_joined).days + 1
+    if  num_days == 0:
+        num_days = 1
+
     return num_days
 
 

@@ -18,11 +18,12 @@ function show_login_task_modal() {
     var pos = parseInt(myDiv.getAttribute("data-my-variable"));
 
     // Fetch and update the task point statuses
+
     get_login_task_status(pos);
   });
-
-  // Show the modal
   modalInstance.show();
+  // Show the modal
+
 }
 
 
@@ -33,6 +34,7 @@ function get_login_task_status(pos) {
 
   xhr.onload = function () {
     if (xhr.status === 200) {
+
       update_modal(xhr.response);
     } else {
       console.error("An error occurred while fetching the task point status");
@@ -42,32 +44,39 @@ function get_login_task_status(pos) {
   xhr.send();
 }
 
-function update_modal(data) {
-  data.task_statuses.forEach((taskStatus) => {
-    const square = document.getElementById(`task_point-normal-${taskStatus.day}`);
 
-    if (taskStatus.received) {
-      square.innerHTML = `day${taskStatus.day} <br> <i class='bi bi-emoji-smile'></i>get!!!`;
-    } else {
-      square.style.backgroundColor = "grey";
+function update_modal(data) {
+
+  data.task_statuses.forEach((taskStatus) => {
+    let square = document.getElementById(`task_point-normal-${taskStatus.day}`);
+    if (!square) {
+      square = document.getElementById(`task_point-pos-${taskStatus.day}`);
+      if (!square) {
+        square = document.getElementById(`task_point-super-${taskStatus.day}`);
+      }
+    }
+    console.log(taskStatus);
+
+    if (taskStatus.completed) {
+      square.innerHTML = "<i class='bi bi-emoji-smile'></i>get!!!";
+    } else{
+
+      square.innerHTML =  "<i class='bi bi-emoji-frown-fill'></i> miss";
     }
   });
+//document.getElementById("www").innerHTML = "<i class='bi bi-emoji-smile'></i>get!!!";
+
+//var squares = document.querySelectorAll(".square");
+//for (var i = 0; i < squares.length; i++) {
+//  console.log(squares[i].id);
+//}
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
 function task_point_pos_click_handler(day) {
-    var task_point_pos = document.getElementById('task_point-pos');
+ console.log(day)
+    var task_point_pos = document.getElementById("task_point-pos-{{ day }}");
 //    var td_id = td_element.getAttribute('id');
     const xhr = new XMLHttpRequest();
 
@@ -78,7 +87,7 @@ function task_point_pos_click_handler(day) {
     // Handle the response from the server
     xhr.onreadystatechange = function() {
       if (this.readyState === 4 && this.status === 200) {
-      console.log(day)
+
         task_point_pos.innerHTML = "<i class='bi bi-emoji-smile'></i>get!!!";
       }else {
         console.log('Request failed.  Returned status of ' + xhr.status);

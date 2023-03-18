@@ -121,6 +121,12 @@ class DailyTask(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     days = models.ManyToManyField(Day, through='DailyTaskStatus')
 
+    def get_day(self):
+        return self.days.all()
+
+    def get_user(self):
+        return self.user
+
     # def mark_received(self, day):
     #     status = DailyTaskStatus.objects.get(task=self, day=day)
     #     status.received = True
@@ -155,7 +161,6 @@ class TaskType(Enum):
 class DailyTaskStatus(models.Model):
     task = models.ForeignKey(DailyTask, on_delete=models.CASCADE)
     day = models.ForeignKey(Day, on_delete=models.CASCADE)
-    completed = models.BooleanField(default=False)
     task_points = models.IntegerField(default=0)
     task_type = models.CharField(choices=TaskType.choices(), default=TaskType.LOGIN.name, max_length=10)
 

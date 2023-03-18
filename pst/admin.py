@@ -88,18 +88,18 @@ class LikeAdmin(admin.ModelAdmin):
 @admin.register(DailyTaskStatus)
 class DailyTaskStatusAdmin(admin.ModelAdmin):
     list_display = [
-      'task', 'day', 'completed',  'task_type',
+      'task', 'day',  'task_type',
     ]
 
-# @admin.register(DailyTask)
-# class DailyTaskAdmin(admin.ModelAdmin):
-#     list_display = [
-#         'user', 'days',
-#     ]
-#
-#
-# @admin.register(Day)
-# class DayAdmin(admin.ModelAdmin):
-#     list_display = [
-#         'number',
-#     ]
+@admin.register(DailyTask)
+class DailyTaskAdmin(admin.ModelAdmin):
+    list_display = [
+        'get_day', 'get_user',
+    ]
+
+
+@admin.register(Day)
+class DayAdmin(admin.ModelAdmin):
+    list_display = [
+        'number',
+    ]
