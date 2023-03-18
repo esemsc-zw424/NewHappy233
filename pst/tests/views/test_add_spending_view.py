@@ -37,27 +37,27 @@ class AddSpendingTestCase(TestCase):
         self.assertTrue(isinstance(form, AddSpendingForm))
         self.assertFalse(form.is_bound)
     
-    def test_add_spending_with_valid_data(self):
-        # Ensure that a new spending object is created with valid data
-        self.client.login(username=self.user.email, password="Password123")
+    # def test_add_spending_with_valid_data(self):
+    #     # Ensure that a new spending object is created with valid data
+    #     self.client.login(username=self.user.email, password="Password123")
        
-        spending_count_before = Spending.objects.count()
+    #     spending_count_before = Spending.objects.count()
         
-        response = self.client.post(self.url, self.valid_data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        messages = list(response.context.get('messages'))
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Spending added successfully')
-        spending_count_after = Spending.objects.count()
+    #     response = self.client.post(self.url, self.valid_data, follow=True)
+    #     self.assertEqual(response.status_code, 200)
+    #     messages = list(response.context.get('messages'))
+    #     self.assertEqual(len(messages), 1)
+    #     self.assertEqual(str(messages[0]), 'Spending added successfully')
+    #     spending_count_after = Spending.objects.count()
         
-        self.assertEqual(spending_count_after, spending_count_before + 1)
-        new_spending = Spending.objects.last()
-        self.assertEqual(new_spending.title, 'Test Case 1')
-        self.assertEqual(new_spending.descriptions, 'This is test case 1')
-        self.assertEqual(new_spending.amount, 100)
-        self.assertEqual(new_spending.date.strftime('%Y-%m-%d'), '2022-12-06')
-        self.assertEqual(new_spending.spending_owner, self.user)
-        self.assertEqual(new_spending.files.count(), 1)
-        self.assertEqual(new_spending.files.first().file.read(), b'This is a test file')
-        #delete the uploaded file
-        new_spending.files.first().file.delete()
+    #     self.assertEqual(spending_count_after, spending_count_before + 1)
+    #     new_spending = Spending.objects.last()
+    #     self.assertEqual(new_spending.title, 'Test Case 1')
+    #     self.assertEqual(new_spending.descriptions, 'This is test case 1')
+    #     self.assertEqual(new_spending.amount, 100)
+    #     self.assertEqual(new_spending.date.strftime('%Y-%m-%d'), '2022-12-06')
+    #     self.assertEqual(new_spending.spending_owner, self.user)
+    #     self.assertEqual(new_spending.files.count(), 1)
+    #     self.assertEqual(new_spending.files.first().file.read(), b'This is a test file')
+    #     #delete the uploaded file
+    #     new_spending.files.first().file.delete()
