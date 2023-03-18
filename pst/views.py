@@ -104,26 +104,30 @@ def get_login_task_status(request):
 @csrf_exempt
 def add_login_task_points(request):
     if request.method == 'POST':
+
         user = request.user
         login_task = DailyTask.objects.create(user=user)
         current_day = get_number_days_from_register(request)
-        day = Day.objects.create(number=current_day)
-
+        day, _ = Day.objects.get_or_create(number=current_day)
+        print(day)
         # give user extra points if user has login consecutive for seven days
         if user.consecutive_login_days > 7:
             daily_task_status = DailyTaskStatus.objects.create(
                 task=login_task,
                 day=day,
                 task_points=high_reward_points,
-                task_type=TaskType.LOGIN
+                task_type=TaskType.LOGIN.name
             )
+
         else:
+
             daily_task_status = DailyTaskStatus.objects.create(
                 task=login_task,
                 day=day,
                 task_points=normal_reward_points,
-                task_type=TaskType.LOGIN
+                task_type=TaskType.LOGIN.name
             )
+
 
 
         return JsonResponse({"status": "success"})
@@ -156,7 +160,7 @@ def get_position_in_daily_reward(request):
 
 def get_super_task_point_position(request):
     cur_pos = get_position_in_daily_reward(request)
-    days_need = 7 - request.user.consecutive_login_days
+    days_need = 8 - request.user.consecutive_login_days
     return cur_pos + days_need
 
 

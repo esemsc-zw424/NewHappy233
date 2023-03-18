@@ -55,7 +55,6 @@ function update_modal(data) {
         square = document.getElementById(`task_point-super-${taskStatus.day}`);
       }
     }
-    console.log(taskStatus);
 
     if (taskStatus.completed) {
       square.innerHTML = "<i class='bi bi-emoji-smile'></i>get!!!";
@@ -64,36 +63,26 @@ function update_modal(data) {
       square.innerHTML =  "<i class='bi bi-emoji-frown-fill'></i> miss";
     }
   });
-//document.getElementById("www").innerHTML = "<i class='bi bi-emoji-smile'></i>get!!!";
 
-//var squares = document.querySelectorAll(".square");
-//for (var i = 0; i < squares.length; i++) {
-//  console.log(squares[i].id);
-//}
 }
 
 
 
 function task_point_pos_click_handler(day) {
- console.log(day)
-    var task_point_pos = document.getElementById("task_point-pos-{{ day }}");
-//    var td_id = td_element.getAttribute('id');
+    var task_point_pos = document.getElementById("task_point-pos-" + day);
     const xhr = new XMLHttpRequest();
 
     xhr.open("POST", "/add_login_task_points/", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
 
-    // Handle the response from the server
     xhr.onreadystatechange = function() {
-      if (this.readyState === 4 && this.status === 200) {
-
+      if ( this.status === 200) {
         task_point_pos.innerHTML = "<i class='bi bi-emoji-smile'></i>get!!!";
       }else {
         console.log('Request failed.  Returned status of ' + xhr.status);
       }
     };
-  // Send the AJAX request with the content data
     xhr.send();
 }
 
