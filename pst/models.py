@@ -104,15 +104,9 @@ class Categories(models.Model):
 
 
 class Spending(models.Model):
-
-    title = models.CharField(  # title for the spending
-        max_length=30,
-        blank=False
-    )
-
-    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') #this refers to the user when create this spending
-
-    amount = models.DecimalField(  # this refers to the amount this user spent or gained
+    title = models.CharField(max_length=30, blank=False)
+    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') 
+    amount = models.DecimalField(  
         blank=False,
         max_digits=8,
         decimal_places=2,
@@ -120,26 +114,15 @@ class Spending(models.Model):
             MinValueValidator(0),
         ]
     )
-
-    descriptions = models.CharField(  # comments for the spending
-        blank=True,
-        max_length=500,
-    )
-
-    date = models.DateField( # date of the spending
-        blank = False,
-    )
-
-    spending_type = models.CharField(  # this refers to the spending type
+    descriptions = models.CharField(blank=True, max_length=500)
+    date = models.DateField(blank = False)
+    spending_type = models.CharField(
         max_length=30,
         choices=Spending_type.choices,
         default=Spending_type.EXPENDITURE,
         blank=False,
     )
-
-
-    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category',
-                                          blank=False)  # this refers to the category of the spending
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  
 
 
 class SpendingFile(models.Model):
@@ -157,8 +140,8 @@ class SpendingFile(models.Model):
 class Budget(models.Model):
     name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
-    start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)
+    # start_date = models.DateField(default=timezone.now)
+    # end_date = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(  # user which this budget belongs to
@@ -229,7 +212,7 @@ def validate_file_extension(value):
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(
+    file = models.ImageField(
         null=True,
         blank=True,
         upload_to='post_images/',
@@ -238,7 +221,7 @@ class PostImage(models.Model):
 
 @receiver(pre_delete, sender=SpendingFile)
 @receiver(pre_delete, sender=Spending)
-@receiver(pre_delete, sender=Post)
+@receiver(pre_delete, sender=PostImage)
 def delete_file(sender, instance, **kwargs):
     # delete the file when the related object is deleted
     if instance.file:
@@ -305,13 +288,24 @@ class DeliveryAddress(models.Model):
     address = models.CharField(max_length=200, blank=True)
     phone_number = models.IntegerField(blank=True)
 
+# class TotalBudget(models.Model):
+#     name = models.CharField(max_length=100, default='')
+#     limit = models.PositiveIntegerField()
+#     start_date = models.DateField(default=timezone.now)
+#     end_date = models.DateField(default=timezone.now)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     budget_owner = models.ForeignKey(  # user which this budget belongs to
+#         User, on_delete=models.CASCADE
+#     )
+
 class TotalBudget(models.Model):
     name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
     start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(blank=True, null=True)  # make end_date optional
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    budget_owner = models.ForeignKey(  # user which this budget belongs to
-        User, on_delete=models.CASCADE
+    budget_owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='total_budgets'  # add related name
     )

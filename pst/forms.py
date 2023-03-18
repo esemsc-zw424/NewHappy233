@@ -4,7 +4,7 @@ from django.forms import ModelForm, Form
 from pst.models import User, Spending, Categories, Spending_type, Budget, Post, Reply, DeliveryAddress, TotalBudget, SpendingFile
 from django.forms import ClearableFileInput
 from django.contrib import messages
-from datetime import date
+from datetime import date, timedelta
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 
@@ -58,21 +58,21 @@ class VisitorSignupForm(PasswordValidationForm):
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'bio', 'gender']
-        widgets = {'bio': forms.Textarea()}
+        fields = ['email', 'first_name', 'last_name']
+        # widgets = {'bio': forms.Textarea()}
 
-    def save(self, commit=False):
+    def save(self):
         """Create a new user"""
 
-        super().save(commit)
+        super().save(commit=False)
         data = self.cleaned_data
         user = User.objects.create_user(
-            first_name=data.get('first_name'),
-            last_name=data.get('last_name'),
-            email=data.get('email'),
-            password=data.get('password'),
-            bio=data.get('bio'),
-            gender=data.get('gender'),
+                first_name=data.get('first_name'),
+                last_name=data.get('last_name'),
+                email=data.get('email'),
+                password=data.get('password'),
+                # bio=data.get('bio'),
+                # gender=data.get('gender'),
         )
 
         categories = [
@@ -126,7 +126,7 @@ class LoginForm(Form):
 
 class AddSpendingForm(forms.ModelForm):
 
-    
+
     spending_category = forms.ModelChoiceField(
         queryset=Categories.objects.none(), empty_label=None)
 
@@ -160,7 +160,7 @@ class AddSpendingForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
-    
+
 
 
 class EditSpendingForm(forms.ModelForm):
@@ -211,13 +211,11 @@ class EditSpendingForm(forms.ModelForm):
 
 
 class BudgetForm(forms.ModelForm):
-    spending_category = forms.ModelChoiceField(
-        queryset=Categories.objects.none())
+    spending_category = forms.ModelChoiceField(queryset=Categories.objects.none())
 
     class Meta:
         model = Budget
-        fields = ['name', 'limit', 'spending_category',
-                  'start_date', 'end_date']
+        fields = ['name','limit', 'spending_category']
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -225,16 +223,16 @@ class BudgetForm(forms.ModelForm):
         if user:
             spending_type = self.data.get('spending_type', '')
             self.fields['spending_category'].queryset = Categories.objects.filter(
-                owner=user)
+                owner=user, categories_type=Spending_type.EXPENDITURE)
 
     def clean(self):
         cleaned_data = super().clean()
         limit = cleaned_data.get('limit')
         spending_category = cleaned_data.get('spending_category')
-        total_spent_category = Budget.objects.filter(
-            budget_owner=self.user, spending_category=spending_category).last()
-        if total_spent_category:
-            category_value = total_spent_category.limit
+        category_spent = Budget.objects.filter(budget_owner=self.user, spending_category=spending_category).last()
+        if category_spent:
+            category_value = category_spent.limit
+            print("cs" + str(category_spent.limit))
         else:
             category_value = 0
  
@@ -242,12 +240,22 @@ class BudgetForm(forms.ModelForm):
         if total_budget is None:
             raise forms.ValidationError("You need to set a total budget first")
         # Check if the limit for this budget exceeds the remaining amount in the total budget
-        total_spent = Budget.objects.filter(
-            budget_owner=self.user).aggregate(Sum('limit'))['limit__sum'] or 0
-        remaining_amount = total_budget.limit - total_spent + category_value
+        total_specific_budget_spent = 0
+        categories = Categories.objects.filter(owner=self.user)
+        for category in categories:
+            budget = Budget.objects.filter(spending_category=category).last()
+            if budget:
+                total_specific_budget_spent += budget.limit
+        # total_spent = Budget.objects.filter(budget_owner=self.user).last().aggregate(Sum('limit'))['limit__sum'] or 0
+        print("total: "+str(total_specific_budget_spent))
+        remaining_amount = total_budget.limit - total_specific_budget_spent + category_value
+        print("remaining amount"+str(remaining_amount))
         if limit > remaining_amount:
             raise forms.ValidationError(
-                "You exceeded the total budget")
+                "I'm sorry, but you have gone over your total budget limit. Your remaining budget allocation is: ("
+                + str(total_budget.limit - total_specific_budget_spent) + " + "
+                + "Your last budget for this category, which is: " + str(category_value) + "). "
+                + "Which means your set here can't exceed: " + str(remaining_amount))
 
         return cleaned_data
 
@@ -269,17 +277,27 @@ class ReplyForm(forms.ModelForm):
         fields = ['content', 'parent_reply']
         widgets = {'parent_reply': forms.HiddenInput()}
 
-
 class AddressForm(forms.ModelForm):
     class Meta:
         model = DeliveryAddress
         fields = ['address', 'phone_number']
 
+# class TotalBudgetForm(forms.ModelForm):
+#     class Meta:
+#         model = TotalBudget
+#         fields = ['name','limit', 'start_date', 'end_date']
+#
+#     def __init__(self, user, *args, **kwargs):
+#         self.user = user
+#         super().__init__(*args, **kwargs)
 
 class TotalBudgetForm(forms.ModelForm):
     class Meta:
         model = TotalBudget
         fields = ['name', 'limit', 'start_date', 'end_date']
+        widgets = {
+            'end_date': forms.DateInput(attrs={'placeholder': 'Default is 30 days later.'}),
+        }
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -293,4 +311,35 @@ class TotalBudgetForm(forms.ModelForm):
         if specific_budget:
             specific_budget.delete()
 
+        # Set end_date to 30 days after start_date if it is not provided by user
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        if not end_date:
+            print(1)
+            cleaned_data['end_date'] = start_date + timedelta(days=30)
+
         return cleaned_data
+
+class PasswordForm(forms.Form):
+    """Form enabling users to change their password."""
+
+    password = forms.CharField(label='Current password', widget=forms.PasswordInput())
+    new_password = forms.CharField(
+        label='Password',
+        widget=forms.PasswordInput(),
+        validators=[RegexValidator(
+            regex=r'^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$',
+            message='Password must contain an uppercase character, a lowercase '
+                    'character and a number'
+            )]
+    )
+    password_confirmation = forms.CharField(label='Password confirmation', widget=forms.PasswordInput())
+
+    def clean(self):
+        """Clean the data and generate messages for any errors."""
+
+        super().clean()
+        new_password = self.cleaned_data.get('new_password')
+        password_confirmation = self.cleaned_data.get('password_confirmation')
+        if new_password != password_confirmation:
+            self.add_error('password_confirmation', 'Confirmation does not match password.')

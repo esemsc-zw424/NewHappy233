@@ -1,52 +1,41 @@
-from pst.models import Budget, User, Categories
-from pst.forms import BudgetForm
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.utils import timezone
+from pst.models import User
+from datetime import date
 
+from pst.forms import TotalBudgetForm
+from pst.models import TotalBudget
 
-class SetBudgetTestCase(TestCase):
-    fixtures = ['pst/tests/fixtures/categories.json']
+class SetBudgetViewTestCase(TestCase):
 
     def setUp(self):
+        self.client = Client()
         self.user = User.objects.create_user(
-            first_name='John',
-            last_name='Tester',
-            email='testuser@example.com',
-            password='testpass'
-        )
-        self.category = Categories.objects.get(name = 'Food')
-        self.budget = Budget.objects.create(
-            name='Test Budget',
-            limit=1000,
-            start_date=timezone.now(),
-            end_date=timezone.now(),
-            budget_owner=self.user,
-            spending_category=self.category,
-        )
+            first_name='test', last_name='user', email='testuser@test.com', password='testpass')
+        self.url = reverse('budget_set')
+        self.form_input = {
+            'name': 'Test Budget',
+            'limit': 1000,
+            'start_date': date.today(),
+            'end_date': date.today(),
+        }
+        self.client.login(email='testuser@test.com', password='testpass')
 
-    def test_budget_creation(self):
-        self.assertEqual(Budget.objects.count(), 1)
-        budget = Budget.objects.last()
+    def test_get_set_budget_view(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'budget_set.html')
+        form = response.context['form']
+        self.assertTrue(form, TotalBudgetForm)
+        self.assertFalse(form.is_bound)
+
+    def test_set_budget_with_valid_data(self):
+        response = self.client.post(self.url, self.form_input)
+        self.assertRedirects(response, reverse('budget_show'))
+        self.assertEqual(TotalBudget.objects.count(), 1)
+        budget = TotalBudget.objects.first()
         self.assertEqual(budget.name, 'Test Budget')
         self.assertEqual(budget.limit, 1000)
+        self.assertEqual(budget.start_date, date.today())
+        self.assertEqual(budget.end_date, date.today())
         self.assertEqual(budget.budget_owner, self.user)
-        self.assertEqual(budget.spending_category, self.category)
-        self.assertEqual(str(budget), 'Budget object (1)')
-
-    def test_budget_update(self):
-        budget = Budget.objects.first()
-        budget.limit = 2000
-        budget.save()
-        self.assertEqual(Budget.objects.count(), 1)
-        budget = Budget.objects.first()
-        self.assertEqual(budget.limit, 2000)
-
-    def test_budget_deletion(self):
-        budget = Budget.objects.first()
-        budget.delete()
-        self.assertEqual(Budget.objects.count(), 0)
-
-    def test_budget_string_representation(self):
-        budget = Budget.objects.first()
-        self.assertEqual(str(budget), 'Budget object (1)')

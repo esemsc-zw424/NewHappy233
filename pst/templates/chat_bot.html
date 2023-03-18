@@ -1,9 +1,11 @@
+{% extends 'base_content.html' %}
+
+{% block content %}
 <head>
   <style>
     body {
       background-image: linear-gradient(to right, #f8cdda, #a8c0ff);
       height: 100vh;
-      display: flex;
       align-items: center;
       justify-content: center;
     }
@@ -72,7 +74,10 @@
       <li><b>HuanXi:</b> {{ chatbot_answer }}</li>
       {% endfor %}
     </ul>
+
     <br>
+
     <a href="{% url 'view_settings' %}" class="btn btn-primary-sm" id="return_setting_page">Return to setting page</a>
   </div>
 </div>
+{% endblock %}
