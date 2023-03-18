@@ -92,8 +92,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
             income_sum = 0
             # adds each spending in the database to each date in the calendar
             for spending in spendings:
-                if spending.date.day == month_calendar_list[i][j][
-                        0] and spending.date.month == month and spending.date.year == year:
+                if spending.date.day == month_calendar_list[i][j][0] and spending.date.month == month and spending.date.year == year:
                     spendings_daily.append(spending)
             # calculates the sum of expenditures and sums of all the spendings in a single day
             for spending_daily in spendings_daily:
@@ -101,8 +100,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
                     exp_sum += spending_daily.amount
                 else:
                     income_sum += spending_daily.amount
-            month_calendar_list[i][j] = (
-                month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
+            month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
 
     context = {'month_calendar_list': month_calendar_list,
                'year': year, 'month': month_name,
@@ -457,7 +455,7 @@ def spending_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     selected_categories = request.GET.get('selected_categories')
-    selected_sort = request.GET.get('sorted')
+    sorted = request.GET.get('sorted')
     if start_date and end_date:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -473,21 +471,22 @@ def spending_report(request):
         selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
     spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
 
-    if selected_sort:
-        sorted_spendings = selected_spendings.order_by(selected_sort)
+    if sorted:
+        sorted_spendings = selected_spendings.order_by(sorted)
     else:
         sorted_spendings = selected_spendings
 
-    paginator = Paginator(sorted_spendings, 10)
+    paginator = Paginator(sorted_spendings, 3)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
         'report_type': report_type,
         'selected_spendings': selected_spendings,
         'spendings_data': spendings_data,
+        'sorted': sorted,
         'sorted_spendings': sorted_spendings,
         'page_obj': page_obj
-    }
+        }
     return render(request, 'spending_report.html', context)
 
 @login_required
