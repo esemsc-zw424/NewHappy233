@@ -45,9 +45,10 @@ class AddSpendingCategoriesTestCase(TestCase):
 
         # Test that the view returns a success status code and a success message
         self.assertEqual(response.status_code, 200)
-        messages = list(response.context.get('messages'))
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Category successfully added')
+        messages_list = list(response.context.get('messages'))
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(str(messages_list[0]), 'Category successfully added')
+        self.assertEqual(messages_list[0].level, messages.SUCCESS)
 
         # Test that a new category has been created with the expected attributes
         spending_categories_count_after = Categories.objects.count()
@@ -72,9 +73,10 @@ class AddSpendingCategoriesTestCase(TestCase):
 
         # Test that the view returns a success status code and a success message
         self.assertEqual(response.status_code, 200)
-        messages = list(response.context.get('messages'))
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Category successfully added')
+        messages_list = list(response.context.get('messages'))
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(str(messages_list[0]), 'Category successfully added')
+        self.assertEqual(messages_list[0].level, messages.SUCCESS)
 
         # Test that a new category has been created with the expected attributes
         spending_categories_count_after = Categories.objects.count()
