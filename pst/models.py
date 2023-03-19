@@ -303,7 +303,6 @@ class PostImage(models.Model):
     )
 
 @receiver(pre_delete, sender=SpendingFile)
-@receiver(pre_delete, sender=Spending)
 @receiver(pre_delete, sender=PostImage)
 def delete_file(sender, instance, **kwargs):
     # delete the file when the related object is deleted

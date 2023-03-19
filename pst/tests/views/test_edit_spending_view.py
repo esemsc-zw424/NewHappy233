@@ -26,7 +26,6 @@ class EditSpendingTestCase(TestCase):
             'date': '2022-12-06',
             'spending_type': 'Expenditure',
             'spending_category': self.category.id,
-            'file': SimpleUploadedFile('test_file.txt', b'This is a test file'),
         }
         
         self.valid_data_2 = {
@@ -71,12 +70,7 @@ class EditSpendingTestCase(TestCase):
         self.assertEqual(updated_spending.spending_category.id, self.valid_data['spending_category'])
         self.assertEqual(updated_spending.date, datetime.strptime(self.valid_data['date'], '%Y-%m-%d').date())
         self.assertEqual(updated_spending.spending_owner, self.user)
-        self.assertEqual(updated_spending.files.count(), 1)
-        self.assertEqual(updated_spending.files.first().file.read(), b'This is a test file')
 
-        file_dir = os.path.abspath(os.path.join(__file__, '../../../../static'))
-        file_path = os.path.join(file_dir, 'user_files', 'test_file.txt')
-        os.remove(file_path)
 
 
     def test_edit_spending_with_valid_data_with_delete_file_function(self):

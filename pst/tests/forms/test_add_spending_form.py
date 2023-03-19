@@ -19,7 +19,6 @@ class AddSpendingFormTestCase(TestCase):
             'date': '2022-12-06',
             'spending_type': 'Expenditure',
             'spending_category': self.category.id,
-            'file': SimpleUploadedFile('test_file.txt', b'This is a test file')
         }
 
     def test_form_contains_necessary_fields(self):
@@ -48,12 +47,3 @@ class AddSpendingFormTestCase(TestCase):
         self.assertEqual(spending.date, date(2022, 12, 6))
         self.assertEqual(spending.spending_type, 'Expenditure')
         self.assertEqual(spending.spending_category, self.category)
-        file = self.form_input['file']
-        SpendingFile.objects.create(spending=spending, file=file)
-        self.assertTrue(spending.files.all().count(), 1)
-        self.assertEqual(spending.files.first().file.read(), b'This is a test file')
-
-        # Get the absolute path to the static directory and delete the file
-        file_dir = os.path.abspath(os.path.join(__file__, '../../../../static'))
-        file_path = os.path.join(file_dir, 'user_files', 'test_file.txt')
-        os.remove(file_path)

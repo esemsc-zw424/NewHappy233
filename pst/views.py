@@ -791,7 +791,7 @@ def redeem(request, reward_id):
     elif total_task_points >= reward.points_required:
         user.decrease_total_task_points(reward.points_required)
         messages.add_message(
-            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
+            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address within 7 days.')
         return redirect('index')
     else:
 
