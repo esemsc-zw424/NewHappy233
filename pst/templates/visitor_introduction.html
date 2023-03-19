@@ -1,5 +1,11 @@
-<div class="container">
+
+
+
+
 {% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/liststyle.css' %}">
+<div class="container">
   <head>
       <style>
           body {
@@ -62,7 +68,7 @@
           <h3>Already a user?</h3>
           <a href="{% url 'log_in' %}" class="btn">Log In</a>
           {% load socialaccount %}
-          <a href="{% provider_login_url "google" action="reauthenticate" %}" class = "btn btn-primary">Sign in Google account</a>
+          <a href="{% provider_login_url "google" action="reauthenticate" %}" class = "login-with-google-btn">Sign in Google account</a>
       </div>
     </div>
   </body>
