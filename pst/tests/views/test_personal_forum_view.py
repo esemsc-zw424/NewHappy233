@@ -4,51 +4,52 @@ from pst.models import Post, Reply, Like, PostImage, User
 from pst.forms import PostForm, ReplyForm
 from django.urls import reverse
 from django.shortcuts import render
+from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from datetime import datetime
 import os
 
 
-class ForumTestCase(TestCase):
+class PersonalForumTestCase(TestCase):
     fixtures = ['pst/tests/fixtures/post.json']
 
     def setUp(self):
         self.post = Post.objects.get(content='This is example post 1')
         self.user = User.objects.get(email="johndoe@example.org")
-        self.url = reverse('forum')
+        self.url = reverse('personal_forum')
 
-    def test_forum_url(self):
-        # Test that the URL for forum is correct
-        self.assertEqual(self.url, '/forum/')
+    def test_personal_forum_url(self):
+        # Test that the URL for personal forum is correct
+        self.assertEqual(self.url, '/personal_forum/')
     
-    def test_forum_page_accessible(self):
+    def test_personal_forum_page_accessible(self):
         # Log in as the test user
         self.client.login(username=self.user.email, password='Password123')
 
-        # Test that the forum page is accessible when logged in
+        # Test that the personal forum page is accessible when logged in
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'forum.html')
+        self.assertTemplateUsed(response, 'personal_forum.html')
 
         # Test that the page contains the correct number of posts
         posts = response.context['page_obj']
         self.assertEqual(posts.paginator.count, Post.objects.count())
 
-    def test_forum_page_post_request(self):
+    def test_personal_forum_page_post_request(self):
         # Log in as the test user
         self.client.login(username=self.user.email, password='Password123')
 
         response = self.client.post(self.url, follow=True)
         self.assertEqual(response.status_code, 200)
 
-        # Test that the post is correctly display in the forum
+        # Test that the post is correctly display in the personal forum
         select_post = Post.objects.filter(content='This is example post 1').first()
         self.assertIsNotNone(select_post)
         self.assertEqual(select_post.user, self.user)
         self.assertEqual(select_post.title, '')
         self.assertEqual(select_post.content, 'This is example post 1')
 
-    def test_forum_page_post_request_with_new_post_create(self):
+    def test_personal_forum_page_post_request_with_new_post_create(self):
         # Log in as the test user
         self.client.login(username=self.user.email, password='Password123')
 
@@ -68,14 +69,14 @@ class ForumTestCase(TestCase):
         posts_count_after = Post.objects.count()
         self.assertEqual(posts_count_before + 1, posts_count_after)
 
-        # Test that the post is correctly display in the forum
+        # Test that the post is correctly display in the personal forum
         new_post = Post.objects.filter(content='This is new example post').first()
         self.assertIsNotNone(new_post)
         self.assertEqual(new_post.user, self.user)
         self.assertEqual(new_post.title, '')
         self.assertEqual(new_post.content, 'This is new example post')
 
-    def test_forum_page_post_request_with_image(self):
+    def test_personal_forum_page_post_request_with_image(self):
         # Log in as the test user
         self.client.login(username=self.user.email, password='Password123')
 
@@ -105,7 +106,7 @@ class ForumTestCase(TestCase):
         image_path = os.path.join(image_dir, 'post_images', 'test_image.png')
         os.remove(image_path)
 
-    def test_post_paginator(self):
+    def test_personal_forum_post_paginator(self):
         # Create 13 test posts
         posts = [Post.objects.create(
                 user=self.user,
@@ -113,7 +114,7 @@ class ForumTestCase(TestCase):
                 post_date='2024-3-30'
             ) for i in range(13)]
 
-        # Log in as the test user and get the first page of the forum
+        # Log in as the test user and get the first page of the personal forum
         self.client.login(username=self.user.email, password='Password123')
         response = self.client.get(self.url)
 
@@ -140,6 +141,3 @@ class ForumTestCase(TestCase):
         # Get a non-existent page and check that the response is 200 since it will return the content in the last existing page
         response = self.client.get(self.url + '?page=4')
         self.assertEqual(response.status_code, 200)
-
-
-
