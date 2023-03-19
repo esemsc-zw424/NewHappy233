@@ -863,6 +863,8 @@ def add_post(request):
                     post=post,
                     file=file
                 )
+            messages.add_message(request, messages.SUCCESS,
+                                 "post has been successfully added!")
             return redirect('forum')
     else:
         form = PostForm()
@@ -870,7 +872,6 @@ def add_post(request):
 
 @login_required
 def delete_post(request, post_id):
-
     delete_post = get_object_or_404(Post, id=post_id)
     delete_post.delete()
     messages.warning(request, "post has been deleted")
@@ -1011,7 +1012,6 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
 
 @login_required
 def delete_reply(request, reply_id):
-
     delete_reply = get_object_or_404(Reply, id=reply_id)
     delete_reply.delete()
     messages.warning(request, "reply has been deleted")
