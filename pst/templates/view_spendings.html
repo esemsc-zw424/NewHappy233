@@ -250,6 +250,11 @@
     
                                 <input type="submit" value="Save" class="btn btn-primary">
                             </form>
+                             <form action="{% url 'delete_spending' spending_id=i.id %}" method="post" style="display:inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="spending_id" value="{{ i.id }}">
+                                <br/><input type="submit" value="Delete spending" class="btn btn-danger">
+                             </form>
                         </div>
                     </div>
                 </div>

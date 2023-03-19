@@ -1,0 +1,40 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<div class ="container">
+  <p class="fs-1">Hello, <b>{{ request.user.full_name }}</b></p >
+  <div class ="row">
+    <div class="col">
+      <div class="card">
+        <h2 class="card-header container">
+          <div class="row">
+            <<div class="col flex-1 text-center">{{month}} {{year}}</div>>
+          </div>
+        </h2>
+          <div class="class-body p-2">
+            <div class="row row-cols-7">
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Monday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Tuesday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Wednesday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Thursday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Friday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Saturday</h5>
+              </div>
+              <div class="col text-truncate">
+                <h5 class="text-truncate">Sunday</h5>
+              </div>
+            </div>
+{% endblock %}
+           
+                 

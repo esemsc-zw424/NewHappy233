@@ -1,36 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=1440, maximum-scale=1.0" />
-    {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}"/>
-    
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'css/style.css' %}"
-    />
+{% extends 'base_home.html' %}
+{% load mathfilters %}
+{% load static %}
 
-    
-    <meta name="og:type" content="website" />
-    <meta name="twitter:card" content="photo" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/home-page.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styleguide.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/globals.css' %}" />
-    
+{% block content %}
 
-  </head>
   <body style="margin: 0; background: #d0e6fd">
 
     <div class="container-center-horizontal">
@@ -39,7 +12,7 @@
           <!-- overlap-group5 is css for sidebar and top rectangle banner -->
           <div class="overlap-group5">
             <div class="rectangle-17"></div>
-            
+
             <img
               class="rectangle-9"
               src="{% static 'img/rectangle-9.png' %}" 
@@ -86,6 +59,7 @@
                   class="button-image"
                   src="{% static 'img/image-2@2x.png' %}"
                   alt="image 2"
+                  onclick="show_login_task_modal()"
                 />
               </button>
 
@@ -385,18 +359,69 @@
         </div>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
-            integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.min.js"
-            integrity="sha384-PsUw7Xwds7x08Ew3exXhqzbhuEYmA2xnwc8BuD6SEr+UmEHlX8/MCltYEodzWA4u"
-            crossorigin="anonymous"></script>
-    
-   
-   
-  
+
+
+<!-- used by js to retrieve pos variable from context-->
+   <div id="pos_val" data-my-variable="{{ pos }}"></div>
+
+<!--daily login task modal -->
+    <div class="modal" id="daily_login_task" tabindex="-1">
+      <div class="modal-dialog modal-lg " style="min-width:30%;" >
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Daily Reward</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <table id="reward-table">
+                <tbody>
+
+                    {% for i in week_list %}
+                      <tr>
+                        {% for j in weekday_list %}
+                            <!-- day from 1 to 35 (total 35 squares on the daily login task table) -->
+                           {% with within_bracket=i|sub:1 %}
+                                {% with mul=within_bracket|mul:7 %}
+                                    {% with day=mul|add:j %}
+
+                             {% if day == pos %}
+                                 <td class="square" id="task_point-pos-{{ day }}"  name= "task_point_pos" >
+                                     <button  onclick="task_point_pos_click_handler({{ day }})" >
+                                         day{{pos}}<i class="bi bi-cart-check"></i></button> </td>
+                            {% elif day == super_task_point_pos %}
+                                <td class = "square" id="task_point-super-{{ day }}"style="color: rgb(255, 24, 7);">
+                                    day{{day}} <br>
+                                    <i class="fa-solid fa-gem"></i>
+                                    {{high_task_points}}</td>
+                            {% else %}
+                                 <td class = "square"  id="task_point-normal-{{ day }}"> day{{day}}  <br>
+                                 <i class="fa-solid fa-sack-dollar"></i>
+
+                                    {{normal_task_points}}</td>
+                            {% endif %}
+
+                            {% endwith %}
+                          {% endwith %}
+                        {% endwith %}
+                       {% endfor %}
+                      </tr>
+                    {% endfor %}
+               </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <p>Log in for 7 consecutive days to receive <p class="fw-bold"><i class="fa-solid fa-fire" style="color: rgb(255, 24, 7);"></i>  super reward</p></p>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+    {% endblock %}
 
     
 
-  </body>
-</html>
+
