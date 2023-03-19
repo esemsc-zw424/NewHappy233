@@ -758,13 +758,13 @@ def index(request):
 
     if Reward.objects.count() == 0:
         Reward.objects.create(
-            name='T-shirt', points_required=20, image='rewards/shirt.jpg')
-        Reward.objects.create(name='PlayStation Store 50 GBP Gift Card',
-                              points_required=50, image='rewards/playstation_gift_card.jpg')
-        Reward.objects.create(name="Xbox 10 GBP Gift Card",
-                              points_required=10, image='rewards/xbox_gift_card.jpg')
-        Reward.objects.create(name="Amazon 20 GBP Gift Card",
-                              points_required=20, image='rewards/amazon_gift_card.jpg')
+            name='T-shirt', points_required=10, image='rewards/shirt.jpg')
+        Reward.objects.create(name='PSN £50 Gift Card',
+                              points_required=500, image='rewards/playstation_gift_card.jpg')
+        Reward.objects.create(name="XBX £10 Gift Card",
+                              points_required=100, image='rewards/xbox_gift_card.jpg')
+        Reward.objects.create(name="AMZ £20 Gift Card",
+                              points_required=200, image='rewards/amazon_gift_card.jpg')
 
 #
     rewards = Reward.objects.all()
