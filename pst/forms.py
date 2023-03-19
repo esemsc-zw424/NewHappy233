@@ -232,7 +232,6 @@ class BudgetForm(forms.ModelForm):
         category_spent = Budget.objects.filter(budget_owner=self.user, spending_category=spending_category).last()
         if category_spent:
             category_value = category_spent.limit
-            print("cs" + str(category_spent.limit))
         else:
             category_value = 0
  
@@ -313,7 +312,6 @@ class TotalBudgetForm(forms.ModelForm):
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
         if not end_date:
-            print(1)
             cleaned_data['end_date'] = start_date + timedelta(days=30)
 
         return cleaned_data
