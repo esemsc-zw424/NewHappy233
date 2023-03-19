@@ -1,6 +1,8 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <script>
+
+
     function addSortUrl() {
         var url = new URL(window.location.href);
         var search_params = url.searchParams;
@@ -10,6 +12,12 @@
         return new_url;
     }
     window.onload = function() {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl, {
+                customClass: tooltipTriggerEl.dataset.bsCustomClass || ''
+            })
+        });
         if (get('sorted') == 'budget'){
             document.getElementById('empty_sort').innerHTML = "Budget: low to high";
         }else if (get('sorted') == '-budget'){
@@ -101,14 +109,19 @@
         <tr>
             <th scope="col">category</th>
             <th scope="col">budget</th>
-            <th scope="col">spending in chosen period</th>
             <th scope="col" type="button"
                 data-bs-toggle="tooltip" data-bs-placement="top"
                 data-bs-custom-class="custom-tooltip"
-                data-bs-title="This top tooltip is themed via CSS variables.">
-                percentage<i class="bi bi-exclamation-circle"></i>
+                data-bs-title="spending within your selected timeframe">
+                spending<i class="bi bi-question-circle"></i>
             </th>
             <th scope="col">go over budget?</th>
+            <th scope="col" type="button"
+                data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-custom-class="custom-tooltip"
+                data-bs-title="Include spending and budget for accurate percentage.">
+                percentage<i class="bi bi-exclamation-circle"></i>
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -117,18 +130,20 @@
                 <td> {{ category_budget.name }} </td>
                 <td> {{ category_budget.budget }} </td>
                 <td> {{ category_budget.spending }} </td>
-                {% if category_budget.percentage %}
-                    <td>Percentage: {{ category_budget.percentage }}%</td>
-                {% else %}
-                    <td>Include spending and non-zero budgets for accurate percentage.</td>
-                {% endif %}
                 {% if category_budget.percentage >= 100 %}
                     <td>Yes</td>
-                {% elif category_budget.percentage == None %}
+                    {% elif category_budget.percentage == None %}
                     <td>Set a budget first</td>
-                {% else %}
+                    {% else %}
                     <td>No</td>
-                {% endif %}
+                    {% endif %}
+                {% if category_budget.percentage %}
+                    <td>Percentage: {{ category_budget.percentage }}%</td>
+                    {% elif category_budget.percentage == 0%}
+                    <td>Percentage: {{ category_budget.percentage }}%</td>
+                    {% else %}
+                    <td>Can't be calculated accurately.</td>
+                    {% endif %}
             </tr>
         {% endfor %}
     </tbody>

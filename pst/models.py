@@ -224,7 +224,7 @@ class SpendingFile(models.Model):
 
 
 class Budget(models.Model):
-    name = models.CharField(max_length=100, default='')
+    # name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
     # start_date = models.DateField(default=timezone.now)
     # end_date = models.DateField(default=timezone.now)
@@ -383,7 +383,7 @@ class DeliveryAddress(models.Model):
 #     )
 
 class TotalBudget(models.Model):
-    name = models.CharField(max_length=100, default='')
+    # name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
     start_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)  # make end_date optional
