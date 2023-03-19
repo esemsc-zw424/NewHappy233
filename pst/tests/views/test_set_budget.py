@@ -14,7 +14,6 @@ class SetBudgetViewTestCase(TestCase):
             first_name='test', last_name='user', email='testuser@test.com', password='testpass')
         self.url = reverse('budget_set')
         self.form_input = {
-            'name': 'Test Budget',
             'limit': 1000,
             'start_date': date.today(),
             'end_date': date.today(),
@@ -34,7 +33,6 @@ class SetBudgetViewTestCase(TestCase):
         self.assertRedirects(response, reverse('budget_show'))
         self.assertEqual(TotalBudget.objects.count(), 1)
         budget = TotalBudget.objects.first()
-        self.assertEqual(budget.name, 'Test Budget')
         self.assertEqual(budget.limit, 1000)
         self.assertEqual(budget.start_date, date.today())
         self.assertEqual(budget.end_date, date.today())
