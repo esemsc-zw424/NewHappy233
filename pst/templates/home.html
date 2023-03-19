@@ -360,13 +360,13 @@
       </div>
     </div>
 
-   
+
 <!-- used by js to retrieve pos variable from context-->
    <div id="pos_val" data-my-variable="{{ pos }}"></div>
 
 <!--daily login task modal -->
     <div class="modal" id="daily_login_task" tabindex="-1">
-      <div class="modal-dialog" style="min-width:30%;" >
+      <div class="modal-dialog modal-lg " style="min-width:30%;" >
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Daily Reward</h5>
@@ -384,7 +384,7 @@
                                 {% with mul=within_bracket|mul:7 %}
                                     {% with day=mul|add:j %}
 
-                            {% if day == pos %}
+                             {% if day == pos %}
                                  <td class="square" id="task_point-pos-{{ day }}"  name= "task_point_pos" >
                                      <button  onclick="task_point_pos_click_handler({{ day }})" >
                                          day{{pos}}<i class="bi bi-cart-check"></i></button> </td>
@@ -406,19 +406,18 @@
                        {% endfor %}
                       </tr>
                     {% endfor %}
-                <td id = "www"></td>
                </tbody>
             </table>
           </div>
           <div class="modal-footer">
             <p>Log in for 7 consecutive days to receive <p class="fw-bold"><i class="fa-solid fa-fire" style="color: rgb(255, 24, 7);"></i>  super reward</p></p>
-            
+
 
           </div>
         </div>
       </div>
     </div>
-    
+
 </div>
 
     {% endblock %}

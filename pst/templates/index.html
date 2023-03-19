@@ -1,32 +1,16 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <p>{{ message }}</p>
-<style>
-.rewards-container {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-}
 
-.reward {
-    display: inline-block;
-    text-align: center;
-    margin-right: 20px;
-}
-.rewards-container {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center; /* center horizontally */
-  align-items: center; /* center vertically */
-  overflow-x: auto;
-}
-
-</style>
-  <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return To Home</a>
+  <p>
+      <a href='{% url 'home' %}'class="btn btn btn-primary">Return To Home</a>
     <button type="button" class="btn btn-primary"
                     data-bs-toggle="modal" data-bs-target="#address">
     Address
     </button>
+     {% if not address %}
+        <p>Don't forget to add your address</p>
+    {% endif %}
     <div class="modal fade" id="address" tabindex="-1" role="dialog" aria-labelledby="addAddress">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -48,14 +32,12 @@
         </div>
     </div>
     </p>
-  {% if reward_points %}
-    <p>You have {{ reward_points.points }} reward points.</p>
-  {% else %}
-    <p>You don't have any reward points yet.</p>
-  {% endif %}
-    {% if not address %}
-        <p>Don't forget to add your address</p>
+    {% if task_points %}
+    <h1>You have {{ task_points }}  points.</h1>
+    {% else %}
+    <p>You don't have any points.</p>
     {% endif %}
+
 
   <div class="rewards-container">
     {% for reward in rewards %}
@@ -72,6 +54,7 @@
           <button type="submit">Redeem</button>
         </form>
       </div>
+
     {% endfor %}
 
     </div>

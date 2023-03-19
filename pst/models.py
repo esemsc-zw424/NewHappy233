@@ -64,7 +64,7 @@ class User(AbstractUser):
     phone_regex = RegexValidator(regex=r'^\d{10,15}$', message="Phone number must be entered in the format: '9999999999' and maximum 15 digits allowed.")
     phone_number = models.CharField(validators=[phone_regex], max_length=15, blank=True)
     address = models.CharField(max_length=100, blank=True)
-
+    total_task_points = models.IntegerField(default=0)
     consecutive_login_days = models.IntegerField(default=1)
     logged_in_once_daily = models.BooleanField(default = False)
 
@@ -74,13 +74,6 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
-    @property
-    def total_task_points(self):
-        total_points = 0
-        for daily_task in self.dailytask_set.all():
-            for status in daily_task.dailytaskstatus_set.all():
-                total_points += status.task_points
-        return total_points
 
     def increase_total_task_points(self, value):
         self.total_task_points += value
@@ -185,6 +178,12 @@ class DailyTaskStatus(models.Model):
     day = models.ForeignKey(Day, on_delete=models.CASCADE)
     task_points = models.IntegerField(default=0)
     task_type = models.CharField(choices=TaskType.choices(), default=TaskType.LOGIN.name, max_length=10)
+
+    def save(self, *args, **kwargs):
+        user = self.task.user  # Assuming that there is a 'user' foreign key field in the 'DailyTask' model
+        user.total_task_points += self.task_points
+        user.save()
+        super().save(*args, **kwargs)
 
     class Meta:
         unique_together = ('task', 'day', 'task_type')
