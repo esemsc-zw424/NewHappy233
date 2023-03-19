@@ -2,10 +2,10 @@
 
 from django.core.management.base import BaseCommand, CommandError
 
-from .models import User
-from .models import Post
+from pst.models import User
+from pst .models import Post
 
-import pytz
+#import pytz
 from faker import Faker
 from random import randint, random
 
@@ -53,8 +53,8 @@ class Command(BaseCommand):
     def create_user(self):
         first_name = self.faker.first_name()
         last_name = self.faker.last_name()
-        email = create_email(first_name, last_name)
-        username = create_username(first_name, last_name)
+        email = self._create_email(first_name, last_name)
+        username = self._create_username(first_name, last_name)
         bio = self.faker.text(max_nb_chars=520)
         User.objects.create_user(
             username=username,
@@ -64,6 +64,14 @@ class Command(BaseCommand):
             last_name=last_name,
             bio=bio
         )
+
+    def _create_email(self, first_name, last_name):
+        email = f'{first_name}.{last_name}@example.org'
+        return email
+
+    def _create_username(self, first_name, last_name):
+        username = f'@{first_name}.{last_name}'
+        return username
 
     def create_posts(self):
         for i in range(self.POST_COUNT):
@@ -95,9 +103,3 @@ class Command(BaseCommand):
         for follower in self.users:
             if random() < self.FOLLOW_PROBABILITY:
                 user.toggle_follow(follower)
-
-    def create_username(first_name, last_name):
-        return '@' + first_name.lower() + last_name.lower()
-
-    def create_email(first_name, last_name):
-        return first_name + '.' + last_name + '@example.org'

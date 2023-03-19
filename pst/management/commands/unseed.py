@@ -2,8 +2,9 @@ from django.core.management.base import BaseCommand, CommandError
 from pst.models import User, Spending, SpendingFile, Categories, Budget, RewardPoint, Reward, Post, PostImage, Reply, Like
 
 class Command(BaseCommand):
+    help = 'Removes seeded data'
     def handle(self, *args, **options):
-        User.objects.all().delete()
+        User.objects.filter(is_staff=False, is_superuser=False).delete()
         Spending.objects.all().delete()
         SpendingFile.objects.all().delete()
         Categories.objects.all().delete()
