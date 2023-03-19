@@ -42,7 +42,7 @@ class ForumTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Test that the post is correctly display in the forum
-        select_post = Post.objects.filter(content='This is example post 1').first()
+        select_post = Post.objects.get(content='This is example post 1')
         self.assertIsNotNone(select_post)
         self.assertEqual(select_post.user, self.user)
         self.assertEqual(select_post.title, '')
@@ -69,7 +69,7 @@ class ForumTestCase(TestCase):
         self.assertEqual(posts_count_before + 1, posts_count_after)
 
         # Test that the post is correctly display in the forum
-        new_post = Post.objects.filter(content='This is new example post').first()
+        new_post = Post.objects.get(content='This is new example post')
         self.assertIsNotNone(new_post)
         self.assertEqual(new_post.user, self.user)
         self.assertEqual(new_post.title, '')
@@ -83,12 +83,12 @@ class ForumTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Use a test image from the fixtures directory
-        with open('pst/tests/views/test_image/test_image.png', 'rb') as f:
-            image = SimpleUploadedFile('test_image.png', f.read(), content_type='image/png')
+        with open('pst/tests/views/test_image/test_image_HOWAREYOU.png', 'rb') as f:
+            image = SimpleUploadedFile('test_image_HOWAREYOU.png', f.read(), content_type='image/png')
             post_image = PostImage.objects.create(post=self.post, file=image)
 
         # Test that the new post was created with the correct attributes
-        new_post = Post.objects.filter(content='This is example post 1').first()
+        new_post = Post.objects.get(content='This is example post 1')
         self.assertIsNotNone(new_post)
         self.assertEqual(new_post.user, self.user)
         self.assertEqual(new_post.title, '')
@@ -98,11 +98,11 @@ class ForumTestCase(TestCase):
         # Test that the image was saved correctly
         saved_image = new_post.images.first()
         self.assertIsNotNone(saved_image.file)
-        self.assertEqual(saved_image.file.name, 'post_images/test_image.png')
+        self.assertEqual(saved_image.file.name, 'post_images/test_image_HOWAREYOU.png')
 
         # Get the absolute path to the static directory and delete it
         image_dir = os.path.abspath(os.path.join(__file__, '../../../../static'))
-        image_path = os.path.join(image_dir, 'post_images', 'test_image.png')
+        image_path = os.path.join(image_dir, 'post_images', 'test_image_HOWAREYOU.png')
         os.remove(image_path)
 
     def test_post_paginator(self):
