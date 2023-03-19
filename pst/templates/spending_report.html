@@ -65,10 +65,23 @@
         return new_url;
     }
 
+    function reloadUrl(event, pageNumber) {
+        event.preventDefault();
+        var url = window.location.href;
+        var search_params = new URLSearchParams(window.location.search);
+        if (pageNumber) {
+        search_params.set('page', pageNumber);
+        }
+        new_url = "?" + search_params.toString();
+        window.location.href = new_url;
+        return window.location.href;
+    }
+
     function get(name) {
         if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
             return decodeURIComponent(name[1]);
     }
+
 
     window.onload = function() {
         if (get('sorted') == 'date') {
@@ -93,7 +106,7 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container">start_date
         <div class="row">
             <div class="col offset-md-11">
                 <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
@@ -273,46 +286,26 @@
                     {% endfor %}
                 </tbody>
             </table>
-
+            
             <div class="pagination">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination">
                     {% if page_obj.has_previous %}
-                      <li class="page-item"><a class="page-link" href="?start_date={{ start_date }}&end_date={{ end_date }}&select_categories={{ selected_categories }}&sorted={{ sorted }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}" onclick="return reloadUrl(event, {{ page_obj.previous_page_number }})">Previous</a></li>
                     {% endif %}
                     {% if page_obj.has_other_pages %}
                     {% for num in page_obj.paginator.page_range %}
                       <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                        <a class="page-link" href="?start_date={{start_date}}&end_date={{ end_date }}&select_categories={{ selected_categories }}&sorted={{ sorted }}&page={{ num }}">{{ num }}</a>
+                        <a class="page-link" href="?page={{ num }}" onclick="return reloadUrl(event, {{ num }})">{{ num }}</a>
                       </li>
                     {% endfor %}
                     {% endif %}
                     {% if page_obj.has_next %}
-                      <li class="page-item"><a class="page-link" href="?start_date={{ start_date }}&end_date={{ end_date }}&select_categories={{ selected_categories }}&sorted={{ sorted }}&page={{ page_obj.next_page_number }}">Next</a></li>
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}" onclick="return reloadUrl(event, {{ page_obj.next_page_number }})">Next</a></li>
                     {% endif %}
                     </ul>
                   </nav>
             </div>
-
-            <!-- <div class="pagination">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
-                    {% endif %}
-                    {% if page_obj.has_other_pages %}
-                    {% for num in page_obj.paginator.page_range %}
-                      <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                      </li>
-                    {% endfor %}
-                    {% endif %}
-                    {% if page_obj.has_next %}
-                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
-                    {% endif %}
-                    </ul>
-                  </nav>
-            </div> -->
         </div>
     </div>
 </body>
