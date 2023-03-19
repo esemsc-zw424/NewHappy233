@@ -31,6 +31,7 @@ class EditSpendingFormTestCase(TestCase):
             'spending_category': self.category.id,
             'file': SimpleUploadedFile('test_file.txt', b'This is a test file')
         }
+        
     
 
     def test_form_contains_necessary_fields(self):
@@ -48,7 +49,7 @@ class EditSpendingFormTestCase(TestCase):
         self.assertTrue('delete_file', form.fields)
     
     def test_form_with_valid_data(self):
-        self.assertTrue(self.spending.files.all().count(), 0)
+        
         form = EditSpendingForm(user=self.user, data=self.form_input, instance=self.spending)
         self.assertTrue(form.is_valid())
         before_count = User.objects.count()
@@ -71,3 +72,4 @@ class EditSpendingFormTestCase(TestCase):
         file_dir = os.path.abspath(os.path.join(__file__, '../../../../static'))
         file_path = os.path.join(file_dir, 'user_files', 'test_file.txt')
         os.remove(file_path)
+        self.assertTrue(self.spending.files.all().count(), 0)
