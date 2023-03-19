@@ -1,3 +1,5 @@
+from audioop import reverse
+import datetime
 from django.db.models import Sum
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -8,20 +10,26 @@ from django.urls import reverse
 from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+
 from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Sum
+from datetime import timedelta
+from django.utils import timezone
 from django.db.models import Max, Sum, Subquery, OuterRef
 
 import calendar
 from datetime import date, datetime
 import datetime as dt
 
-from .models import User, Categories, SpendingFile, Reward, Budget, RewardPoint, DeliveryAddress, SpendingFile, PostImage, Like
+from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType, DeliveryAddress
+
 from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -40,8 +48,11 @@ import nltk
 nltk.download('punkt')
 nltk.download('wordnet')
 
-# Create your views here.
 
+
+high_task_points = 30
+normal_task_points = 10
+current_datetime = timezone.now()
 
 @login_required
 def user_feed(request):
@@ -54,8 +65,7 @@ def visitor_signup(request):
         form = VisitorSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth.login(request, user,
-                       backend='django.contrib.auth.backends.ModelBackend')
+            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('home')
         else:
             return render(request, 'visitor_signup.html', {'form': form})
@@ -115,9 +125,121 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
                'income_amount': income_sum}
     return context
 
+def get_login_task_status(request):
+    pos = int(request.GET.get("pos", 0))
+    task_statuses  = DailyTaskStatus.objects.filter(
+    day__number__lte=pos,
+    task_type=TaskType.LOGIN.name,
+    task__user=request.user,
+
+    )
+
+    # Create a dictionary with day numbers as keys and completed status as values
+    task_status_dict = {
+        task_status.day.number: True
+        for task_status in task_statuses
+    }
+
+    # Create a list of dictionaries for each day from 1 to pos, with their completion status
+    data = {
+        "task_statuses": [
+            {
+                "day": day,
+                "completed": task_status_dict.get(day, False),
+            }
+            for day in range(1, pos + 1)
+        ]
+    }
+
+    if not task_status_dict.get(pos) and len(data['task_statuses']) > 0:
+        data['task_statuses'].pop()
+
+    return JsonResponse(data)
+
+@login_required
+@csrf_exempt
+def add_login_task_points(request):
+    if request.method == 'POST':
+
+        user = request.user
+        login_task = DailyTask.objects.create(user=user)
+        current_day = get_number_days_from_register(request)
+        day, _ = Day.objects.get_or_create(number=current_day)
+        print(day)
+        # give user extra points if user has login consecutive for seven days
+        if user.consecutive_login_days > 7:
+            daily_task_status = DailyTaskStatus.objects.create(
+                task=login_task,
+                day=day,
+                task_points=high_task_points,
+                task_type=TaskType.LOGIN.name
+            )
+
+        else:
+
+            daily_task_status = DailyTaskStatus.objects.create(
+                task=login_task,
+                day=day,
+                task_points=normal_task_points,
+                task_type=TaskType.LOGIN.name
+            )
+
+
+
+        return JsonResponse({"status": "success"})
+
+
+def check_already_logged_in_once_daily(request):
+    user = request.user
+    # if over a day since last login
+    if current_datetime - user.last_login > timedelta(hours=24):
+        user.logged_in_once_daily = False
+        user.save()
+    else:
+        user.logged_in_once_daily = True
+        user.save()
+
+
+def get_number_days_from_register(request):
+    date_joined = request.user.date_joined
+    num_days = (current_datetime - date_joined).days + 1
+    if  num_days == 0:
+        num_days = 1
+
+    return num_days
+
+
+def get_position_in_daily_reward(request):
+    pos = get_number_days_from_register(request)
+    return pos % 35
+
+
+def get_super_task_point_position(request):
+    cur_pos = get_position_in_daily_reward(request)
+    days_need = 8 - request.user.consecutive_login_days
+    return cur_pos + days_need
+
+
+def add_consecutive_login_days(request):
+    user = request.user
+    if current_datetime - user.last_login < timedelta(hours=24):
+        user.consecutive_login_days += 1
+
+        # user has not logged in consecutively
+    else:
+        user.consecutive_login_days = 1
+    user.save()
+
+
 
 @login_required
 def home(request):
+    week_list = [1,2,3,4,5]
+    weekday_list = [1,2,3,4,5,6,7]
+    current_day = str(timezone.now().day)
+    pos = get_position_in_daily_reward(request)
+    super_task_pos = get_super_task_point_position(request)
+
     user = request.user
     percentage = calculate_budget(request)
     month = datetime.now().month
@@ -146,9 +268,14 @@ def home(request):
     context = {'user': user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
 
+    daily_reward_context = {"pos": pos, "super_task_pos": super_task_pos, "week_list": week_list,
+                            "weekday_list": weekday_list, "current_datetime": current_day,
+                            "high_task_points": high_task_points, "normal_task_points": normal_task_points}
+
     calendar_context = get_spending_calendar_context(request)
 
     context.update(calendar_context)
+    context.update(daily_reward_context)
 
     return render(request, 'home.html', context)
 
@@ -158,27 +285,59 @@ def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
 
 
+
+@login_required
+def edit_spending(request, spending_id):
+    # if request.method == 'POST':
+    #     form = EditSpendingForm(request.POST)
+    #     if form.is_valid():
+    try:
+        spending = Spending.objects.get(id = spending_id)
+    except ObjectDoesNotExist:
+        return render(request, 'view_spendings.html')
+
+    if request.method == 'POST':
+        form = EditSpendingForm(request.POST, instance=spending)
+        if form.is_valid():
+            form.save()
+            request.spending.save()
+            messages.success(request, 'success')
+            return redirect('view_spendings')
+    else:
+        form = EditSpendingForm(instance=spending)
+    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
+
+
 @login_prohibited
 def log_in(request):
     if request.method == 'POST':
         next = request.POST.get('next') or ''
         form = LoginForm(request.POST)
+
         if form.is_valid():
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
             user = authenticate(username=email, password=password)
             if user is not None:
                 login(request, user)
-                next = request.GET.get('next') or ''
                 redirect_url = next or 'home'
+                next = request.GET.get('next') or ''
+                check_already_logged_in_once_daily(request)
+                add_consecutive_login_days(request)
+                user.last_login = timezone.now()
+                user.save()
+
                 return redirect(redirect_url)
 
-        else:
-            messages.add_message(request, messages.ERROR,
-                                 "The credentials provided are invalid!")
+            else:
+                messages.add_message(request, messages.ERROR, "The credentials provided are invalid!")
+
+
 
     form = LoginForm()
+
     return render(request, 'log_in.html', {'form': form})
+
 
 
 def log_out(request):
@@ -308,9 +467,8 @@ def view_spendings(request):
 
 @login_required
 def edit_spending(request, spending_id):
-   
-    try: 
-        spending = Spending.objects.get(id=spending_id)
+    try:
+        spending = Spending.objects.get(id = spending_id)
     except ObjectDoesNotExist:
         return redirect('view_spendings')
         
@@ -334,13 +492,14 @@ def edit_spending(request, spending_id):
             messages.success(request, 'Change made successfully')
             return redirect('view_spendings')
     else:
-        form = EditSpendingForm(request.user, instance=spending)
-    return render(request, 'view_spendings.html', {'form': form})
+        form = EditSpendingForm(user=request.user)
+    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
 
 
 @login_required
 def delete_spending(request, spending_id):
-    delete_spending = get_object_or_404(Spending, id=spending_id)
+
+    delete_spending = get_object_or_404(Spending, id = spending_id)
     delete_spending.delete()
     messages.warning(request, "spending has been deleted")
     return redirect('view_spendings')
@@ -552,22 +711,8 @@ def show_budget(request):
     selected_sort = request.GET.get('sorted')
     # the budget will be refreshed automatically after the end date
     # of your last budget
-    current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
-    if current_budget and current_budget.end_date < datetime.now().date():
-        TotalBudget.objects.create(
-            name=current_budget.name,
-            limit=current_budget.limit,
-            start_date=datetime.now().date(),
-            end_date=datetime.now().date() + timedelta(days=30),
-            budget_owner=request.user,
-        )
-    current_month = datetime.now().month
-    # total_spending = Spending.objects.filter(
-    # spending_owner = request.user,
-    # date__month = current_month,
-    #  spending_type = Spending_type.EXPENDITURE,
-    # ).aggregate(nums=Sum('amount')).get('nums')
-    # total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
+    create_new_budget_if_needed(request)
+    # current_month = datetime.now().month
     total_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
     percentage = calculate_budget(request)
     # check if a message with the INFO level already exists
@@ -581,95 +726,10 @@ def show_budget(request):
         messages.add_message(request, messages.INFO,
                              'you have exceeded the limit')
 
-    categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
-    category_budgets = []
-    for category in categories:
-        budget = Budget.objects.filter(spending_category=category).last()
-        if budget:
-            # print(category.name + str(budget.limit))
-            spending_sum = Spending.objects.filter(
-                spending_owner=request.user,
-                # date__month=current_month,
-                date__range=(total_budget.start_date, total_budget.end_date),
-                spending_type=Spending_type.EXPENDITURE,
-                spending_category=category,
-            ).aggregate(nums=Sum('amount')).get('nums') or 0
-
-            # print(budget.limit)
-            category_budgets.append({
-                'name': category.name,
-                'budget': budget.limit,
-                'spending': spending_sum,
-                'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
-                # 'start_date': total_budget.start_date,
-                # 'end_date': total_budget.end_date,
-            })
-        else:
-            if total_budget:
-                spending_sum = Spending.objects.filter(
-                    spending_owner=request.user,
-                    # date__month=current_month,
-                    date__range=(total_budget.start_date, total_budget.end_date),
-                    spending_type=Spending_type.EXPENDITURE,
-                    spending_category=category,
-                ).aggregate(nums=Sum('amount')).get('nums') or 0
-                category_budgets.append({
-                    'name': category.name,
-                    'budget': 'Not set yet',
-                    'spending': spending_sum,
-                    'percentage': None,
-                    # 'start_date': None,
-                    # 'end_date': None,
-                })
-            else:
-                category_budgets.append({
-                    'name': category.name,
-                    'budget': 'Not set yet',
-                    'spending': 'Please set a total budget first',
-                    'percentage': None,
-                    # 'start_date': None,
-                    # 'end_date': None,
-            })
-    print(selected_sort)
-    if selected_sort == '-budget':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
-                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
-            ),
-            reverse=True
-        )
-    elif selected_sort == 'budget':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
-                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
-            )
-        )
-    elif selected_sort == '-spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
-            ),
-            reverse=True
-        )
-    elif selected_sort == 'spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
-            ),
-        )
-    elif selected_sort == '':
-        sorted_category_budgets = category_budgets
-    else:
-        print(1)
-        sorted_category_budgets = category_budgets
+    # the budget will be refreshed automatically after the end date
+    # of your last budget
+    category_budgets = get_category_budgets(request, total_budget)
+    sorted_category_budgets = sort_catrgory_budget(request, selected_sort, category_budgets)
     form = TotalBudgetForm(request.user)
     specific_form = BudgetForm(request.user)
 
@@ -682,10 +742,19 @@ def show_budget(request):
     })
 
 
+# @login_required
+# def index(request):
+#     if Reward.objects.count() == 0:
+#         Reward.objects.create(name='Discount coupon', points_required=10)
+#         Reward.objects.create(name='Free T-shirt', points_required=20)
+#         Reward.objects.create(name='Gift card', points_required=50)
+
+
+
 @login_required
 def index(request):
     address = DeliveryAddress.objects.filter(user=request.user).last()
-    form = AddressForm()
+    form = AddressForm(instance=address)
 
     if Reward.objects.count() == 0:
         Reward.objects.create(
@@ -697,12 +766,12 @@ def index(request):
         Reward.objects.create(name="Amazon 20 GBP Gift Card",
                               points_required=20, image='rewards/amazon_gift_card.jpg')
 
+#
     rewards = Reward.objects.all()
-    rewards_points = RewardPoint.objects.filter(user=request.user).first()
     context = {
         'form': form,
         'rewards': rewards,
-        'reward_points': rewards_points,
+        'task_points': request.user.total_task_points,
         'address': address,
     }
     return render(request, 'index.html', context)
@@ -710,31 +779,22 @@ def index(request):
 
 @login_required
 def redeem(request, reward_id):
+    user = request.user
+    total_task_points = user.total_task_points
     reward = Reward.objects.get(id=reward_id)
-    reward_points = RewardPoint.objects.filter(user=request.user).first()
 
-    error_message = "You don't have enough reward points to redeem this reward."
-    context = {
-        'error_message': error_message, }
+    if total_task_points is None:
 
-    if reward_points is None:
-        # error_message = "You don't have enough reward points to redeem this reward."
-        # return render(request, 'error.html', context)
         messages.add_message(
             request, messages.INFO, "You don't have enough reward points to redeem this reward.")
         return redirect('index')
-    elif reward_points.points >= reward.points_required:
-        reward_points.points -= reward.points_required
-        reward_points.save()
+    elif total_task_points >= reward.points_required:
+        user.decrease_total_task_points(reward.points_required)
         messages.add_message(
             request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
         return redirect('index')
     else:
-        # error_message = "You don't have enough reward points to redeem this reward."
-        # context = {
-        #     'error_message': error_message,}
-        #
-        # return render(request, 'error.html', context)
+
         messages.add_message(
             request, messages.INFO, "You don't have enough reward points to redeem this reward.")
         return redirect('index')
@@ -978,7 +1038,7 @@ def spending_calendar(request, year=datetime.now().year, month=datetime.now().mo
     context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
 
-
+@login_required
 def set_specific_budget(request):
     if request.method == 'POST':
         form = BudgetForm(request.user, request.POST)
@@ -991,6 +1051,7 @@ def set_specific_budget(request):
         form = BudgetForm(request.user)
     return render(request, 'specific_budget_set.html', {'form': form})
 
+@login_required
 def password(request):
     if request.user.is_authenticated:
         current_user = request.user
@@ -1014,3 +1075,103 @@ def password(request):
 
         form = PasswordForm()
         return render(request, 'password.html', {'form': form})
+
+@login_required
+def create_new_budget_if_needed(request):
+    current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
+    if current_budget and current_budget.end_date < datetime.now().date():
+        TotalBudget.objects.create(
+            limit=current_budget.limit,
+            start_date=datetime.now().date(),
+            end_date=datetime.now().date() + timedelta(days=30),
+            budget_owner=request.user,
+        )
+
+@login_required
+def get_category_budgets(request, total_budget):
+    categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
+    category_budgets = []
+    for category in categories:
+        budget = Budget.objects.filter(spending_category=category).last()
+        if budget:
+            # print(category.name + str(budget.limit))
+            spending_sum = Spending.objects.filter(
+                spending_owner=request.user,
+                # date__month=current_month,
+                date__range=(total_budget.start_date, total_budget.end_date),
+                spending_type=Spending_type.EXPENDITURE,
+                spending_category=category,
+            ).aggregate(nums=Sum('amount')).get('nums') or 0
+
+            # print(budget.limit)
+            category_budgets.append({
+                'name': category.name,
+                'budget': budget.limit,
+                'spending': spending_sum,
+                'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
+                # 'start_date': total_budget.start_date,
+                # 'end_date': total_budget.end_date,
+            })
+        else:
+            if total_budget:
+                spending_sum = Spending.objects.filter(spending_owner=request.user,
+                                                       date__range=(total_budget.start_date, total_budget.end_date),
+                                                       spending_type=Spending_type.EXPENDITURE,
+                                                       spending_category=category,
+                                                       ).aggregate(nums=Sum('amount')).get('nums') or 0
+                category_budgets.append({
+                    'name': category.name,
+                    'budget': 'Not set yet',
+                    'spending': spending_sum,
+                    'percentage': None,
+                    # 'start_date': None,
+                    # 'end_date': None,
+                })
+            else:
+                category_budgets.append(
+                    {'name': category.name, 'budget': 'Not set yet', 'spending': 'Please set a total budget first',
+                     'percentage': None,
+                     })
+    return category_budgets
+
+@login_required
+def sort_catrgory_budget(request, selected_sort, category_budgets):
+    if selected_sort == '-budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            )
+        )
+    elif selected_sort == '-spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+        )
+    elif selected_sort == '':
+        sorted_category_budgets = category_budgets
+    else:
+        sorted_category_budgets = category_budgets
+    return sorted_category_budgets

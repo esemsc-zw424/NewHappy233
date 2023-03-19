@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pst',
+    'mathfilters',
     'widget_tweaks',
     'crispy_forms',
     'crispy_bootstrap5',
@@ -169,6 +170,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'static/img'),
 ]
 
 # Default primary key field type
@@ -180,6 +182,7 @@ AUTH_USER_MODEL = 'pst.User'
 
 REDIRECT_URL_WHEN_LOGGED_IN = 'home'
 LOGIN_REDIRECT_URL = 'home'
+
 
 SITE_ID = 1
 

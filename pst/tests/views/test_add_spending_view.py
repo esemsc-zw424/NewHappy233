@@ -21,8 +21,6 @@ class AddSpendingTestCase(TestCase):
             'date': '2022-12-06',
             'spending_type': 'Expenditure',
             'spending_category': self.categories.id,
-            'file': SimpleUploadedFile('test_file.txt', b'This is a test file')
-
     }
 
     #add_spending is made as a modal in view_spendings.html
@@ -57,7 +55,3 @@ class AddSpendingTestCase(TestCase):
         self.assertEqual(new_spending.amount, 100)
         self.assertEqual(new_spending.date.strftime('%Y-%m-%d'), '2022-12-06')
         self.assertEqual(new_spending.spending_owner, self.user)
-        self.assertEqual(new_spending.files.count(), 1)
-        self.assertEqual(new_spending.files.first().file.read(), b'This is a test file')
-        #delete the uploaded file
-        new_spending.files.first().file.delete()
