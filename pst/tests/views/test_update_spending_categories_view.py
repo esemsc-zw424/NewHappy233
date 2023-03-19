@@ -160,7 +160,7 @@ class UpdateSpendingCategoriesTestCase(TestCase):
         # Create a new default category
         category_default = Categories.objects.create(
             name='test category',
-            categories_type='Expenditure',
+            categories_type='Income',
             owner=self.user,
             default_category=True
         )
