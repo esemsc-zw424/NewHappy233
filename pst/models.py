@@ -270,14 +270,7 @@ class Post(models.Model):
         blank = False,
     )
 
-    # this field store the number of likes other user gave
-    # likes = models.IntegerField( # this store the number of likes other user gave
-    #     default=0,
-    #     blank = False,
-    #     validators=[
-    #         MinValueValidator(0),
-    #     ]
-    # )
+    # this field store the likes from other user
     likes = GenericRelation('Like')
 
     # this field store the date and time when this post sent
@@ -330,14 +323,7 @@ class Reply(models.Model):
         blank = False,
     )
 
-    # this field store the number of likes other user gave
-    # likes = models.IntegerField(
-    #     default=0,
-    #     blank = False,
-    #     validators=[
-    #         MinValueValidator(0),
-    #     ]
-    # )
+    # this field store the likes from other user
     likes = GenericRelation('Like')
 
     # this field store the date and time when this reply sent
