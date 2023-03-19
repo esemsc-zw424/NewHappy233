@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from pst.models import User, Spending, Categories, SpendingFile
 from pst.forms import AddSpendingForm
+import os
 
 class AddSpendingTestCase(TestCase):
     fixtures = ['pst/tests/fixtures/users.json'], ['pst/tests/fixtures/spending.json']
@@ -21,6 +22,7 @@ class AddSpendingTestCase(TestCase):
             'date': '2022-12-06',
             'spending_type': 'Expenditure',
             'spending_category': self.categories.id,
+            'file': SimpleUploadedFile('test_file.txt', b'This is a test file')
     }
 
     #add_spending is made as a modal in view_spendings.html
@@ -55,3 +57,10 @@ class AddSpendingTestCase(TestCase):
         self.assertEqual(new_spending.amount, 100)
         self.assertEqual(new_spending.date.strftime('%Y-%m-%d'), '2022-12-06')
         self.assertEqual(new_spending.spending_owner, self.user)
+        self.assertEqual(new_spending.files.count(), 1)
+        self.assertEqual(new_spending.files.first().file.read(), b'This is a test file')
+
+        # Get the absolute path to the static directory and delete the file
+        file_dir = os.path.abspath(os.path.join(__file__, '../../../../static'))
+        file_path = os.path.join(file_dir, 'user_files', 'test_file.txt')
+        os.remove(file_path)

@@ -1,7 +1,9 @@
 from django import forms
+import os
 from django.test import TestCase
 from pst.forms import EditSpendingForm
-from pst.models import Spending, User, Categories
+from django.core.files.uploadedfile import SimpleUploadedFile
+from pst.models import Spending, SpendingFile, User, Categories
 from django.urls import reverse
 from datetime import date
 
@@ -27,6 +29,7 @@ class EditSpendingFormTestCase(TestCase):
             'date': '2022-12-06',
             'spending_type': 'Expenditure',
             'spending_category': self.category.id,
+            'file': SimpleUploadedFile('test_file.txt', b'This is a test file')
         }
     
 
@@ -45,6 +48,7 @@ class EditSpendingFormTestCase(TestCase):
         self.assertTrue('delete_file', form.fields)
     
     def test_form_with_valid_data(self):
+        self.assertTrue(self.spending.files.all().count(), 0)
         form = EditSpendingForm(user=self.user, data=self.form_input, instance=self.spending)
         self.assertTrue(form.is_valid())
         before_count = User.objects.count()
@@ -57,3 +61,13 @@ class EditSpendingFormTestCase(TestCase):
         self.assertEqual(spending.date, date(2022, 12, 6))
         self.assertEqual(spending.spending_type, 'Expenditure')
         self.assertEqual(spending.spending_category, self.category)
+        file = self.form_input['file']
+
+        SpendingFile.objects.create(spending=spending, file=file)
+        self.assertTrue(self.spending.files.all().count(), 1)
+        self.assertEqual(self.spending.files.first().file.read(), b'This is a test file')
+
+        # Get the absolute path to the static directory and delete the file
+        file_dir = os.path.abspath(os.path.join(__file__, '../../../../static'))
+        file_path = os.path.join(file_dir, 'user_files', 'test_file.txt')
+        os.remove(file_path)

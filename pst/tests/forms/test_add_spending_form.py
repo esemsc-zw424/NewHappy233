@@ -1,9 +1,10 @@
+import os
 from django import forms
 from django.test import TestCase
 from pst.forms import AddSpendingForm
 from datetime import date
 from pst.models import Spending, SpendingFile, User, Categories
-from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class AddSpendingFormTestCase(TestCase):
@@ -18,6 +19,7 @@ class AddSpendingFormTestCase(TestCase):
             'date': '2022-12-06',
             'spending_type': 'Expenditure',
             'spending_category': self.category.id,
+            'file': SimpleUploadedFile('test_file.txt', b'This is a test file')
         }
 
     def test_form_contains_necessary_fields(self):
@@ -34,6 +36,7 @@ class AddSpendingFormTestCase(TestCase):
         self.assertTrue(isinstance(file.widget, forms.ClearableFileInput))
 
     def test_form_with_valid_data(self):
+        
         form = AddSpendingForm(data=self.form_input, user=self.user)
         self.assertTrue(form.is_valid())
         spending = form.save(commit=False)
@@ -45,3 +48,12 @@ class AddSpendingFormTestCase(TestCase):
         self.assertEqual(spending.date, date(2022, 12, 6))
         self.assertEqual(spending.spending_type, 'Expenditure')
         self.assertEqual(spending.spending_category, self.category)
+        file = self.form_input['file']
+        SpendingFile.objects.create(spending=spending, file=file)
+        self.assertTrue(spending.files.all().count(), 1)
+        self.assertEqual(spending.files.first().file.read(), b'This is a test file')
+
+        # Get the absolute path to the static directory and delete the file
+        file_dir = os.path.abspath(os.path.join(__file__, '../../../../static'))
+        file_path = os.path.join(file_dir, 'user_files', 'test_file.txt')
+        os.remove(file_path)
