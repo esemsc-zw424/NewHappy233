@@ -83,31 +83,36 @@ class ForumTestCase(TestCase):
         response = self.client.post(self.url, follow=True)
         self.assertEqual(response.status_code, 200)
 
-        image_path = os.path.join(os.path.dirname(__file__), 'test_image', 'test_image.png')
-        with open(image_path, 'rb') as image_data:
-            image_file = File(image_data, name=os.path.basename(image_path))
-            post_image = PostImage.objects.create(post=self.post, file=image_file)
+        # Use a test image from the fixtures directory
+        with open('pst/tests/views/test_image/test_image.png', 'rb') as f:
+            image = SimpleUploadedFile('test_image.png', f.read(), content_type='image/png')
+            post_image = PostImage.objects.create(post=self.post, file=image)
 
         # Test that the new post was created with the correct attributes
-        select_post = Post.objects.filter(content='This is example post 1').first()
-        self.assertIsNotNone(select_post)
-        self.assertEqual(select_post.user, self.user)
-        self.assertEqual(select_post.title, '')
-        self.assertEqual(select_post.content, 'This is example post 1')
-        self.assertEqual(select_post.images.count(), 1)
+        new_post = Post.objects.filter(content='This is example post 1').first()
+        self.assertIsNotNone(new_post)
+        self.assertEqual(new_post.user, self.user)
+        self.assertEqual(new_post.title, '')
+        self.assertEqual(new_post.content, 'This is example post 1')
+        self.assertEqual(new_post.images.count(), 1)
 
         # Test that the image was saved correctly
-        saved_image = select_post.images.first()
+        saved_image = new_post.images.first()
         self.assertIsNotNone(saved_image.file)
-        self.assertEqual(saved_image.file.name, post_image.file.name)
+        self.assertEqual(saved_image.file.name, 'post_images/test_image.png')
+
+        # Get the absolute path to the static directory
+        image_dir = os.path.abspath(os.path.join(__file__, '../../../../static'))
+        image_path = os.path.join(image_dir, 'post_images', 'test_image.png')
+        os.remove(image_path)
 
     def test_post_paginator(self):
         # Create 13 test posts
         posts = [Post.objects.create(
-            user=self.user,
-            content=f'Test Post {i}',
-            post_date='2024-3-30'
-        ) for i in range(13)]
+                user=self.user,
+                content=f'Test Post {i}',
+                post_date='2024-3-30'
+            ) for i in range(13)]
 
         # Log in as the test user and get the first page of the forum
         self.client.login(username=self.user.email, password='Password123')
