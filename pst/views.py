@@ -213,18 +213,19 @@ def get_position_in_daily_reward(request):
 
 
 def get_super_task_point_position(request):
+    consecutive_login_days = request.user.consecutive_login_days
     cur_pos = get_position_in_daily_reward(request)
-    days_need = 8 - request.user.consecutive_login_days
+    days_need = 7 - consecutive_login_days
     return cur_pos + days_need
 
 
 def add_consecutive_login_days(request):
     user = request.user
-    if current_datetime - user.last_login < timedelta(hours=24):
+    if current_datetime - user.last_login < timedelta(hours=24) and user.logged_in_once_daily == False:
         user.consecutive_login_days += 1
 
         # user has not logged in consecutively
-    else:
+    elif current_datetime - user.last_login >= timedelta(hours=24):
         user.consecutive_login_days = 1
     user.save()
 
@@ -320,8 +321,8 @@ def log_in(request):
                 login(request, user)
                 redirect_url = next or 'home'
                 next = request.GET.get('next') or ''
-                check_already_logged_in_once_daily(request)
                 add_consecutive_login_days(request)
+                check_already_logged_in_once_daily(request)
                 user.last_login = timezone.now()
                 user.save()
 
@@ -763,13 +764,13 @@ def index(request):
 
     if Reward.objects.count() == 0:
         Reward.objects.create(
-            name='T-shirt', points_required=20, image='rewards/shirt.jpg')
-        Reward.objects.create(name='PlayStation Store 50 GBP Gift Card',
-                              points_required=50, image='rewards/playstation_gift_card.jpg')
-        Reward.objects.create(name="Xbox 10 GBP Gift Card",
-                              points_required=10, image='rewards/xbox_gift_card.jpg')
-        Reward.objects.create(name="Amazon 20 GBP Gift Card",
-                              points_required=20, image='rewards/amazon_gift_card.jpg')
+            name='T-shirt', points_required=10, image='rewards/shirt.jpg')
+        Reward.objects.create(name='PSN £50 Gift Card',
+                              points_required=500, image='rewards/playstation_gift_card.jpg')
+        Reward.objects.create(name="XBX £10 Gift Card",
+                              points_required=100, image='rewards/xbox_gift_card.jpg')
+        Reward.objects.create(name="AMZ £20 Gift Card",
+                              points_required=200, image='rewards/amazon_gift_card.jpg')
 
 #
     rewards = Reward.objects.all()
@@ -796,7 +797,7 @@ def redeem(request, reward_id):
     elif total_task_points >= reward.points_required:
         user.decrease_total_task_points(reward.points_required)
         messages.add_message(
-            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
+            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address within 7 days.')
         return redirect('index')
     else:
 

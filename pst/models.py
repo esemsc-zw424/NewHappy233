@@ -90,7 +90,7 @@ class User(AbstractUser):
         gravatar_url = gravatar_object.get_image(size=size, default='mp')
         return gravatar_url
 
-    @property
+
 
     def __str__(self):
         return self.email
@@ -142,23 +142,6 @@ class DailyTask(models.Model):
     def get_user(self):
         return self.user
 
-    # def mark_received(self, day):
-    #     status = DailyTaskStatus.objects.get(task=self, day=day)
-    #     status.received = True
-    #     status.save()
-    #
-    # def set_task_points(self, day, points):
-    #     status = DailyTaskStatus.objects.get(task=self, day=day)
-    #     status.points = points
-    #     status.save()
-    #
-    # def get_task_status(self, day):
-    #     status = DailyTaskStatus.objects.get(task=self, day=day)
-    #     return status.received
-    #
-    # def get_task_points(self, day):
-    #     status = DailyTaskStatus.objects.get(task=self, day=day)
-    #     return status.points
 
     def __str__(self):
         return f"{self.user.email}'s daily tasks"
@@ -270,14 +253,7 @@ class Post(models.Model):
         blank = False,
     )
 
-    # this field store the number of likes other user gave
-    # likes = models.IntegerField( # this store the number of likes other user gave
-    #     default=0,
-    #     blank = False,
-    #     validators=[
-    #         MinValueValidator(0),
-    #     ]
-    # )
+    # this field store the likes from other user
     likes = GenericRelation('Like')
 
     # this field store the date and time when this post sent
@@ -303,7 +279,6 @@ class PostImage(models.Model):
     )
 
 @receiver(pre_delete, sender=SpendingFile)
-@receiver(pre_delete, sender=Spending)
 @receiver(pre_delete, sender=PostImage)
 def delete_file(sender, instance, **kwargs):
     # delete the file when the related object is deleted
@@ -331,14 +306,7 @@ class Reply(models.Model):
         blank = False,
     )
 
-    # this field store the number of likes other user gave
-    # likes = models.IntegerField(
-    #     default=0,
-    #     blank = False,
-    #     validators=[
-    #         MinValueValidator(0),
-    #     ]
-    # )
+    # this field store the likes from other user
     likes = GenericRelation('Like')
 
     # this field store the date and time when this reply sent

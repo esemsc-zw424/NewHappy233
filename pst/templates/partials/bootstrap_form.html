@@ -1,4 +1,4 @@
-{% load widget_tweaks %}
+<!-- {% load widget_tweaks %}
 {% for field in form %}
     <div class="form-group row mb-4" >
         <label class="col-6 col-form-label">{{ field.label_tag }}</label>
@@ -21,4 +21,23 @@
             {% endif %}
         </div>
     </div>
+{% endfor %} -->
+{% load widget_tweaks %}
+{% for field in form %}
+    <div class="mb-4">
+        {{ field.label_tag }}
+        {% if form.is_bound %}
+            {% if field.errors %}
+                {% render_field field class="form-control is-invalid" %}
+            {% else %}
+                {% render_field field class="form-control is-valid" %}
+            {% endif %}
+            <div class="invalid-feedback">
+                {{ field.errors }}
+            </div>
+        {% else %}
+            {% render_field field class="form-control" %}
+        {% endif %}
+    </div>
+
 {% endfor %}

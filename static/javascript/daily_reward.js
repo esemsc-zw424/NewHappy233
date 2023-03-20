@@ -1,11 +1,5 @@
 
 
-//function show_login_task_modal()() {
-//    var modal = document.getElementById('daily_login_task');
-//    var modalInstance = new bootstrap.Modal(modal);
-//    modalInstance.show();
-//}
-
 
 function show_login_task_modal() {
   var modal = document.getElementById("daily_login_task");
@@ -103,27 +97,3 @@ function getCookie(name) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-//function rewardPosClickHandler() {
-//const xhr = new XMLHttpRequest();
-//xhr.open('GET', 'get_reward_points/');
-//xhr.onload = function() {
-//    if (xhr.status === 200) {
-//    rewardPos.innerHTML = "<i class='bi bi-emoji-smile'></i>get!!!";
-//    } else {
-//    console.log('Request failed.  Returned status of ' + xhr.status);
-//    }
-//};
-//xhr.send();
-//
-//}

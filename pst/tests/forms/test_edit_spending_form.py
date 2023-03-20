@@ -1,7 +1,9 @@
 from django import forms
+import os
 from django.test import TestCase
 from pst.forms import EditSpendingForm
-from pst.models import Spending, User, Categories
+from django.core.files.uploadedfile import SimpleUploadedFile
+from pst.models import Spending, SpendingFile, User, Categories
 from django.urls import reverse
 from datetime import date
 
@@ -28,6 +30,7 @@ class EditSpendingFormTestCase(TestCase):
             'spending_type': 'Expenditure',
             'spending_category': self.category.id,
         }
+        
     
 
     def test_form_contains_necessary_fields(self):
@@ -45,6 +48,7 @@ class EditSpendingFormTestCase(TestCase):
         self.assertTrue('delete_file', form.fields)
     
     def test_form_with_valid_data(self):
+        
         form = EditSpendingForm(user=self.user, data=self.form_input, instance=self.spending)
         self.assertTrue(form.is_valid())
         before_count = User.objects.count()
@@ -57,3 +61,7 @@ class EditSpendingFormTestCase(TestCase):
         self.assertEqual(spending.date, date(2022, 12, 6))
         self.assertEqual(spending.spending_type, 'Expenditure')
         self.assertEqual(spending.spending_category, self.category)
+
+
+
+

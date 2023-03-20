@@ -59,6 +59,7 @@
                   src="{% static 'img/image-2@2x.png' %}"
                   alt="image 2"
                   onclick="show_login_task_modal()"
+                  id="login_task"
                 />
               </button>
 
@@ -387,7 +388,7 @@
                                  <td class="square" id="task_point-pos-{{ day }}"  name= "task_point_pos" >
                                      <button  onclick="task_point_pos_click_handler({{ day }})" >
                                          day{{pos}}<i class="bi bi-cart-check"></i></button> </td>
-                            {% elif day == super_task_point_pos %}
+                            {% elif day == super_task_pos %}
                                 <td class = "square" id="task_point-super-{{ day }}"style="color: rgb(255, 24, 7);">
                                     day{{day}} <br>
                                     <i class="fa-solid fa-gem"></i>
