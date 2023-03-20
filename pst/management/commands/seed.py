@@ -11,16 +11,8 @@ import pytz
 from faker import Faker
 from random import randint, random
 
-class Command(BaseCommand):
-    USER_COUNT = 100
-    POST_COUNT = 2000
-    FOLLOW_PROBABILITY = 0.1
-    DEFAULT_PASSWORD = 'Password123'
-    help = 'Seeds the database with sample data'
-
-from faker import Faker
 from django.contrib.auth import models
-from pst.models import User, Spending, SpendingFile, Spending_type, Categories, Budget, RewardPoint, Reward, Post, PostImage, Reply, Like, TotalBudget
+from pst.models import User, Spending, SpendingFile, Spending_type, Categories, Budget, Reward, Post, PostImage, Reply, Like, TotalBudget   #,RewardPoint
 import datetime
 import random
 from django.db import IntegrityError
@@ -30,8 +22,13 @@ import io
 from django.core.files.base import ContentFile
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+
 class Command(BaseCommand):
-    help = 'Seed database with fake data'
+    USER_COUNT = 100
+    POST_COUNT = 2000
+    FOLLOW_PROBABILITY = 0.1
+    DEFAULT_PASSWORD = 'Password123'
+    help = 'Seeds the database with sample data'
 
     def __init__(self):
         super().__init__()
