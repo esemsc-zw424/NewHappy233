@@ -365,3 +365,8 @@ NewHappy/__pycache__/urls.cpython-310.pyc
 .gitignore
 .gitignore
 pst/tests/models/__pycache__/test_post_image_model.cpython-310.pyc
+NewHappy/__pycache__/urls.cpython-310.pyc
+pst/__pycache__/views.cpython-310.pyc
+pst/tests/__pycache__/__init__.cpython-310.pyc
+pst/tests/models/__pycache__/__init__.cpython-310.pyc
+pst/tests/models/__pycache__/test_post_image_model.cpython-310.pyc
