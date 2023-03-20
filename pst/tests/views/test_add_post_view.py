@@ -41,7 +41,7 @@ class AddPostTestCase(TestCase):
             post_data = {
                 'title': 'Test Post',
                 'content': 'This is a test post',
-                'image': image
+                'image' : image
             }
 
             # Count the number of posts before adding a new one
