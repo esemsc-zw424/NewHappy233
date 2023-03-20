@@ -1,0 +1,16 @@
+[
+    {
+        "model": "pst.day",
+        "pk": 1,
+        "fields": {
+            "number": 1
+        }
+    },
+   {
+        "model": "pst.day",
+        "pk": 2,
+        "fields": {
+            "number": 2
+        }
+    }
+]
