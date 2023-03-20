@@ -17,7 +17,9 @@ class LogInViewTestCase(TestCase, LogInTester):
 
 
     def test_login_url(self):
-        self.assertEqual(self.url, "/log_in/")
+
+        expected_url = '/accounts/login/'
+        self.assertEqual(self.url, expected_url)
 
 
     def test_get_login(self):

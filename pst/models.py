@@ -1,5 +1,8 @@
+from enum import Enum
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Sum
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator, MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser
@@ -9,6 +12,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 import os
 
 
@@ -31,6 +36,7 @@ class UserManager(BaseUserManager):
         return user
 
 
+
     def create_superuser(self, first_name, last_name, email, password, **extra_fields):
         user = self.create_user(first_name, last_name, email, password)
         user.is_staff = True
@@ -40,6 +46,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+
+
     username = None
     email = models.EmailField(unique=True, blank=False)
     first_name = models.CharField(blank=False, unique=False, max_length=50)
@@ -56,11 +64,25 @@ class User(AbstractUser):
     phone_regex = RegexValidator(regex=r'^\d{10,15}$', message="Phone number must be entered in the format: '9999999999' and maximum 15 digits allowed.")
     phone_number = models.CharField(validators=[phone_regex], max_length=15, blank=True)
     address = models.CharField(max_length=100, blank=True)
+    total_task_points = models.IntegerField(default=0)
+    consecutive_login_days = models.IntegerField(default=1)
+    logged_in_once_daily = models.BooleanField(default = False)
+
 
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
+
+
+    def increase_total_task_points(self, value):
+        self.total_task_points += value
+        self.save()
+
+    def decrease_total_task_points(self, value):
+        self.total_task_points -= value
+        self.save()
+
 
     def gravatar(self, size=120):
         """Return a URL to the user's gravatar."""
@@ -68,8 +90,11 @@ class User(AbstractUser):
         gravatar_url = gravatar_object.get_image(size=size, default='mp')
         return gravatar_url
 
+    @property
+
     def __str__(self):
         return self.email
+
 
 class Categories(models.Model):
 
@@ -100,17 +125,74 @@ class Categories(models.Model):
         return self.name
 
 
+class Day(models.Model):
+    number = models.IntegerField(unique=True)
+
+    def __str__(self):
+        return f"Day {self.number}"
+
+
+class DailyTask(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    days = models.ManyToManyField(Day, through='DailyTaskStatus')
+
+    def get_day(self):
+        return self.days.all()
+
+    def get_user(self):
+        return self.user
+
+    # def mark_received(self, day):
+    #     status = DailyTaskStatus.objects.get(task=self, day=day)
+    #     status.received = True
+    #     status.save()
+    #
+    # def set_task_points(self, day, points):
+    #     status = DailyTaskStatus.objects.get(task=self, day=day)
+    #     status.points = points
+    #     status.save()
+    #
+    # def get_task_status(self, day):
+    #     status = DailyTaskStatus.objects.get(task=self, day=day)
+    #     return status.received
+    #
+    # def get_task_points(self, day):
+    #     status = DailyTaskStatus.objects.get(task=self, day=day)
+    #     return status.points
+
+    def __str__(self):
+        return f"{self.user.email}'s daily tasks"
+
+
+class TaskType(Enum):
+    LOGIN = 'Login'
+    POST = 'Post'
+
+    @classmethod
+    def choices(cls):
+        return [(choice.name, choice.value) for choice in cls]
+
+
+class DailyTaskStatus(models.Model):
+    task = models.ForeignKey(DailyTask, on_delete=models.CASCADE)
+    day = models.ForeignKey(Day, on_delete=models.CASCADE)
+    task_points = models.IntegerField(default=0)
+    task_type = models.CharField(choices=TaskType.choices(), default=TaskType.LOGIN.name, max_length=10)
+
+    def save(self, *args, **kwargs):
+        user = self.task.user  # Assuming that there is a 'user' foreign key field in the 'DailyTask' model
+        user.total_task_points += self.task_points
+        user.save()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('task', 'day', 'task_type')
+
 
 class Spending(models.Model):
-
-    title = models.CharField(  # title for the spending
-        max_length=30,
-        blank=False
-    )
-
-    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') #this refers to the user when create this spending
-
-    amount = models.DecimalField(  # this refers to the amount this user spent or gained
+    title = models.CharField(max_length=30, blank=False)
+    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') 
+    amount = models.DecimalField(  
         blank=False,
         max_digits=8,
         decimal_places=2,
@@ -118,27 +200,15 @@ class Spending(models.Model):
             MinValueValidator(0),
         ]
     )
-
-    descriptions = models.CharField(  # comments for the spending
-        blank=True,
-        max_length=500,
-    )
-
-    date = models.DateField( # date of the spending
-        blank = False,
-    )
-
-    spending_type = models.CharField(  # this refers to the spending type
+    descriptions = models.CharField(blank=True, max_length=500)
+    date = models.DateField(blank=False)
+    spending_type = models.CharField(
         max_length=30,
         choices=Spending_type.choices,
         default=Spending_type.EXPENDITURE,
         blank=False,
     )
-
-
-    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category',
-                                          blank=False)  # this refers to the category of the spending
-
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  
 
 
 class SpendingFile(models.Model):
@@ -151,11 +221,13 @@ class SpendingFile(models.Model):
     )
 
 
+
+
 class Budget(models.Model):
-    name = models.CharField(max_length=100, default='')
+    # name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
-    start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)
+    # start_date = models.DateField(default=timezone.now)
+    # end_date = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(  # user which this budget belongs to 
@@ -163,12 +235,9 @@ class Budget(models.Model):
     )
     spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='budget_spending_category', blank=True)
 
-class RewardPoint(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    points = models.IntegerField(default=0)
 
-    def __str__(self):
-        return f"{self.user.username}: {self.points} points"
+
+
 
 class Reward(models.Model):
     name = models.CharField(max_length=50)
@@ -201,14 +270,7 @@ class Post(models.Model):
         blank = False,
     )
 
-    # this field store the number of likes other user gave
-    # likes = models.IntegerField( # this store the number of likes other user gave
-    #     default=0,
-    #     blank = False,
-    #     validators=[
-    #         MinValueValidator(0),
-    #     ]
-    # )
+    # this field store the likes from other user
     likes = GenericRelation('Like')
 
     # this field store the date and time when this post sent
@@ -226,12 +288,22 @@ def validate_file_extension(value):
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(
+    file = models.ImageField(
         null=True,
         blank=True,
         upload_to='post_images/',
         validators=[validate_file_extension],
     )
+
+@receiver(pre_delete, sender=SpendingFile)
+@receiver(pre_delete, sender=PostImage)
+def delete_file(sender, instance, **kwargs):
+    # delete the file when the related object is deleted
+    if instance.file:
+        path = instance.file.path
+        if os.path.exists(path):
+            os.remove(path)
+
 
 # this model is for replies under a post
 class Reply(models.Model):
@@ -251,14 +323,7 @@ class Reply(models.Model):
         blank = False,
     )
 
-    # this field store the number of likes other user gave
-    # likes = models.IntegerField(
-    #     default=0,
-    #     blank = False,
-    #     validators=[
-    #         MinValueValidator(0),
-    #     ]
-    # )
+    # this field store the likes from other user
     likes = GenericRelation('Like')
 
     # this field store the date and time when this reply sent
@@ -291,13 +356,24 @@ class DeliveryAddress(models.Model):
     address = models.CharField(max_length=200, blank=True)
     phone_number = models.IntegerField(blank=True)
 
+# class TotalBudget(models.Model):
+#     name = models.CharField(max_length=100, default='')
+#     limit = models.PositiveIntegerField()
+#     start_date = models.DateField(default=timezone.now)
+#     end_date = models.DateField(default=timezone.now)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     budget_owner = models.ForeignKey(  # user which this budget belongs to
+#         User, on_delete=models.CASCADE
+#     )
+
 class TotalBudget(models.Model):
-    name = models.CharField(max_length=100, default='')
+    # name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
     start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(blank=True, null=True)  # make end_date optional
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    budget_owner = models.ForeignKey(  # user which this budget belongs to
-        User, on_delete=models.CASCADE
+    budget_owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='total_budgets'  # add related name
     )

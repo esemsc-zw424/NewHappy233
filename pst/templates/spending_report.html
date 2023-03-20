@@ -20,7 +20,7 @@
         .chartCard {
         width: 100vw;
         height: calc(60vh - 40px);
-        background: rgba(206, 212, 216, 0.2);
+        background: rgba(206, 212, 216, 0.192);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -35,6 +35,61 @@
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.2/dist/chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+    <script>
+    function selectSpending() {
+        const start_date = document.getElementById('start_date').value;
+        const end_date = document.getElementById('end_date').value;
+        const selected_categories = document.getElementById('selected_categories').value;
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if(this.readyState == 4 && this.status == 200) {
+                document.getElementById('spending_pie_graph').innerHTML = this.responseText;
+                document.getElementById('spending_bar_graph').innerHTML = this.responseText;
+                document.getElementById('spending_list').innerHTML = this.responseText;
+            }
+        };
+        xhttp.open('GET', `/spendings?start_date=${start_date}&end_date=${end_date}&select_categories=${selected_categories}`, true);
+        xhttp.send();
+        return false;
+    }
+
+    function addSortUrl() {
+        var url = new URL(window.location.href);
+        var search_params = url.searchParams;
+        search_params.set('sorted', document.getElementById('selected_sort').value);
+        url.search = search_params.toString();
+        var new_url = url.toString();
+        return new_url;
+    }
+
+    function get(name) {
+        if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+    }
+
+    window.onload = function() {
+        if (get('sorted') == 'date') {
+            document.getElementById('empty_sort').innerHTML = "date";
+        } else if (get('sorted') == 'spending_category') {
+            document.getElementById('empty_sort').innerHTML = "category";
+        } else if (get('sorted') == 'amount') {
+            document.getElementById('empty_sort').innerHTML = "amount:low to high";
+        } else if (get('sorted') == '-amount') {
+            document.getElementById('empty_sort').innerHTML = "amount:high to low";
+        } else {
+            document.getElementById('empty_sort').innerHTML = "";
+        }
+
+        if (get('selected_categories') == 'Income') {
+            document.getElementById('empty_category').innerHTML = "Income";
+        } else {
+            document.getElementById('empty_category').innerHTML = "Expenditure";
+        }
+    }
+    </script>
 </head>
 
 <body>
@@ -45,27 +100,54 @@
             </div>
         </div>
 
+        <form method="GET" action="{% url 'spending_report' %}">
+            <div class="row">
+                <div class="col col-lg-3">
+                <div class="form-floating">
+                    <input type="date" class="form-control" id="start_date" name="start_date">
+                    <label for="floatingInputGrid">Start date:</label>
+                </div>
+                </div>
+                <div class="col col-lg-3">
+                <div class="form-floating">
+                    <input type="date" class="form-control" id="end_date" name="end_date">
+                    <label for="floatingInputGrid">End date:</label>
+                </div>
+                </div>
+                <div class="col col-lg-3">
+                <select id="selected_categories" name="selected_categories" style="height: 58px;font-size: 22px;">
+                    <option id="empty_category" value="" disabled selected hidden></option>
+                    <option id="selected_expenditure" value="Expenditure">Expenditure</option>
+                    <option id="selected_income" value="Income">Income</option>
+                </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" id="generate-button" class="btn btn-primary btn-lg" style="font-size: 22px;" onclick="selectSpending">Generate report</button>
+                </div>
+            </div>
+        </form>
+
         <div class="row">
             <div class="chartMenu">
-                <p>Expenditure analysis graph</p>
+                <p>{{ report_type }} analysis graph</p>
             </div>
             <div class="chartCard">
                 <div class="chartBox">
-                    <canvas id="expenditure_pie_graph" width="100" height="400"></canvas>
+                    <canvas id="spending_pie_graph" width="100" height="400"></canvas>
                 </div>
                 <div class="chartBox">
-                    <canvas id="expenditure_bar_graph" width="100" height="400"></canvas>
+                    <canvas id="spending_bar_graph" width="100" height="400"></canvas>
                 </div>
             </div>
                 <script>
-                    var ctx = document.getElementById('expenditure_pie_graph').getContext('2d');
-                    var expenditure_graph = new Chart(ctx, {
+                    var ctx = document.getElementById('spending_pie_graph').getContext('2d');
+                    var spending_graph = new Chart(ctx, {
                         type: 'pie',
                         data: {
-                            labels:[{% for i in expenditures_data %} '{{i.spending_category__name}}', {% endfor %}],
+                            labels:[{% for i in spendings_data %} '{{i.spending_category__name}}', {% endfor %}],
                             datasets: [{
-                                label: '# of expenditures',
-                                data:[{% for i in  expenditures_data %} {{ i.exp_amount }}, {% endfor %}],
+                                label: '# of spendings',
+                                data:[{% for i in  spendings_data %} {{ i.exp_amount }}, {% endfor %}],
                                 backgroundColor: [
                                     'rgba(255, 99, 132, 0.8)',
                                     'rgba(54, 162, 235, 0.8)',
@@ -83,7 +165,6 @@
                                     'rgba(153, 102, 255, 1)',
                                     'rgba(255, 159, 64, 1)',
                                     'rgba(240, 120, 50, 1)',
-
                                 ],
                                 borderWidth: 2
                             }]
@@ -106,14 +187,14 @@
                         }
                     });
                     
-                    var ctx = document.getElementById('expenditure_bar_graph').getContext('2d');
-                    var expenditure_graph = new Chart(ctx, {
+                    var ctx = document.getElementById('spending_bar_graph').getContext('2d');
+                    var spending_graph = new Chart(ctx, {
                         type: 'bar',
                         data: {
-                            labels:[{% for i in  expenditures_data %} '{{i.spending_category__name}}', {% endfor %}],
+                            labels:[{% for i in  spendings_data %} '{{i.spending_category__name}}', {% endfor %}],
                             datasets: [{
-                                label: 'amount of expenditures',
-                                data:[{% for i in  expenditures_data %} {{i.exp_amount}}, {% endfor %}],
+                                label: 'amount of spendings',
+                                data:[{% for i in  spendings_data %} {{i.exp_amount}}, {% endfor %}],
                                 backgroundColor: [
                                     'rgba(255, 99, 132, 0.8)',
                                     'rgba(54, 162, 235, 0.8)',
@@ -131,7 +212,6 @@
                                     'rgba(153, 102, 255, 1)',
                                     'rgba(255, 159, 64, 1)',
                                     'rgba(240, 120, 50, 1)',
-
                                 ],
                                 borderWidth: 2
                             }]
@@ -152,39 +232,40 @@
         </div></br>
         
         <div class="row">
-            <div class="row">
-                <div class="col">
-                    <h3>Expenditures List</h3>
-                </div>
+            <h3>{{ report_type }} List</h3>
 
-                <div class="col offset-md-10">
-                    <label for="filter">Filter by:</label>
-                    <select name="filter" id="filter">
-                        <option value="category">category</option>
-                        <option value="amount">amount</option>
-                        <option value="owner">owner</option>
-                        <option value="date">date</option>
-                    </select>
+            <form method="GET" action="{% url 'spending_report' %}">
+                <div class="row">
+                    <div class="col offset-md-9">
+                        <label for="sorter">Sort by:</label>
+                        <select id="selected_sort" name="selected_sort" onchange="location = addSortUrl();">
+                            <option id="empty_sort" value="" disabled selected hidden></option>
+                            <option id="spending_category" value="spending_category">category</option>
+                            <option id="amount" value="amount">amount:low to high</option>
+                            <option id="-amount" value="-amount">amount:high to low</option>
+                            <option id="date" value="date">date</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
+            </form>
 
-            <table class="table">
+            <table class="table" id="spending_list">
                 <thead>
                     <tr>
-                        <th scope="col">expenditure owner</th>
+                        <th scope="col">spending owner</th>
                         <th scope="col">date</th>
                         <th scope="col">title</th>
                         <th scope="col">description</th>
-                        <th scope="col">expenditure category</th>
+                        <th scope="col">spending category</th>
                         <th scope="col">amount</th>
                     </tr>
                 </thead>
         
                 <tbody>
-                    {% for i in expenditures %}
+                    {% for i in page_obj %}
                     <tr class="align-middle">
                         <td> {{ i.spending_owner }}</td>
-                        <td> {{ i.date }}</td>
+                        <td> {{ i.date|date:"m/d/Y" }}</td>
                         <td> {{ i.title }}</td>
                         <td> {{ i.descriptions }}</td>
                         <td> {{ i.spending_category }}</td>
@@ -192,6 +273,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% include 'pagination.html' %}
         </div>
     </div>
 </body>

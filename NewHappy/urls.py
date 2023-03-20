@@ -34,6 +34,7 @@ urlpatterns = [
     path('budget_show/', views.show_budget, name='budget_show'),
     path('user_guideline/', views.user_guideline, name='user_guideline'),
     path('log_in/', views.log_in, name='log_in'),
+    path('accounts/login/', views.log_in, name='log_in'),
     path('chat_bot/', views.chat_bot, name='chat_bot'),
     path('log_out/', views.log_out, name='log_out'),
     path('accounts/', include('allauth.urls')),
@@ -41,7 +42,7 @@ urlpatterns = [
     path('view_spendings', views.view_spendings, name='view_spendings'),
     path('add_spending_categories/', views.add_spending_categories,
          name='add_spending_categories'),
-    path('view_spending_categories', views.view_spending_categories,
+    path('view_spending_categories/', views.view_spending_categories,
          name='view_spending_categories'),
     path('update_spending_categories/<int:category_id>/',
          views.update_spending_categories, name='update_spending_categories'),
@@ -70,6 +71,8 @@ urlpatterns = [
 
     path('forum/', views.forum, name='forum'),
     path('add_post/', views.add_post, name='add_post'),
+    path('delete_post/<int:post_id>/', views.delete_post, name = 'delete_post'),
+    path('delete_reply/<int:reply_id>', views.delete_reply, name = 'delete_reply'),
     path('post_detail/<int:post_id>/', views.post_detail, name='post_detail'),
     path('like_post/<int:post_id>/', views.like_post, name='like_post'),
     path('like_post_details/<int:post_id>/',
@@ -92,7 +95,11 @@ urlpatterns = [
     path('get_categories_by_type/', views.get_categories_by_type, name='get_categories_by_type'),
 
     path('add_address/', views.add_address, name='add_address'),
-    path('set_specific_budget/', views.set_specific_budget, name='set_specific_budget')
+    path('set_specific_budget/', views.set_specific_budget, name='set_specific_budget'),
+    path('password/', views.password, name='password'),
+    path('add_login_task_points/', views.add_login_task_points, name='add_login_task_points'),
+    path('get_login_task_status/', views.get_login_task_status,name='get_login_task_status')
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
         ('contenttypes', '0002_remove_content_type_name'),
+        ('auth', '0012_alter_user_first_name_max_length'),
     ]
 
     operations = [
@@ -35,6 +35,9 @@ class Migration(migrations.Migration):
                 ('gender', models.CharField(blank=True, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other'), ('Prefer not to say', 'Perfer not to say')], max_length=20)),
                 ('phone_number', models.CharField(blank=True, max_length=15, validators=[django.core.validators.RegexValidator(message="Phone number must be entered in the format: '9999999999' and maximum 15 digits allowed.", regex='^\\d{10,15}$')])),
                 ('address', models.CharField(blank=True, max_length=100)),
+                ('total_task_points', models.IntegerField(default=0)),
+                ('consecutive_login_days', models.IntegerField(default=1)),
+                ('logged_in_once_daily', models.BooleanField(default=False)),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
             ],
@@ -52,6 +55,19 @@ class Migration(migrations.Migration):
                 ('categories_type', models.CharField(choices=[('Expenditure', 'Expenditure'), ('Income', 'Income')], default='Expenditure', max_length=30)),
                 ('default_category', models.BooleanField(default=False, help_text='Designates this category is a default category or notdefault category are not expected to be modified')),
                 ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='DailyTask',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Day',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('number', models.IntegerField(unique=True)),
             ],
         ),
         migrations.CreateModel(
@@ -91,13 +107,12 @@ class Migration(migrations.Migration):
             name='TotalBudget',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default='', max_length=100)),
                 ('limit', models.PositiveIntegerField()),
                 ('start_date', models.DateField(default=django.utils.timezone.now)),
-                ('end_date', models.DateField(default=django.utils.timezone.now)),
+                ('end_date', models.DateField(blank=True, null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('budget_owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('budget_owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='total_budgets', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -106,14 +121,6 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('file', models.FileField(blank=True, null=True, upload_to='user_files/')),
                 ('spending', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='files', to='pst.spending')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='RewardPoint',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('points', models.IntegerField(default=0)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -131,7 +138,7 @@ class Migration(migrations.Migration):
             name='PostImage',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(blank=True, null=True, upload_to='post_images/', validators=[pst.models.validate_file_extension])),
+                ('file', models.ImageField(blank=True, null=True, upload_to='post_images/', validators=[pst.models.validate_file_extension])),
                 ('post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='pst.post')),
             ],
         ),
@@ -145,13 +152,33 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='DailyTaskStatus',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('task_points', models.IntegerField(default=0)),
+                ('task_type', models.CharField(choices=[('LOGIN', 'Login'), ('POST', 'Post')], default='LOGIN', max_length=10)),
+                ('day', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pst.day')),
+                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pst.dailytask')),
+            ],
+            options={
+                'unique_together': {('task', 'day', 'task_type')},
+            },
+        ),
+        migrations.AddField(
+            model_name='dailytask',
+            name='days',
+            field=models.ManyToManyField(through='pst.DailyTaskStatus', to='pst.day'),
+        ),
+        migrations.AddField(
+            model_name='dailytask',
+            name='user',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.CreateModel(
             name='Budget',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default='', max_length=100)),
                 ('limit', models.PositiveIntegerField()),
-                ('start_date', models.DateField(default=django.utils.timezone.now)),
-                ('end_date', models.DateField(default=django.utils.timezone.now)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('budget_owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),

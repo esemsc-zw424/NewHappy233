@@ -9,27 +9,13 @@ class BudgetModelTestCase(TestCase):
         # Create a user to be the owner of the budget
         self.user = self.user = User.objects.get(email='lll@example.org')
         self.category = Categories.objects.get(name='Food')
-        self.budget = Budget.objects.create(name='Test Budget', limit=1000, budget_owner=self.user, spending_category=self.category)
+        self.budget = Budget.objects.create(limit=1000, budget_owner=self.user, spending_category=self.category)
 
-    def test_budget_name_label(self):
-        budget = Budget.objects.get(id=1)
-        field_label = budget._meta.get_field('name').verbose_name
-        self.assertEqual(field_label, 'name')
 
     def test_budget_limit_label(self):
         budget = Budget.objects.get(id=1)
         field_label = budget._meta.get_field('limit').verbose_name
         self.assertEqual(field_label, 'limit')
-
-    def test_budget_start_date_label(self):
-        budget = Budget.objects.get(id=1)
-        field_label = budget._meta.get_field('start_date').verbose_name
-        self.assertEqual(field_label, 'start date')
-
-    def test_budget_end_date_label(self):
-        budget = Budget.objects.get(id=1)
-        field_label = budget._meta.get_field('end_date').verbose_name
-        self.assertEqual(field_label, 'end date')
 
     def test_budget_budget_owner_label(self):
         budget = Budget.objects.get(id=1)

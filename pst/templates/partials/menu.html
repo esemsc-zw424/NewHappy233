@@ -1,4 +1,5 @@
 {% if user.is_authenticated %}
+
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
@@ -11,6 +12,7 @@
                     <span class="bi-person-circle"></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="user-account-dropdown">
+                   
                     <li><a class="dropdown-item" href='{% url 'edit_profile' %}'>Edit profile</a></li>
                     <li><a class="dropdown-item" href="{% url 'log_out' %}">Log out</a></li>
                     <li><a class="dropdown-item" href="{% url 'view_settings' %}"> Settings</a></li>
@@ -18,5 +20,6 @@
             </li>
 
         </ul>
+
     </div>
 {% endif %}
