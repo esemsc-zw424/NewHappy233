@@ -207,7 +207,7 @@ class SpendingFile(models.Model):
 
 
 class Budget(models.Model):
-    name = models.CharField(max_length=100, default='')
+    # name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
     # start_date = models.DateField(default=timezone.now)
     # end_date = models.DateField(default=timezone.now)
@@ -253,14 +253,7 @@ class Post(models.Model):
         blank = False,
     )
 
-    # this field store the number of likes other user gave
-    # likes = models.IntegerField( # this store the number of likes other user gave
-    #     default=0,
-    #     blank = False,
-    #     validators=[
-    #         MinValueValidator(0),
-    #     ]
-    # )
+    # this field store the likes from other user
     likes = GenericRelation('Like')
 
     # this field store the date and time when this post sent
@@ -286,7 +279,6 @@ class PostImage(models.Model):
     )
 
 @receiver(pre_delete, sender=SpendingFile)
-@receiver(pre_delete, sender=Spending)
 @receiver(pre_delete, sender=PostImage)
 def delete_file(sender, instance, **kwargs):
     # delete the file when the related object is deleted
@@ -314,14 +306,7 @@ class Reply(models.Model):
         blank = False,
     )
 
-    # this field store the number of likes other user gave
-    # likes = models.IntegerField(
-    #     default=0,
-    #     blank = False,
-    #     validators=[
-    #         MinValueValidator(0),
-    #     ]
-    # )
+    # this field store the likes from other user
     likes = GenericRelation('Like')
 
     # this field store the date and time when this reply sent
@@ -366,7 +351,7 @@ class DeliveryAddress(models.Model):
 #     )
 
 class TotalBudget(models.Model):
-    name = models.CharField(max_length=100, default='')
+    # name = models.CharField(max_length=100, default='')
     limit = models.PositiveIntegerField()
     start_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)  # make end_date optional

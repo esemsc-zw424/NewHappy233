@@ -42,7 +42,7 @@ urlpatterns = [
     path('view_spendings', views.view_spendings, name='view_spendings'),
     path('add_spending_categories/', views.add_spending_categories,
          name='add_spending_categories'),
-    path('view_spending_categories', views.view_spending_categories,
+    path('view_spending_categories/', views.view_spending_categories,
          name='view_spending_categories'),
     path('update_spending_categories/<int:category_id>/',
          views.update_spending_categories, name='update_spending_categories'),

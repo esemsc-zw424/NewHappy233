@@ -213,7 +213,7 @@ class BudgetForm(forms.ModelForm):
 
     class Meta:
         model = Budget
-        fields = ['name','limit', 'spending_category']
+        fields = ['limit', 'spending_category']
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -230,7 +230,6 @@ class BudgetForm(forms.ModelForm):
         category_spent = Budget.objects.filter(budget_owner=self.user, spending_category=spending_category).last()
         if category_spent:
             category_value = category_spent.limit
-            print("cs" + str(category_spent.limit))
         else:
             category_value = 0
  
@@ -245,9 +244,7 @@ class BudgetForm(forms.ModelForm):
             if budget:
                 total_specific_budget_spent += budget.limit
         # total_spent = Budget.objects.filter(budget_owner=self.user).last().aggregate(Sum('limit'))['limit__sum'] or 0
-        print("total: "+str(total_specific_budget_spent))
         remaining_amount = total_budget.limit - total_specific_budget_spent + category_value
-        print("remaining amount"+str(remaining_amount))
         if limit > remaining_amount:
             raise forms.ValidationError(
                 "I'm sorry, but you have gone over your total budget limit. Your remaining budget allocation is: ("
@@ -292,7 +289,7 @@ class AddressForm(forms.ModelForm):
 class TotalBudgetForm(forms.ModelForm):
     class Meta:
         model = TotalBudget
-        fields = ['name', 'limit', 'start_date', 'end_date']
+        fields = ['limit', 'start_date', 'end_date']
         widgets = {
             'end_date': forms.DateInput(attrs={'placeholder': 'Default is 30 days later.'}),
         }
@@ -313,7 +310,6 @@ class TotalBudgetForm(forms.ModelForm):
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
         if not end_date:
-            print(1)
             cleaned_data['end_date'] = start_date + timedelta(days=30)
 
         return cleaned_data

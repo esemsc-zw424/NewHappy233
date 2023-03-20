@@ -303,7 +303,7 @@ def edit_spending(request, spending_id):
             form.save()
             request.spending.save()
             messages.success(request, 'success')
-            return redirect('view_spendings') 
+            return redirect('view_spendings')
     else:
         form = EditSpendingForm(instance=spending)
     return render(request, "edit_spending.html", {'form': form, 'spending': spending})
@@ -314,7 +314,7 @@ def log_in(request):
     if request.method == 'POST':
         next = request.POST.get('next') or ''
         form = LoginForm(request.POST)
-        
+
         if form.is_valid():
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
@@ -329,7 +329,7 @@ def log_in(request):
                 user.save()
 
                 return redirect(redirect_url)
-        
+
             else:
                 messages.add_message(request, messages.ERROR, "The credentials provided are invalid!")
 
@@ -503,8 +503,8 @@ def delete_spending(request, spending_id):
     delete_spending = get_object_or_404(Spending, id = spending_id)
     delete_spending.delete()
     messages.warning(request, "spending has been deleted")
-    return redirect('view_spendings') 
-   
+    return redirect('view_spendings')
+
 
 @login_required
 def add_spending(request):
@@ -712,22 +712,8 @@ def show_budget(request):
     selected_sort = request.GET.get('sorted')
     # the budget will be refreshed automatically after the end date
     # of your last budget
-    current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
-    if current_budget and current_budget.end_date < datetime.now().date():
-        TotalBudget.objects.create(
-            name=current_budget.name,
-            limit=current_budget.limit,
-            start_date=datetime.now().date(),
-            end_date=datetime.now().date() + timedelta(days=30),
-            budget_owner=request.user,
-        )
-    current_month = datetime.now().month
-    # total_spending = Spending.objects.filter(
-    # spending_owner = request.user,
-    # date__month = current_month,
-    #  spending_type = Spending_type.EXPENDITURE,
-    # ).aggregate(nums=Sum('amount')).get('nums')
-    # total = Spending.objects.aggregate(nums=Sum('amount')).get('nums')
+    create_new_budget_if_needed(request)
+    # current_month = datetime.now().month
     total_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
     percentage = calculate_budget(request)
     # check if a message with the INFO level already exists
@@ -741,94 +727,10 @@ def show_budget(request):
         messages.add_message(request, messages.INFO,
                              'you have exceeded the limit')
 
-    categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
-    category_budgets = []
-    for category in categories:
-        budget = Budget.objects.filter(spending_category=category).last()
-        if budget:
-            # print(category.name + str(budget.limit))
-            spending_sum = Spending.objects.filter(
-                spending_owner=request.user,
-                # date__month=current_month,
-                date__range=(total_budget.start_date, total_budget.end_date),
-                spending_type=Spending_type.EXPENDITURE,
-                spending_category=category,
-            ).aggregate(nums=Sum('amount')).get('nums') or 0
-
-            # print(budget.limit)
-            category_budgets.append({
-                'name': category.name,
-                'budget': budget.limit,
-                'spending': spending_sum,
-                'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
-                # 'start_date': total_budget.start_date,
-                # 'end_date': total_budget.end_date,
-            })
-        else:
-            if total_budget:
-                spending_sum = Spending.objects.filter(
-                    spending_owner=request.user,
-                    # date__month=current_month,
-                    date__range=(total_budget.start_date, total_budget.end_date),
-                    spending_type=Spending_type.EXPENDITURE,
-                    spending_category=category,
-                ).aggregate(nums=Sum('amount')).get('nums') or 0
-                category_budgets.append({
-                    'name': category.name,
-                    'budget': 'Not set yet',
-                    'spending': spending_sum,
-                    'percentage': None,
-                    # 'start_date': None,
-                    # 'end_date': None,
-                })
-            else:
-                category_budgets.append({
-                    'name': category.name,
-                    'budget': 'Not set yet',
-                    'spending': 'Please set a total budget first',
-                    'percentage': None,
-                    # 'start_date': None,
-                    # 'end_date': None,
-            })
-    if selected_sort == '-budget':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
-                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
-            ),
-            reverse=True
-        )
-    elif selected_sort == 'budget':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
-                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
-            )
-        )
-    elif selected_sort == '-spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
-            ),
-            reverse=True
-        )
-    elif selected_sort == 'spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
-            ),
-        )
-    elif selected_sort == '':
-        sorted_category_budgets = category_budgets
-    else:
-        print(1)
-        sorted_category_budgets = category_budgets
+    # the budget will be refreshed automatically after the end date
+    # of your last budget
+    category_budgets = get_category_budgets(request, total_budget)
+    sorted_category_budgets = sort_catrgory_budget(request, selected_sort, category_budgets)
     form = TotalBudgetForm(request.user)
     specific_form = BudgetForm(request.user)
 
@@ -853,17 +755,17 @@ def show_budget(request):
 @login_required
 def index(request):
     address = DeliveryAddress.objects.filter(user=request.user).last()
-    form = AddressForm()
+    form = AddressForm(instance=address)
 
     if Reward.objects.count() == 0:
         Reward.objects.create(
-            name='T-shirt', points_required=20, image='rewards/shirt.jpg')
-        Reward.objects.create(name='PlayStation Store 50 GBP Gift Card',
-                              points_required=50, image='rewards/playstation_gift_card.jpg')
-        Reward.objects.create(name="Xbox 10 GBP Gift Card",
-                              points_required=10, image='rewards/xbox_gift_card.jpg')
-        Reward.objects.create(name="Amazon 20 GBP Gift Card",
-                              points_required=20, image='rewards/amazon_gift_card.jpg')
+            name='T-shirt', points_required=10, image='rewards/shirt.jpg')
+        Reward.objects.create(name='PSN £50 Gift Card',
+                              points_required=500, image='rewards/playstation_gift_card.jpg')
+        Reward.objects.create(name="XBX £10 Gift Card",
+                              points_required=100, image='rewards/xbox_gift_card.jpg')
+        Reward.objects.create(name="AMZ £20 Gift Card",
+                              points_required=200, image='rewards/amazon_gift_card.jpg')
 
 #
     rewards = Reward.objects.all()
@@ -890,7 +792,7 @@ def redeem(request, reward_id):
     elif total_task_points >= reward.points_required:
         user.decrease_total_task_points(reward.points_required)
         messages.add_message(
-            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
+            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address within 7 days.')
         return redirect('index')
     else:
 
@@ -1137,7 +1039,7 @@ def spending_calendar(request, year=datetime.now().year, month=datetime.now().mo
     context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
 
-
+@login_required
 def set_specific_budget(request):
     if request.method == 'POST':
         form = BudgetForm(request.user, request.POST)
@@ -1150,6 +1052,7 @@ def set_specific_budget(request):
         form = BudgetForm(request.user)
     return render(request, 'specific_budget_set.html', {'form': form})
 
+@login_required
 def password(request):
     if request.user.is_authenticated:
         current_user = request.user
@@ -1173,3 +1076,103 @@ def password(request):
 
         form = PasswordForm()
         return render(request, 'password.html', {'form': form})
+
+@login_required
+def create_new_budget_if_needed(request):
+    current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
+    if current_budget and current_budget.end_date < datetime.now().date():
+        TotalBudget.objects.create(
+            limit=current_budget.limit,
+            start_date=datetime.now().date(),
+            end_date=datetime.now().date() + timedelta(days=30),
+            budget_owner=request.user,
+        )
+
+@login_required
+def get_category_budgets(request, total_budget):
+    categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
+    category_budgets = []
+    for category in categories:
+        budget = Budget.objects.filter(spending_category=category).last()
+        if budget:
+            # print(category.name + str(budget.limit))
+            spending_sum = Spending.objects.filter(
+                spending_owner=request.user,
+                # date__month=current_month,
+                date__range=(total_budget.start_date, total_budget.end_date),
+                spending_type=Spending_type.EXPENDITURE,
+                spending_category=category,
+            ).aggregate(nums=Sum('amount')).get('nums') or 0
+
+            # print(budget.limit)
+            category_budgets.append({
+                'name': category.name,
+                'budget': budget.limit,
+                'spending': spending_sum,
+                'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
+                # 'start_date': total_budget.start_date,
+                # 'end_date': total_budget.end_date,
+            })
+        else:
+            if total_budget:
+                spending_sum = Spending.objects.filter(spending_owner=request.user,
+                                                       date__range=(total_budget.start_date, total_budget.end_date),
+                                                       spending_type=Spending_type.EXPENDITURE,
+                                                       spending_category=category,
+                                                       ).aggregate(nums=Sum('amount')).get('nums') or 0
+                category_budgets.append({
+                    'name': category.name,
+                    'budget': 'Not set yet',
+                    'spending': spending_sum,
+                    'percentage': None,
+                    # 'start_date': None,
+                    # 'end_date': None,
+                })
+            else:
+                category_budgets.append(
+                    {'name': category.name, 'budget': 'Not set yet', 'spending': 'Please set a total budget first',
+                     'percentage': None,
+                     })
+    return category_budgets
+
+@login_required
+def sort_catrgory_budget(request, selected_sort, category_budgets):
+    if selected_sort == '-budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'budget':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['budget'] != 'Not set yet',
+                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+            )
+        )
+    elif selected_sort == '-spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+            reverse=True
+        )
+    elif selected_sort == 'spending':
+        sorted_category_budgets = sorted(
+            category_budgets,
+            key=lambda k: (
+                k['spending'] != 'Please set a total budget first',
+                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+            ),
+        )
+    elif selected_sort == '':
+        sorted_category_budgets = category_budgets
+    else:
+        sorted_category_budgets = category_budgets
+    return sorted_category_budgets

@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from pst.models import User, Spending, Categories, SpendingFile
 from pst.forms import AddSpendingForm
+import os
 
 class AddSpendingTestCase(TestCase):
     fixtures = ['pst/tests/fixtures/users.json'], ['pst/tests/fixtures/spending.json']
