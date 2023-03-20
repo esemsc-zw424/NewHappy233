@@ -1,6 +1,8 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <script>
+
+
     function addSortUrl() {
         var url = new URL(window.location.href);
         var search_params = url.searchParams;
@@ -10,6 +12,12 @@
         return new_url;
     }
     window.onload = function() {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl, {
+                customClass: tooltipTriggerEl.dataset.bsCustomClass || ''
+            })
+        });
         if (get('sorted') == 'budget'){
             document.getElementById('empty_sort').innerHTML = "Budget: low to high";
         }else if (get('sorted') == '-budget'){
@@ -76,10 +84,14 @@
 
                         <div class="row">
                             <div class="col-6">
-                                <a href ='{% url 'set_specific_budget' %}' class = 'btn btn-lg btn-primary' data-bs-toggle="modal" data-bs-target="#set_specific_budget_modal">Set Specific Budget</a>
+                                {% if budget == None %}
+                                    <a href="#" class="btn btn-lg btn-primary disabled" aria-disabled="true">Set Specific Budget</a>
+                                {% else %}
+                                    <a href="{% url 'set_specific_budget' %}" class="btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#set_specific_budget_modal">Set Specific Budget</a>
+                                {% endif %}
                             </div>
                             <div class="col-6">
-                                
+
                                 <label for="sorter" class="text-nowrap align-self-center">Filter By:</label>
                                 <select class="form-select" id="selected_sort" name="selected_sort" onchange="location = addSortUrl();">
                                     <option id="empty_sort" value="" disabled selected hidden>Select an option</option>
@@ -90,16 +102,26 @@
                                 </select>
                             </div>
                         </div>
-                
+
 <table class="table">
 
     <thead>
         <tr>
             <th scope="col">category</th>
             <th scope="col">budget</th>
-            <th scope="col">spending within the selected timeframe</th>
-            <th scope="col">percentage</th>
-            <th scope="col">exceed the category budget?</th>
+            <th scope="col" type="button"
+                data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-custom-class="custom-tooltip"
+                data-bs-title="spending within your selected timeframe">
+                spending<i class="bi bi-question-circle"></i>
+            </th>
+            <th scope="col">go over budget?</th>
+            <th scope="col" type="button"
+                data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-custom-class="custom-tooltip"
+                data-bs-title="Include spending and budget for accurate percentage.">
+                percentage<i class="bi bi-exclamation-circle"></i>
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -108,18 +130,20 @@
                 <td> {{ category_budget.name }} </td>
                 <td> {{ category_budget.budget }} </td>
                 <td> {{ category_budget.spending }} </td>
-                {% if category_budget.percentage %}
-                    <td>Percentage: {{ category_budget.percentage }}%</td>
-                {% else %}
-                    <td>We need to include both spending and non-zero category budget to calculate the percentage accurately.</td>
-                {% endif %}
                 {% if category_budget.percentage >= 100 %}
                     <td>Yes</td>
-                {% elif category_budget.percentage == None %}
+                    {% elif category_budget.percentage == None %}
                     <td>Set a budget first</td>
-                {% else %}
+                    {% else %}
                     <td>No</td>
-                {% endif %}
+                    {% endif %}
+                {% if category_budget.percentage %}
+                    <td>Percentage: {{ category_budget.percentage }}%</td>
+                    {% elif category_budget.percentage == 0%}
+                    <td>Percentage: {{ category_budget.percentage }}%</td>
+                    {% else %}
+                    <td>Can't be calculated accurately.</td>
+                    {% endif %}
             </tr>
         {% endfor %}
     </tbody>
@@ -128,55 +152,88 @@
 
 <!-- modal for setting new budget -->
       <div class="modal fade" id="set_budget_modal" tabindex="-1" role="dialog" aria-labelledby="set_budget_modal_label">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="set_budget_modal_label">Set New Budget</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{% url 'budget_set' %}" method="post">
-                      {% csrf_token %}
-                        <div class="form-group">
-                            <label for="{{ form.name.id_for_label }}">Name:</label>
-                            {{ form.name }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.limit.id_for_label }}">Limit:</label>
-                            {{ form.limit }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.start_date.id_for_label }}">Start Date:</label>
-                            {{ form.start_date }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.end_date.id_for_label }}">End Date (optional):</label>
-                            {{ form.end_date }}
-                        </div>
-                      <input type="submit" value="Save Budget">
-                    </form>
-                </div>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="set_budget_modal_label">Set New Budget</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'budget_set' %}" method="post">
+          {% csrf_token %}
+{#          <div class="form-group row">#}
+{#            <label for="{{ form.name.id_for_label }}" class="col-sm-3 col-form-label">Name:</label>#}
+{#            <div class="col-sm-9">#}
+{#              {{ form.name }}#}
+{#            </div>#}
+{#          </div>#}
+          <div class="form-group row">
+            <label for="{{ form.limit.id_for_label }}" class="col-sm-3 col-form-label">Limit:</label>
+            <div class="col-sm-9">
+              {{ form.limit }}
             </div>
-        </div>
+          </div>
+          <div class="form-group row">
+            <label for="{{ form.start_date.id_for_label }}" class="col-sm-3 col-form-label">Start Date:</label>
+            <div class="col-sm-9">
+              {{ form.start_date }}
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="{{ form.end_date.id_for_label }}" class="col-sm-3 col-form-label">End Date (optional):</label>
+            <div class="col-sm-9">
+              {{ form.end_date }}
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-sm-12 text-center">
+              <input type="submit" value="Save Budget" class="btn btn-primary">
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
 
 <!-- modal for setting new specific budget -->
-      <div class="modal fade" id="set_specific_budget_modal" tabindex="-1" role="dialog" aria-labelledby="set_specific_budget_modal_label">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="set_budget_modal_label">Set New Specific Budget</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{% url 'set_specific_budget' %}" method="post">
-                      {% csrf_token %}
-                      {{ specific_form.as_p }}
-                      <input type="submit" value="Save Budget">
-                    </form>
-                </div>
+<div class="modal fade" id="set_specific_budget_modal" tabindex="-1" role="dialog" aria-labelledby="set_specific_budget_modal_label">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="set_specific_budget_modal_label">Set New Specific Budget</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'set_specific_budget' %}" method="post">
+          {% csrf_token %}
+{#          <div class="form-group row">#}
+{#            <label for="{{ specific_form.name.id_for_label }}" class="col-sm-3 col-form-label">Name:</label>#}
+{#            <div class="col-sm-9">#}
+{#              {{ specific_form.name }}#}
+{#            </div>#}
+{#          </div>#}
+          <div class="form-group row">
+            <label for="{{ specific_form.limit.id_for_label }}" class="col-sm-3 col-form-label">Limit:</label>
+            <div class="col-sm-9">
+              {{ specific_form.limit }}
             </div>
-        </div>
+          </div>
+          <div class="form-group row">
+            <label for="{{ specific_form.spending_category.id_for_label }}" class="col-sm-3 col-form-label">Spending Category:</label>
+            <div class="col-sm-9">
+              {{ specific_form.spending_category }}
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-sm-12 text-center">
+              <input type="submit" value="Save Budget" class="btn btn-primary">
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
 </body>
 {% endblock %}

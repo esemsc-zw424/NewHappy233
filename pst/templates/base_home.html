@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/style.css' %}"
+    />
+ <meta name="og:type" content="website" />
+    <meta name="twitter:card" content="photo" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/home-page.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styleguide.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/globals.css' %}" />
+
+{% endblock %}
+
+
+{% block body %}
+
+{% block content %}
+  {% endblock %}
+
+
+{% endblock %}

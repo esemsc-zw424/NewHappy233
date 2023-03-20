@@ -1,6 +1,6 @@
 
 from django.contrib import admin
-from .models import User, Spending, SpendingFile, Categories, Post, PostImage, Reply, Like
+from .models import DailyTaskStatus, Day, DailyTask, Spending, SpendingFile, Categories, Post, PostImage, Reply, Like, User
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 
@@ -10,6 +10,8 @@ class MyUserChangeForm(UserChangeForm):
         model = User
         fields = ('email', 'password', 'last_name',
                   'first_name')
+
+
 
 
 @admin.register(User)
@@ -22,7 +24,7 @@ class MyUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name',
-         'bio', 'gender', 'phone_number', 'address')}),
+         'bio', 'gender', 'phone_number', 'address', 'reward_points', 'consecutive_login_days', 'logged_in_once_daily')}),
         ('Permissions', {'fields': ('is_active', 'is_staff',
          'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
@@ -33,8 +35,6 @@ class MyUserAdmin(UserAdmin):
             'fields': ('email', 'password1', 'password2', 'first_name', 'last_name', 'is_staff', 'is_active')}
          ),
     )
-
-
 @admin.register(Spending)
 class SpendingAdmin(admin.ModelAdmin):
     list_display = [
@@ -89,4 +89,23 @@ class ReplyAdmin(admin.ModelAdmin):
 class LikeAdmin(admin.ModelAdmin):
     list_display = [
         'user', 'content_type', 'object_id'
+    ]
+
+@admin.register(DailyTaskStatus)
+class DailyTaskStatusAdmin(admin.ModelAdmin):
+    list_display = [
+      'task', 'day',  'task_type',
+    ]
+
+@admin.register(DailyTask)
+class DailyTaskAdmin(admin.ModelAdmin):
+    list_display = [
+        'get_day', 'get_user',
+    ]
+
+
+@admin.register(Day)
+class DayAdmin(admin.ModelAdmin):
+    list_display = [
+        'number',
     ]
