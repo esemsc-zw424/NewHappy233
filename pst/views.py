@@ -880,12 +880,11 @@ def delete_post(request, post_id):
 
 @login_required
 def post_detail(request, post_id):
-    #post = get_object_or_404(Post, id=post_id)
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return HttpResponseNotFound()
-    replies = Reply.objects.filter(parent_post=post)
+    replies = Reply.objects.filter(parent_post=post).order_by('reply_date')
     paginator = Paginator(replies, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
