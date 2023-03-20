@@ -5,7 +5,9 @@ from django.core.management.base import BaseCommand, CommandError
 from pst.models import User
 from pst .models import Post
 
-#import pytz
+
+from pytz import all_timezones
+import pytz
 from faker import Faker
 from random import randint, random
 

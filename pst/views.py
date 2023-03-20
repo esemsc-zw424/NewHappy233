@@ -866,6 +866,11 @@ def view_friends_list(request):
     return render(request, 'view_friends_list.html', {'users': users})
 
 @login_required
+def search_user(request):
+    users = User.objects.all()
+    return render(request, 'search_user.html', {'users': users})
+
+@login_required
 def show_user(request, user_id):
     try:
         user = User.objects.get(id=user_id)

@@ -1,0 +1,221 @@
+{% extends 'base_content.html' %}
+{% block head %}
+<style>
+    .custom-spacing {
+  margin-right: -10px;
+}
+</style>
+{% endblock %}
+{% block content %}
+
+
+<script>
+    function filterSpending() {
+        const start_date = document.getElementById('start_date').value;
+        const end_date = document.getElementById('end_date').value;
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status == 200){
+                document.getElementById('spending-table').innerHTML = this.responseText;
+            }
+        };
+        xhttp.open('GET', `/spending?start_date=${start_date}&end_date=${end_date}`, true);
+        xhttp.send();
+        return false;
+    }
+
+</script>
+
+<div class="container">
+    <table class="table" id="spending-table">
+        <h1>Search User:</h1>
+        
+        <p>
+            <div class="row align-items-center g-2">
+                <form method="GET" action="{% url 'view_spendings' %}">
+                    <div class="col col-lg-3">
+                    <div class="form-floating">
+                        <input type="search" class="form-control" id="search_user" name="search_user">
+                        <label for="floatingInputGrid">Enter username:</label>
+                    </div>
+                   <!-- </div>
+                    <div class="col col-lg-3">
+                    <div class="form-floating">
+                        <input type="date" class="form-control" id="end_date" name="end_date">
+                        <label for="floatingInputGrid">End date:</label>
+                    </div>  -->
+                    </div>
+                    <div class="col-md-auto" >
+                        <button type="submit" id="find-button" class="btn btn-primary btn-lg" style="font-size: 22px;" onclick="filterSpending">Find</button>
+                    </div>
+                    <div class="col-md-auto" >
+                         <button type="button" class="btn btn-primary btn-lg" style="font-size: 22px;" data-bs-toggle="modal" data-bs-target="#add_spending_modal">+</button>
+                    </div>
+                    <div class="col-md-auto" >
+                        <a href='{% url 'home' %}' class="btn btn btn-primary btn-lg" style="font-size: 22px;">Return</a>
+                    </div>
+                    
+                </form>
+            </div>
+        </p>
+
+        <!-- modal for add spending -->
+        <div class="modal fade" id="add_spending_modal" tabindex="-1" role="dialog" aria-labelledby="add_spending_modal_label">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="add_spending_modal_label">Add Spending</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'add_spending' %}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            <script>
+                                $(document).ready(function () {
+                                    var default_spending_type = $('#id_spending_type').val();
+        
+                                    $.ajax({
+                                        url: '{% url "get_categories_by_type" %}',
+                                        data: {
+                                            'spending_type': default_spending_type
+                                        },
+                                        success: function (data) {
+                                            $('#id_spending_category').empty();
+                                            $.each(data.categories, function (index, value) {
+                                                $('#id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                            });
+                                        }
+                                    });
+        
+                                    $('#id_spending_type').on('change', function () {
+                                        var spending_type = $(this).val();
+                                        $.ajax({
+                                            url: '{% url "get_categories_by_type" %}',
+                                            data: {
+                                                'spending_type': spending_type
+                                            },
+                                            success: function (data) {
+                                                $('#id_spending_category').empty();
+                                                $.each(data.categories, function (index, value) {
+                                                    $('#id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                                });
+                                            }
+                                        });
+                                    });
+                                });
+                            </script>
+                            <input type="submit" class="btn btn-primary" value="Add"></button>
+                        </form>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+        
+        <thead>
+            <tr>
+                <th scope="col">title</th>
+                <th scope="col">description</th>
+                <th scope="col">spending type</th>
+                <th scope="col">spending category</th>
+                <th scope="col">amount</th>
+                <th scope="col">date</th>
+                <th scope="col">file</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for i in page_obj %}
+            <tr class="align-middle">
+                <!-- <td><button type="button" class="btn btn-primary" 
+                    data-bs-toggle="modal" data-bs-target="#editSpendingModal{{ i.id }}">{{ i.title }}</button></td> -->
+                <td><a href="{% url 'edit_spending' i.id %}"  data-bs-toggle="modal" data-bs-target="#editSpendingModal{{ i.id }}">{{ i.title }}</a></td>
+                <td> {{ i.descriptions }} </td>
+                <td> {{ i.spending_type}} </td>
+                <td> {{ i.spending_category}} </td>
+                <td> {{ i.amount}} </td>
+                <td>{{ i.date|date:"m/d/Y" }} </td>
+
+                <td>
+                    {% for individual in i.files.all %}
+                    <a href="{{ individual.file.url }}">{{ individual.file.url }}</a>
+                    {% endfor %}
+                </td>
+                
+            </tr>
+            <div class="modal fade" id="editSpendingModal{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="editSpendingModalLabel">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editSpendingModalLabel">Edit Spending</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="{% url 'edit_spending' i.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+        
+                                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                                <script>
+                                $(document).ready(function() {
+                                    // Get the default spending type and category from the form data
+                                    var default_spending_type = $('#editSpendingModal{{ i.id }} #id_spending_type').val();
+                                    var default_spending_category = $('#editSpendingModal{{ i.id }} #id_spending_category').val();
+        
+                                    // Load the categories for the default spending type
+                                    $.ajax({
+                                        url: '{% url "get_categories_by_type" %}',
+                                        data: {
+                                            'spending_type': default_spending_type
+                                        },
+                                        success: function(data) {
+                                            $('#editSpendingModal{{ i.id }} #id_spending_category').empty();
+                                            $.each(data.categories, function(index, value) {
+                                                $('#editSpendingModal{{ i.id }} #id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                            });
+        
+                                            // Set the default spending category
+                                            $('#editSpendingModal{{ i.id }} #id_spending_category').val(default_spending_category);
+                                        }
+                                    });
+        
+                                    $('#editSpendingModal{{ i.id }} #id_spending_type').on('change', function() {
+                                        var spending_type = $(this).val();
+                                        $.ajax({
+                                            url: '{% url "get_categories_by_type" %}',
+                                            data: {
+                                                'spending_type': spending_type
+                                            },
+                                            success: function(data) {
+                                                $('#editSpendingModal{{ i.id }} #id_spending_category').empty();
+                                                $.each(data.categories, function(index, value) {
+                                                    $('#editSpendingModal{{ i.id }} #id_spending_category').append('<option value="' + value.id + '">' + value.name + '</option>');
+                                                });
+                                            }
+                                        });
+                                    });
+                                });
+                                </script>
+    
+                                <input type="submit" value="Submit" class="btn btn-lg btn-primary">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    {% include 'pagination.html' %}
+
+
+
+</div>
+{% endblock %}

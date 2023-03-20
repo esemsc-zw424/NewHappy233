@@ -56,6 +56,9 @@ urlpatterns = [
     path('view_friends_list/', views.view_friends_list,
          name='view_friends_list'),
 
+     path('search_user/', views.search_user,
+         name='search_user'),
+
     path('user/<int:user_id>', views.show_user, name='show_user'),
 
     path('redeem/<int:reward_id>/', views.redeem, name='redeem'),
