@@ -10,7 +10,7 @@ from datetime import datetime
 import os
 
 class PostDetailTestCase(TestCase):
-    fixtures = ['pst/tests/fixtures/post.json',]
+    fixtures = ['pst/tests/fixtures/post.json']
 
     def setUp(self):
         self.user = User.objects.get(email="johndoe@example.org")
