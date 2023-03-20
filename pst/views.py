@@ -215,18 +215,19 @@ def get_position_in_daily_reward(request):
 
 
 def get_super_task_point_position(request):
+    consecutive_login_days = request.user.consecutive_login_days
     cur_pos = get_position_in_daily_reward(request)
-    days_need = 8 - request.user.consecutive_login_days
+    days_need = 7 - consecutive_login_days
     return cur_pos + days_need
 
 
 def add_consecutive_login_days(request):
     user = request.user
-    if current_datetime - user.last_login < timedelta(hours=24):
+    if current_datetime - user.last_login < timedelta(hours=24) and user.logged_in_once_daily == False:
         user.consecutive_login_days += 1
 
         # user has not logged in consecutively
-    else:
+    elif current_datetime - user.last_login >= timedelta(hours=24):
         user.consecutive_login_days = 1
     user.save()
 
@@ -322,8 +323,8 @@ def log_in(request):
                 login(request, user)
                 redirect_url = next or 'home'
                 next = request.GET.get('next') or ''
-                check_already_logged_in_once_daily(request)
                 add_consecutive_login_days(request)
+                check_already_logged_in_once_daily(request)
                 user.last_login = timezone.now()
                 user.save()
 
