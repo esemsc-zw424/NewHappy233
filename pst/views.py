@@ -95,7 +95,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
         next_month = month + 1
         next_year = year
         previous_year = year
-
+    
     for i in range(0, len(month_calendar_list)):
         for j in range(0, len(month_calendar_list[i])):
             spendings_daily = []
@@ -122,6 +122,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
                'exp_amount': exp_sum,
                'income_amount': income_sum}
     return context
+
 
 
 
@@ -731,15 +732,6 @@ def show_budget(request):
         'form': form,
         'specific_form': specific_form,
     })
-
-
-# @login_required
-# def index(request):
-#     if Reward.objects.count() == 0:
-#         Reward.objects.create(name='Discount coupon', points_required=10)
-#         Reward.objects.create(name='Free T-shirt', points_required=20)
-#         Reward.objects.create(name='Gift card', points_required=50)
-
 
 
 @login_required
