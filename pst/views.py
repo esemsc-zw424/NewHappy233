@@ -1098,7 +1098,7 @@ def password(request):
                     new_password = form.cleaned_data.get('new_password')
                     current_user.set_password(new_password)
                     current_user.save()
-                    authenticated_user = authenticate(username=current_user.username, password=new_password)
+                    authenticated_user = authenticate(username=current_user.email, password=new_password)
                     login(request, authenticated_user, backend='django.contrib.auth.backends.ModelBackend')
                     messages.add_message(request, messages.SUCCESS, "Password updated!")
                     return redirect('password')
