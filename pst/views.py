@@ -114,7 +114,8 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
             month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
 
     context = {'month_calendar_list': month_calendar_list,
-               'year': year, 'month': month_name,
+               'year': year, 
+               'month': month_name,
                'previous_month': previous_month,
                'previous_year': previous_year,
                'next_month': next_month,
@@ -623,6 +624,7 @@ def spending_report(request):
     end_date = request.GET.get('end_date')
     selected_categories = request.GET.get('selected_categories')
     sorted = request.GET.get('sorted')
+    # Filter spendings data by timeframe
     if start_date and end_date:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -630,6 +632,7 @@ def spending_report(request):
     else:
         spendings = Spending.objects.filter(spending_owner=request.user)
 
+    # Filter spendings data by spending type
     if selected_categories == 'Income':
         report_type = 'Income'
         selected_spendings = spendings.filter(spending_type=Spending_type.INCOME)
@@ -638,6 +641,7 @@ def spending_report(request):
         selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
     spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
 
+    # Sort spendings data by spending category, amount, or date
     if sorted == 'spending_category':
         sorted_spendings = selected_spendings.order_by('spending_category')
     elif sorted == 'amount':
