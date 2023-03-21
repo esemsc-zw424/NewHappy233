@@ -156,6 +156,40 @@ def get_login_task_status(request):
 
     return JsonResponse(data)
 
+
+class GetLoginTaskStatusView(View):
+    
+    def get(self, request):
+        pos = self.get_position(request)
+        task_statuses = self.get_task_statuses(request, pos)
+        task_status_dict = self.build_task_status_dict(task_statuses)
+        data = self.build_data(pos, task_status_dict)
+        return JsonResponse(data)
+
+    def get_position(self, request):
+        return int(request.GET.get("pos", 0))
+
+    def get_task_statuses(self, request, pos):
+        return DailyTaskStatus.objects.filter(
+            day__number__lte=pos,
+            task_type=TaskType.LOGIN.name,
+            task__user=request.user,
+        )
+
+    def build_task_status_dict(self, task_statuses):
+        return {task_status.day.number: True for task_status in task_statuses}
+
+    def build_data(self, pos, task_status_dict):
+        task_statuses = [
+            {"day": day, "completed": task_status_dict.get(day, False)}
+            for day in range(1, pos + 1)
+        ]
+        if not task_status_dict.get(pos) and len(task_statuses) > 0:
+            task_statuses.pop()
+        return {"task_statuses": task_statuses}
+    
+    
+
 @login_required
 @csrf_exempt
 def add_login_task_points(request):
