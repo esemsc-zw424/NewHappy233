@@ -1,4 +1,3 @@
-from datetime import timedelta
 from enum import Enum
 
 from django.db import models
@@ -83,23 +82,6 @@ class User(AbstractUser):
     def decrease_total_task_points(self, value):
         self.total_task_points -= value
         self.save()
-
-    def get_number_days_from_register(self):
-        date_joined = self.date_joined
-        num_days = (timezone.now() - date_joined).days + 1
-        if  num_days == 0:
-            num_days = 1
-
-        return num_days
-    
-    def check_already_logged_in_once_daily(self):
-        # if over a day since last login
-        if timezone.now() - self.last_login > timedelta(hours=24):
-            self.logged_in_once_daily = False
-            self.save()
-        else:
-            self.logged_in_once_daily = True
-            self.save()
 
 
     def gravatar(self, size=120):

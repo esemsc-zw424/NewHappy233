@@ -18,7 +18,6 @@ from django.urls import include, path
 from pst import views
 from django.conf import settings
 from django.conf.urls.static import static
-from pst.views import GetLoginTaskStatusView
 
 
 urlpatterns = [
@@ -89,7 +88,7 @@ urlpatterns = [
     path('set_specific_budget/', views.set_specific_budget, name='set_specific_budget'),
     path('password/', views.password, name='password'),
     path('add_login_task_points/', views.add_login_task_points, name='add_login_task_points'),
-    path('get_login_task_status/', GetLoginTaskStatusView.as_view(), name='get_login_task_status'),
+    path('get_login_task_status/', views.get_login_task_status,name='get_login_task_status')
 
 ]
 

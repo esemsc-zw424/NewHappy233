@@ -12,12 +12,5 @@
         "fields": {
             "number": 2
         }
-    },
-    {
-        "model": "pst.day",
-        "pk": 3,
-        "fields": {
-            "number": 3
-        }
     }
 ]

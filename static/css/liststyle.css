@@ -46,4 +46,7 @@ table:not(#reward-table) tr:hover {
 
 }
 
+.note_font {
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+}
 
