@@ -140,23 +140,6 @@ class DailyTask(models.Model):
     def get_user(self):
         return self.user
 
-    # def mark_received(self, day):
-    #     status = DailyTaskStatus.objects.get(task=self, day=day)
-    #     status.received = True
-    #     status.save()
-    #
-    # def set_task_points(self, day, points):
-    #     status = DailyTaskStatus.objects.get(task=self, day=day)
-    #     status.points = points
-    #     status.save()
-    #
-    # def get_task_status(self, day):
-    #     status = DailyTaskStatus.objects.get(task=self, day=day)
-    #     return status.received
-    #
-    # def get_task_points(self, day):
-    #     status = DailyTaskStatus.objects.get(task=self, day=day)
-    #     return status.points
 
     def __str__(self):
         return f"{self.user.email}'s daily tasks"
@@ -294,7 +277,6 @@ class PostImage(models.Model):
     )
 
 @receiver(pre_delete, sender=SpendingFile)
-@receiver(pre_delete, sender=Spending)
 @receiver(pre_delete, sender=PostImage)
 def delete_file(sender, instance, **kwargs):
     # delete the file when the related object is deleted

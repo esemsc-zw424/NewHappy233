@@ -1,9 +1,10 @@
+import os
 from django import forms
 from django.test import TestCase
 from pst.forms import AddSpendingForm
 from datetime import date
 from pst.models import Spending, SpendingFile, User, Categories
-from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class AddSpendingFormTestCase(TestCase):
@@ -34,6 +35,7 @@ class AddSpendingFormTestCase(TestCase):
         self.assertTrue(isinstance(file.widget, forms.ClearableFileInput))
 
     def test_form_with_valid_data(self):
+        
         form = AddSpendingForm(data=self.form_input, user=self.user)
         self.assertTrue(form.is_valid())
         spending = form.save(commit=False)

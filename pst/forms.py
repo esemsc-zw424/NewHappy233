@@ -61,18 +61,16 @@ class VisitorSignupForm(PasswordValidationForm):
         fields = ['email', 'first_name', 'last_name']
         # widgets = {'bio': forms.Textarea()}
 
-    def save(self):
+    def save(self, commit=False):
         """Create a new user"""
 
-        super().save(commit=False)
+        super().save(commit)
         data = self.cleaned_data
         user = User.objects.create_user(
-                first_name=data.get('first_name'),
-                last_name=data.get('last_name'),
-                email=data.get('email'),
-                password=data.get('password'),
-                # bio=data.get('bio'),
-                # gender=data.get('gender'),
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            email=data.get('email'),
+            password=data.get('password'),
         )
 
         categories = [
@@ -232,7 +230,6 @@ class BudgetForm(forms.ModelForm):
         category_spent = Budget.objects.filter(budget_owner=self.user, spending_category=spending_category).last()
         if category_spent:
             category_value = category_spent.limit
-            print("cs" + str(category_spent.limit))
         else:
             category_value = 0
  
@@ -313,7 +310,6 @@ class TotalBudgetForm(forms.ModelForm):
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
         if not end_date:
-            print(1)
             cleaned_data['end_date'] = start_date + timedelta(days=30)
 
         return cleaned_data

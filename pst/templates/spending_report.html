@@ -26,7 +26,8 @@
         justify-content: center;
         }
         .chartBox {
-        width: 700px;
+        width: 50%;
+        min-width: 200px;
         padding: 20px;
         border-radius: 20px;
         border: solid 3px rgba(54, 162, 235, 1);
@@ -35,7 +36,6 @@
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.2/dist/chart.min.js"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 
     <script>
     function selectSpending() {
@@ -65,10 +65,23 @@
         return new_url;
     }
 
+    function reloadUrl(event, pageNumber) {
+        event.preventDefault();
+        var url = window.location.href;
+        var search_params = new URLSearchParams(window.location.search);
+        if (pageNumber) {
+        search_params.set('page', pageNumber);
+        }
+        new_url = "?" + search_params.toString();
+        window.location.href = new_url;
+        return window.location.href;
+    }
+
     function get(name) {
         if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
             return decodeURIComponent(name[1]);
     }
+
 
     window.onload = function() {
         if (get('sorted') == 'date') {
@@ -252,7 +265,6 @@
             <table class="table" id="spending_list">
                 <thead>
                     <tr>
-                        <th scope="col">spending owner</th>
                         <th scope="col">date</th>
                         <th scope="col">title</th>
                         <th scope="col">description</th>
@@ -264,7 +276,6 @@
                 <tbody>
                     {% for i in page_obj %}
                     <tr class="align-middle">
-                        <td> {{ i.spending_owner }}</td>
                         <td> {{ i.date|date:"m/d/Y" }}</td>
                         <td> {{ i.title }}</td>
                         <td> {{ i.descriptions }}</td>
@@ -273,7 +284,26 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% include 'pagination.html' %}
+            
+            <div class="pagination">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}" onclick="return reloadUrl(event, {{ page_obj.previous_page_number }})">Previous</a></li>
+                    {% endif %}
+                    {% if page_obj.has_other_pages %}
+                    {% for num in page_obj.paginator.page_range %}
+                      <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}" onclick="return reloadUrl(event, {{ num }})">{{ num }}</a>
+                      </li>
+                    {% endfor %}
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}" onclick="return reloadUrl(event, {{ page_obj.next_page_number }})">Next</a></li>
+                    {% endif %}
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </body>

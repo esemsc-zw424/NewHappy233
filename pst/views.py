@@ -103,8 +103,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
             income_sum = 0
             # adds each spending in the database to each date in the calendar
             for spending in spendings:
-                if spending.date.day == month_calendar_list[i][j][
-                        0] and spending.date.month == month and spending.date.year == year:
+                if spending.date.day == month_calendar_list[i][j][0] and spending.date.month == month and spending.date.year == year:
                     spendings_daily.append(spending)
             # calculates the sum of expenditures and sums of all the spendings in a single day
             for spending_daily in spendings_daily:
@@ -112,8 +111,7 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
                     exp_sum += spending_daily.amount
                 else:
                     income_sum += spending_daily.amount
-            month_calendar_list[i][j] = (
-                month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
+            month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
 
     context = {'month_calendar_list': month_calendar_list,
                'year': year, 'month': month_name,
@@ -215,18 +213,19 @@ def get_position_in_daily_reward(request):
 
 
 def get_super_task_point_position(request):
+    consecutive_login_days = request.user.consecutive_login_days
     cur_pos = get_position_in_daily_reward(request)
-    days_need = 8 - request.user.consecutive_login_days
+    days_need = 7 - consecutive_login_days
     return cur_pos + days_need
 
 
 def add_consecutive_login_days(request):
     user = request.user
-    if current_datetime - user.last_login < timedelta(hours=24):
+    if current_datetime - user.last_login < timedelta(hours=24) and user.logged_in_once_daily == False:
         user.consecutive_login_days += 1
 
         # user has not logged in consecutively
-    else:
+    elif current_datetime - user.last_login >= timedelta(hours=24):
         user.consecutive_login_days = 1
     user.save()
 
@@ -322,8 +321,8 @@ def log_in(request):
                 login(request, user)
                 redirect_url = next or 'home'
                 next = request.GET.get('next') or ''
-                check_already_logged_in_once_daily(request)
                 add_consecutive_login_days(request)
+                check_already_logged_in_once_daily(request)
                 user.last_login = timezone.now()
                 user.save()
 
@@ -637,7 +636,7 @@ def spending_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     selected_categories = request.GET.get('selected_categories')
-    selected_sort = request.GET.get('sorted')
+    sorted = request.GET.get('sorted')
     if start_date and end_date:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -653,8 +652,14 @@ def spending_report(request):
         selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
     spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
 
-    if selected_sort:
-        sorted_spendings = selected_spendings.order_by(selected_sort)
+    if sorted == 'spending_category':
+        sorted_spendings = selected_spendings.order_by('spending_category')
+    elif sorted == 'amount':
+        sorted_spendings = selected_spendings.order_by('amount')
+    elif sorted == '-amount':
+        sorted_spendings = selected_spendings.order_by('-amount')
+    elif sorted == 'date':
+        sorted_spendings = selected_spendings.order_by('date')
     else:
         sorted_spendings = selected_spendings
 
@@ -665,9 +670,10 @@ def spending_report(request):
         'report_type': report_type,
         'selected_spendings': selected_spendings,
         'spendings_data': spendings_data,
+        'sorted': sorted,
         'sorted_spendings': sorted_spendings,
         'page_obj': page_obj
-    }
+        }
     return render(request, 'spending_report.html', context)
 
 @login_required
@@ -758,13 +764,13 @@ def index(request):
 
     if Reward.objects.count() == 0:
         Reward.objects.create(
-            name='T-shirt', points_required=20, image='rewards/shirt.jpg')
-        Reward.objects.create(name='PlayStation Store 50 GBP Gift Card',
-                              points_required=50, image='rewards/playstation_gift_card.jpg')
-        Reward.objects.create(name="Xbox 10 GBP Gift Card",
-                              points_required=10, image='rewards/xbox_gift_card.jpg')
-        Reward.objects.create(name="Amazon 20 GBP Gift Card",
-                              points_required=20, image='rewards/amazon_gift_card.jpg')
+            name='T-shirt', points_required=10, image='rewards/shirt.jpg')
+        Reward.objects.create(name='PSN £50 Gift Card',
+                              points_required=500, image='rewards/playstation_gift_card.jpg')
+        Reward.objects.create(name="XBX £10 Gift Card",
+                              points_required=100, image='rewards/xbox_gift_card.jpg')
+        Reward.objects.create(name="AMZ £20 Gift Card",
+                              points_required=200, image='rewards/amazon_gift_card.jpg')
 
 #
     rewards = Reward.objects.all()
@@ -791,7 +797,7 @@ def redeem(request, reward_id):
     elif total_task_points >= reward.points_required:
         user.decrease_total_task_points(reward.points_required)
         messages.add_message(
-            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address.')
+            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address within 7 days.')
         return redirect('index')
     else:
 
