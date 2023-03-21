@@ -12,7 +12,6 @@ class SpendingReportTestCase(TestCase):
         self.url = reverse('spending_report')
 
     def test_spending_report_page_loads_successfully(self):
-        # Test that the spending report page loads successfully
         self.client.login(username=self.user.email, password='Password123')
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -20,10 +19,7 @@ class SpendingReportTestCase(TestCase):
         self.assertEqual(response.context['sorted_spendings'].count(), 0)
         self.assertEqual(response.context['page_obj'].number, 1)
         
-# : Response redirected to '/accounts/login/?next=/spending_report/', expected '/spending_report/'Expected '/accounts/login/?next=/spending_report/' to equal '/spending_report/'.
-
     def test_spending_report_displays_correct_data(self):
-        # Test that the spending report page displays the correct data
         Spending.objects.create(
             title='test_spending',
             spending_owner=self.user,
@@ -46,8 +42,6 @@ class SpendingReportTestCase(TestCase):
         self.assertContains(response, '10.00')
 
     def test_spending_report_filters_by_date_range(self):
-        # Test that the spending report can be filtered by date range
-        
         Spending.objects.create(
             title='test_expenditure',
             spending_owner=self.user,
@@ -75,7 +69,6 @@ class SpendingReportTestCase(TestCase):
         self.assertContains(response, '10.00')
 
     def test_spending_report_filters_by_income_type(self):
-        # Test that the spending report can be filtered by category type
         Spending.objects.create(
             title='test_income',
             spending_owner=self.user,
@@ -100,8 +93,7 @@ class SpendingReportTestCase(TestCase):
         self.assertContains(response, 'test_category')
         self.assertContains(response, '20.00')
 
-    def test_spending_report_filters_by_expenditure_category(self):
-        # Test that the spending report can be sorted by spending category
+    def test_spending_report_filters_by_expenditure_type(self):
         Spending.objects.create(
             title='test_expenditure',
             spending_owner=self.user,
@@ -128,7 +120,7 @@ class SpendingReportTestCase(TestCase):
         sorted_spendings = [Spending.objects.create(
         title=f'Test Spending {i}',
         spending_owner=self.user,
-        amount=100,
+        amount=10.0,
         descriptions='This is a test spending',
         date=date.today(),
         spending_category=Categories.objects.create(
@@ -157,3 +149,12 @@ class SpendingReportTestCase(TestCase):
         response = self.client.get(self.url + '?page=2')
         page_obj = response.context['page_obj']
         self.assertEqual(list(page_obj), sorted_spendings[10:])
+
+    def test_spending_report_ajax_request(self):
+        self.client.login(username=self.user.email, password='Password123')
+        start_date = (date.today() - timedelta(days=7)).strftime('%Y-%m-%d')
+        end_date = date.today().strftime('%Y-%m-%d')
+        response = self.client.get(f"{self.url}?start_date={start_date}&end_date={end_date}", HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'spending_report.html')
