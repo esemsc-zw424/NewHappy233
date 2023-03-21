@@ -982,6 +982,8 @@ def add_reply_to_post(request, post_id):
             reply.user = request.user
             reply.parent_post = post
             reply.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 "reply has been successfully added!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = ReplyForm()
@@ -1002,6 +1004,8 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
             reply.parent_post = post
             reply.parent_reply = parent_reply
             reply.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 "reply has been successfully added!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = ReplyForm()

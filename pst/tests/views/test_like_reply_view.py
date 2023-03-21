@@ -5,23 +5,24 @@ from pst.forms import PostForm, ReplyForm
 from django.urls import reverse
 from django.shortcuts import render
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import HttpResponse, HttpResponseNotFound
 from datetime import datetime
 import os
 
-class LikePostDetailTestCase(TestCase):
-    fixtures = ['pst/tests/fixtures/post.json']
+class LikeReplyTestCase(TestCase):
+    fixtures = ['pst/tests/fixtures/reply.json']
 
     def setUp(self):
-        self.user = User.objects.get(email="johndoe@example.org")
         self.post = Post.objects.get(content='This is example post 1')
-        self.url = reverse('like_post_details', kwargs={'post_id': self.post.id})
+        self.parent_reply = Reply.objects.get(content='This is example reply 1')
+        self.reply = Reply.objects.get(content='This is example reply 2')
+        self.user = User.objects.get(email="johndoe@example.org")
+        self.url = reverse('like_reply', kwargs={'reply_id': self.reply.id, 'post_id': self.post.id})
 
-    def test_like_post_details_url(self):
-        # Test that the URL for like post details is correct
-        self.assertEqual(self.url, f'/like_post_details/{self.post.id}/')
+    def test_like_reply_url(self):
+        # Test that the URL for like reply is correct
+        self.assertEqual(self.url, f'/like_reply/{self.reply.id}/{self.post.id}/')
 
-    def test_like_post_detail(self):
+    def test_like_reply(self):
         # Log in as the test user
         self.client.login(username=self.user.email, password='Password123')
 
@@ -31,17 +32,17 @@ class LikePostDetailTestCase(TestCase):
 
         # Test the number of likes is correct
         self.post.refresh_from_db()
-        self.assertEqual(self.post.likes.count(), 1)
-        self.assertEqual(self.post.likes.first().user, self.user)
+        self.assertEqual(self.reply.likes.count(), 1)
+        self.assertEqual(self.reply.likes.first().user, self.user)
 
-    def test_unlike_post_detail(self):
+    def test_unlike_reply(self):
         # Log in as the test user
         self.client.login(username=self.user.email, password='Password123')
 
         # Test that unliking a post works
         like = Like.objects.create(
             user=self.user, 
-            content_object=self.post
+            content_object=self.reply
         )
 
         # Test that the view returns a 200 status code
@@ -50,7 +51,10 @@ class LikePostDetailTestCase(TestCase):
 
         # Test the number of likes is correct
         self.post.refresh_from_db()
-        self.assertEqual(self.post.likes.count(), 0)
+        self.assertEqual(self.reply.likes.count(), 0)
 
         # CHeck that the like is no more exist
         self.assertFalse(Like.objects.filter(pk=like.pk).exists())
+
+
+    

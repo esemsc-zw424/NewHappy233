@@ -58,7 +58,7 @@ class AddPostTestCase(TestCase):
             self.assertRedirects(response, reverse('forum'))
 
             # Check that the new post was created with the correct attributes
-            new_post = Post.objects.filter(content='This is a test post').first()
+            new_post = Post.objects.get(content='This is a test post')
             self.assertIsNotNone(new_post)
             self.assertEqual(new_post.user, self.user)
             self.assertEqual(new_post.title, 'Test Post')
