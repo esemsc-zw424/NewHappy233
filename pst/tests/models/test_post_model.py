@@ -7,7 +7,7 @@ class PostModelTestCase(TestCase):
 
     def setUp(self):
         self.post = Post.objects.get(content = "This is example post 1")
-        self.post_author = User.objects.get(email = "johndoe@example.org")
+        self.post_user = User.objects.get(email = "johndoe@example.org")
 
     def _assert_post_is_valid(self):
         try:
@@ -35,7 +35,7 @@ class PostModelTestCase(TestCase):
         self._assert_post_is_invalid()
 
     def test_post_owner_cannot_be_blank(self):
-        self.post.author = None
+        self.post.user = None
         self._assert_post_is_invalid()
 
     def test_content_cannot_be_blank(self):

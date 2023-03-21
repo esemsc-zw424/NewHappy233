@@ -1,0 +1,21 @@
+{% load humanize %}
+<tr>
+  <td>
+    <img src="{{ post.user.mini_gravatar }}" alt="Gravatar of user {{ post.user.username }}" class="rounded-circle">
+  </td>
+  <td>
+    <p class="post-user">
+      <span class="post-user-fullname">
+        {{ post.user.full_name }}
+      </span>
+      <span class="post-user-user-details">
+        {{ post.user.username }}
+        &nbsp;&middot;&nbsp;
+        {{ post.created_at|naturaltime }}
+      </span>
+    </p>
+    <p class="post-text">
+      {{ post.text }}
+    </p>
+  </td>
+</tr>

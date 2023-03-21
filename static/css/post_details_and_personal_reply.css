@@ -10,7 +10,7 @@
     border-top: 2px solid #ccc;
   }
   
-  .author-link {
+  .user-link {
     text-decoration: none;
     font-weight: bold;
     color: black;
@@ -61,11 +61,11 @@
     background-color: #f5f5f5;
   }
   
-  .author-link img {
+  .user-link img {
     margin-right: 10px;
   }
   
-  .reply .author-link {
+  .reply .user-link {
     margin-bottom: 10px;
     display: inline-block;
   }

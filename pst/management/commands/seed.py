@@ -94,7 +94,7 @@ class Command(BaseCommand):
 
     def create_post(self):
         post = Post()
-        post.author = self.get_random_user()
+        post.user = self.get_random_user()
         post.text = self.faker.text(max_nb_chars=280)
         post.save()
         datetime = self.faker.past_datetime(start_date='-365d', tzinfo=pytz.UTC)

@@ -26,10 +26,10 @@
         <a href='{% url 'forum' %}' class = "btn btn-primary mb-3">Return Forum</a>
 
         <div class="post">
-            <div class="author">
+            <div class="user">
                 <a href="{% url 'view_post_user' post.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">
                     <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
-                    {{ post.author.get_full_name }} 
+                    {{ post.user.get_full_name }} 
                 </a>
             </div>
             <h1>{{ post.title }}</h1>
@@ -75,7 +75,7 @@
                             {% endif %}
                         </div>
                     {% endif %}
-                <div class="author">
+                <div class="user">
                     <a href="{% url 'view_post_user' r.user.id r.id %}" style="text-decoration:none; font-weight:bold; color:black;">
                         <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
                         {{ r.user.get_full_name }} 

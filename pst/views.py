@@ -857,7 +857,7 @@ def add_post(request):
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
-            post.author = request.user
+            post.user = request.user
             post.save()
             for file in request.FILES.getlist('image'):
                 PostImage.objects.create(
@@ -1063,7 +1063,8 @@ def view_friends_page(request):
 @login_required
 def view_friends_list(request):
     users = User.objects.all()
-    return render(request, 'view_friends_list.html', {'users': users})
+    self_user = request.user
+    return render(request, 'view_friends_list.html', {'users': users,'self_user': self_user})
 
 @login_required
 def search_user(request):
@@ -1074,7 +1075,7 @@ def search_user(request):
 def show_user(request, user_id):
     try:
         user = User.objects.get(id=user_id)
-        posts = Post.objects.filter(author=user)
+        posts = Post.objects.filter(user=user)
         following = request.user.is_following(user)
         followable = (request.user != user)
     except ObjectDoesNotExist:
@@ -1086,6 +1087,19 @@ def show_user(request, user_id):
              'following': following,
              'followable': followable}
         )
+
+@login_required
+def follow_toggle(request, user_id):
+    current_user = request.user
+    try:
+        followee = User.objects.get(id=user_id)
+        current_user.toggle_follow(followee)
+    except ObjectDoesNotExist:
+        return redirect('user_list')
+    else:
+        return redirect('show_user', user_id=user_id)
+    
+
 @login_required
 def password(request):
     if request.user.is_authenticated:

@@ -107,7 +107,7 @@ body {
 .post img {
     margin-right: 10px;
 }
-.post .author {
+.post .user {
     margin-bottom: 10px;
 }
 .post .info {
@@ -126,6 +126,6 @@ body {
     margin-bottom: 20px;
     word-wrap: break-word;
 }
-.reply .author {
+.reply .user {
     margin-bottom: 10px;
 }

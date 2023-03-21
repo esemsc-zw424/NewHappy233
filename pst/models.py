@@ -115,6 +115,9 @@ class User(AbstractUser):
 
     def is_following(self, user):
         return user in self.followees.all()
+    
+    def get_is_follow_text(self, user):
+        return "Unfollow" if self.is_following(user) else "Follow"
 
     def follower_count(self):
         return self.followers.count()
@@ -292,7 +295,7 @@ class Reward(models.Model):
 class Post(models.Model):
 
     # this field store the user when sent this post
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
 
     # this field store the title of the post
     # the title are not expected to be very long and can be empty if user don't want to have a title

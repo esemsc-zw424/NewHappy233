@@ -3,7 +3,7 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <h1>Users</h1>
+      <h1>Leaderstats</h1>
       <table class="table">
         {% for user in users %}
           <tr>
@@ -12,8 +12,11 @@
             
               <img src="{{ user.gravatar }}" alt="Gravatar of {{ user.username }}" class="rounded-circle" >
             </td>
-            <td>{{ user.get_total_task_points }}</td>
-            <td><a href="{% url 'show_user' user.id %}">{{ user.username }}</a></td>
+              <td><a href="{% url 'show_user' user.id %}">{{ user.username }}</a> </td>    
+              <td>{{ user.get_total_task_points }}</td>
+              
+            </td>
+            
           </tr>
         {% endfor %}
       </table>

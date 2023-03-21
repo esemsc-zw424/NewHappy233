@@ -91,6 +91,7 @@ urlpatterns = [
     path('view_settings/', views.view_settings, name='view_settings'),
 
     path('view_friends_page/', views.view_friends_page, name='view_friends_page'),
+    path('follow_toggle/<int:user_id>', views.follow_toggle, name='follow_toggle'),
 
     path('get_categories_by_type/', views.get_categories_by_type, name='get_categories_by_type'),
 

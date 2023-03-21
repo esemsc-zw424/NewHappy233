@@ -59,7 +59,7 @@ class CategoriesAdmin(admin.ModelAdmin):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = [
-        'author', 'title', 'content', 'get_num_likes', 'post_date',
+        'user', 'title', 'content', 'get_num_likes', 'post_date',
     ]
 
     def get_num_likes(self, obj):

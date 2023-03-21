@@ -5,6 +5,7 @@
 {% block content %}
 
   <body style="margin: 0; background: #d0e6fd">
+
     <div class="container-center-horizontal">
       <div class="home-page screen">
         <div class="overlap-group-container">
@@ -59,7 +60,6 @@
                   src="{% static 'img/image-2@2x.png' %}"
                   alt="image 2"
                   onclick="show_login_task_modal()"
-                  id="login_task"
                 />
               </button>
 
@@ -192,10 +192,42 @@
                 account :
             </p>
 
-            <a href="{% url 'spending_report' %}?start_date=&end_date=&selected_categories=Income">
-              <div class="overlap-group2">
-                
-                <div class="group-container">
+            <div class="overlap-group2">
+              
+              <div class="group-container">
+                <div class="group">
+                  <div class="flex-row">
+                    <div class="rectangle"></div>
+                    <div class="rectangle-1"></div>
+                  </div>
+                  <div class="rectangle-2"></div>
+                </div>
+                <div class="group-1">
+                  <div class="rectangle-2"></div>
+                  <div class="flex-row">
+                    <div class="rectangle-1"></div>
+                    <div class="rectangle"></div>
+                  </div>
+                </div>
+              </div>
+              <img class="image" src="{% static 'img/image-1@2x.png' %}" alt="Image" />
+              <div class="group-2">
+                <div class="overlap-group1">
+                  <div class="monthly-expenses poppins-medium-bunker-24px">
+                    Monthly Revenue
+                  </div>
+                  <div class="price poppins-medium-bunker-32px">£{{ revenue }}</div>
+                </div>
+                <div class="view-details poppins-normal-persian-blue-15px"> 
+
+                  <a href= '{% url 'spending_report' %}'>View Details</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="overlap-group3">
+              <div class="overlap-group1-1">
+                <div class="group-container-1">
                   <div class="group">
                     <div class="flex-row">
                       <div class="rectangle"></div>
@@ -276,22 +308,44 @@
                     </div>
                   </div>
                 </div>
-
+            </a>     
                 
                   <img class="image" src="{% static 'img/image-6@2x.png' %}" alt="Image" />
                 
                 <div class="group-2">
                   <div class="overlap-group1">
                     <div class="mothly-expenses poppins-medium-bunker-24px">
-                      Monthly Expense
+                      Monthly Expense and other things
                     </div>
                     <div class="price poppins-medium-bunker-32px">£{{ expense }}</div>
                   </div>
-                  
+                  <div class="rectangle-2"></div>
+                </div>
+                <div class="group-1">
+                  <div class="rectangle-2"></div>
+                  <div class="flex-row">
+                    <div class="rectangle-1"></div>
+                    <div class="rectangle"></div>
+                  </div>
+                </div>
+              </div>
+              <img class="image" src="{% static 'img/image-6@2x.png' %}" alt="Image" />
+              <div class="group-2">
+                <div class="overlap-group1">
+                  <div class="monthly-expenses poppins-medium-bunker-24px">
+                    Monthly Expenses
+                  </div>
+                  <div class="price poppins-medium-bunker-32px">£{{ expense }}</div>
+                </div>
+                <div class="view-details poppins-normal-persian-blue-15px">
+                  <a href= '{% url 'spending_report' %}'>View Details</a> 
                 </div>
               </div>
             </div>
-          </a>
+          </div>
+                  
+   
+      
           
           <!-- end of three small windows showing revenue, expenditure, and plan -->
           
@@ -395,9 +449,9 @@
 
                              {% if day == pos %}
                                  <td class="square" id="task_point-pos-{{ day }}"  name= "task_point_pos" >
-                                     <button  onclick="task_point_pos_click_handler({{ day }})" >
+                                     <button  onclick="task_point_pos_click_handler({ day })" >
                                          day{{pos}}<i class="bi bi-cart-check"></i></button> </td>
-                            {% elif day == super_task_pos %}
+                            {% elif day == super_task_point_pos %}
                                 <td class = "square" id="task_point-super-{{ day }}"style="color: rgb(255, 24, 7);">
                                     day{{day}} <br>
                                     <i class="fa-solid fa-gem"></i>
@@ -430,3 +484,7 @@
 </div>
 
     {% endblock %}
+
+    
+
+
