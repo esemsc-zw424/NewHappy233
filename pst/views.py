@@ -178,7 +178,7 @@ def create_login_task(user):
 
 
 def create_daily_task_status(request, login_task):
-    current_day = get_number_days_from_register(request)
+    current_day = request.user.get_number_days_from_register()
     day, _ = Day.objects.get_or_create(number=current_day)
     if request.user.consecutive_login_days > 7:
         task_points = settings.HIGH_TASK_POINTS
@@ -193,17 +193,8 @@ def create_daily_task_status(request, login_task):
 
 
 
-def get_number_days_from_register(request):
-    date_joined = request.user.date_joined
-    num_days = (current_datetime - date_joined).days + 1
-    if  num_days == 0:
-        num_days = 1
-
-    return num_days
-
-
 def get_position_in_daily_reward(request):
-    pos = get_number_days_from_register(request)
+    pos = request.user.get_number_days_from_register()
     return pos % 35
 
 
@@ -302,16 +293,6 @@ def edit_spending(request, spending_id):
     return render(request, "edit_spending.html", {'form': form, 'spending': spending})
 
 
-def check_already_logged_in_once_daily(request):
-    user = request.user
-    # if over a day since last login
-    if current_datetime - user.last_login > timedelta(hours=24):
-        user.logged_in_once_daily = False
-        user.save()
-    else:
-        user.logged_in_once_daily = True
-        user.save()
-
 
 @login_prohibited
 def log_in(request):
@@ -328,7 +309,7 @@ def log_in(request):
                 redirect_url = next or 'home'
                 next = request.GET.get('next') or ''
                 add_consecutive_login_days(request)
-                check_already_logged_in_once_daily(request)
+                user.check_already_logged_in_once_daily()
                 user.last_login = timezone.now()
                 user.save()
 

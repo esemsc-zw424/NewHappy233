@@ -25,7 +25,7 @@ class AddLoginTaskTestCase(TestCase):
         mock_create_login_task.assert_called_once_with(self.user)
 
 
-    @patch('pst.views.get_number_days_from_register')
+    @patch('pst.models.User.get_number_days_from_register')
     def test_create_task_status_successfully_with_days_less_than_7(self, mock_get_number_days_from_register):
         mock_get_number_days_from_register.return_value = 5
         request = self.factory.post('/')
@@ -36,7 +36,7 @@ class AddLoginTaskTestCase(TestCase):
         self.assertEqual(daily_task_status.task_points, settings.NORMAL_TASK_POINTS)
 
 
-    @patch('pst.views.get_number_days_from_register')
+    @patch('pst.models.User.get_number_days_from_register')
     def test_create_task_status_successfully_with_days_more_than_7(self, mock_get_number_days_from_register):
         mock_get_number_days_from_register.return_value = 10
         request = self.factory.post('/')
