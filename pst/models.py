@@ -334,8 +334,8 @@ class Like(models.Model):
 
 class DeliveryAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    address = models.CharField(max_length=200, blank=True)
-    phone_number = models.IntegerField(blank=True)
+    address = models.CharField(max_length=200, blank=False)
+    phone_number = models.IntegerField(blank=False)
 
 # class TotalBudget(models.Model):
 #     name = models.CharField(max_length=100, default='')
