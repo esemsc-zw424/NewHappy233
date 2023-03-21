@@ -60,18 +60,16 @@ class VisitorSignupForm(PasswordValidationForm):
         fields = ['email', 'first_name', 'last_name']
         # widgets = {'bio': forms.Textarea()}
 
-    def save(self):
+    def save(self, commit=False):
         """Create a new user"""
 
-        super().save(commit=False)
+        super().save(commit)
         data = self.cleaned_data
         user = User.objects.create_user(
-                first_name=data.get('first_name'),
-                last_name=data.get('last_name'),
-                email=data.get('email'),
-                password=data.get('password'),
-                # bio=data.get('bio'),
-                # gender=data.get('gender'),
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            email=data.get('email'),
+            password=data.get('password'),
         )
 
         categories = [
@@ -292,7 +290,9 @@ class TotalBudgetForm(forms.ModelForm):
         model = TotalBudget
         fields = ['limit', 'start_date', 'end_date']
         widgets = {
-            'end_date': forms.DateInput(attrs={'placeholder': 'Default is 30 days later.'}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'value': date.today().strftime('%Y-%m-%d')}),
+            'end_date': forms.DateInput(attrs={'placeholder': 'Default is 30 days later.', 'type': 'date',
+                                               'value': date.today().strftime('%Y-%m-%d')}),
         }
 
     def __init__(self, user, *args, **kwargs):

@@ -85,8 +85,3 @@ class AddSpendingCategoriesTestCase(TestCase):
         self.assertEqual(category.owner, self.user)
         self.assertEqual(category.categories_type, 'Income')
             
-    # def test_access_add_categories_when_not_log_in(self):
-    #     response = self.client.get(self.url)
-    #     self.assertEqual(response.status_code, 302)
-    #     redirect_url = reverse('visitor_signup')
-    #     self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
