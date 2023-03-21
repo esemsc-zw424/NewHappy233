@@ -1016,7 +1016,7 @@ def view_post_user(request, user_id, post_id):
 @login_required
 def view_settings(request):
     form = TotalBudgetForm(request.user)
-    form = BudgetForm()
+    #form = BudgetForm()
     return render(request, 'setting_page.html', {'form': form})
    
 
