@@ -47,7 +47,7 @@ urlpatterns = [
          name='view_spending_categories'),
     path('update_spending_categories/<int:category_id>/',
          views.update_spending_categories, name='update_spending_categories'),
-    path('delete_spending_categories/<int:category_id>', views.delete_spending_categories, name='delete_spending_categories'),
+    path('delete_spending_categories/<int:category_id>/', views.delete_spending_categories, name='delete_spending_categories'),
 
     path('edit_spending/<int:spending_id>/',
          views.edit_spending, name='edit_spending'),
@@ -65,7 +65,7 @@ urlpatterns = [
     path('forum/', views.forum, name='forum'),
     path('add_post/', views.add_post, name='add_post'),
     path('delete_post/<int:post_id>/', views.delete_post, name = 'delete_post'),
-    path('delete_reply/<int:reply_id>', views.delete_reply, name = 'delete_reply'),
+    path('delete_reply/<int:reply_id>/', views.delete_reply, name = 'delete_reply'),
     path('post_detail/<int:post_id>/', views.post_detail, name='post_detail'),
     path('like_post/<int:post_id>/', views.like_post, name='like_post'),
     path('like_post_details/<int:post_id>/',

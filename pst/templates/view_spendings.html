@@ -34,6 +34,18 @@
         return new_url;
     }
 
+    function reloadUrl(event, pageNumber) {
+        event.preventDefault();
+        var url = window.location.href;
+        var search_params = new URLSearchParams(window.location.search);
+        if (pageNumber) {
+        search_params.set('page', pageNumber);
+        }
+        new_url = "?" + search_params.toString();
+        window.location.href = new_url;
+        return window.location.href;
+    }
+
     function get(name) {
         if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
             return decodeURIComponent(name[1]);
@@ -265,10 +277,25 @@
         </tbody>
     </table>
 
-
-    {% include 'pagination.html' %}
-
-
+    <div class="pagination">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}" onclick="return reloadUrl(event, {{ page_obj.previous_page_number }})">Previous</a></li>
+            {% endif %}
+            {% if page_obj.has_other_pages %}
+            {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}" onclick="return reloadUrl(event, {{ num }})">{{ num }}</a>
+                </li>
+            {% endfor %}
+            {% endif %}
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}" onclick="return reloadUrl(event, {{ page_obj.next_page_number }})">Next</a></li>
+            {% endif %}
+            </ul>
+        </nav>
+    </div>
 
 </div>
 {% endblock %}
