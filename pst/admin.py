@@ -1,6 +1,6 @@
 
 from django.contrib import admin
-from .models import DailyTaskStatus, Day, DailyTask, Spending, SpendingFile, Categories, Post, PostImage, Reply, Like, User
+from .models import DailyTaskStatus, Day, DailyTask, Spending, SpendingFile, Categories, Post, PostImage, Reply, Like, User, TotalBudget, Budget
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 
@@ -109,3 +109,17 @@ class DayAdmin(admin.ModelAdmin):
     list_display = [
         'number',
     ]
+
+
+@admin.register(TotalBudget)
+class TotalBudgetAdmin(admin.ModelAdmin):
+    list_display = [
+        'limit', 'start_date', 'end_date', 'created_at', 'updated_at', 'budget_owner'
+    ]
+
+@admin.register(Budget)
+class BudgetAdmin(admin.ModelAdmin):
+    list_display = [
+        'limit', 'created_at', 'budget_owner', 'spending_category'
+    ]
+ 
