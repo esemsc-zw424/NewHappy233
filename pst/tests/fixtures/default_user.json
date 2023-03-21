@@ -1,0 +1,16 @@
+[
+    {
+        "model": "pst.user",
+        "pk": 1,
+        "fields": {
+            "password": "padgaadhaetadsdyewwe",
+            "email": "default.user@example.org",
+            "first_name": "default",
+            "last_name": "user",
+            "bio": "bio1",
+            "gender": "Male",
+            "phone_number": "0111112222",
+            "address": "Street CBA"
+        }
+    }
+]

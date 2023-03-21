@@ -58,9 +58,6 @@ urlpatterns = [
     path('view_friends_list/', views.view_friends_list,
          name='view_friends_list'),
 
-     path('search_user/', views.search_user,
-         name='search_user'),
-
     path('user/<int:user_id>', views.show_user, name='show_user'),
 
     path('redeem/<int:reward_id>/', views.redeem, name='redeem'),
@@ -101,6 +98,8 @@ urlpatterns = [
     path('password/', views.password, name='password'),
     path('add_login_task_points/', views.add_login_task_points, name='add_login_task_points'),
     path('get_login_task_status/', GetLoginTaskStatusView.as_view(), name='get_login_task_status'),
+
+    path('users/', views.user_list, name='user_list'),
 
 ]
 

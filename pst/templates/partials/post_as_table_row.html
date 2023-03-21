@@ -9,13 +9,13 @@
         {{ post.user.full_name }}
       </span>
       <span class="post-user-user-details">
-        {{ post.user.username }}
+        {{ post.post_date }}
         &nbsp;&middot;&nbsp;
         {{ post.created_at|naturaltime }}
       </span>
     </p>
     <p class="post-text">
-      {{ post.text }}
+      {{ post.content }}
     </p>
   </td>
 </tr>
