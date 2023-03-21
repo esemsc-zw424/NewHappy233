@@ -28,6 +28,7 @@
         .chartBox {
         width: 50%;
         min-width: 200px;
+        min-height:50px;
         padding: 20px;
         border-radius: 20px;
         border: solid 3px rgba(54, 162, 235, 1);
@@ -107,27 +108,27 @@
 
 <body>
     <div class="container">
-        <div class="row">
+        <!-- <div class="row">
             <div class="col offset-md-11">
                 <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
             </div>
-        </div>
+        </div> -->
 
         <form method="GET" action="{% url 'spending_report' %}">
             <div class="row">
-                <div class="col col-lg-3">
+                <div class="col col-lg-2">
                 <div class="form-floating">
                     <input type="date" class="form-control" id="start_date" name="start_date">
                     <label for="floatingInputGrid">Start date:</label>
                 </div>
                 </div>
-                <div class="col col-lg-3">
+                <div class="col col-lg-2">
                 <div class="form-floating">
                     <input type="date" class="form-control" id="end_date" name="end_date">
                     <label for="floatingInputGrid">End date:</label>
                 </div>
                 </div>
-                <div class="col col-lg-3">
+                <div class="col col-lg-2">
                 <select id="selected_categories" name="selected_categories" style="height: 58px;font-size: 22px;">
                     <option id="empty_category" value="" disabled selected hidden></option>
                     <option id="selected_expenditure" value="Expenditure">Expenditure</option>
@@ -136,6 +137,9 @@
                 </div>
                 <div class="col-md-auto">
                     <button type="submit" id="generate-button" class="btn btn-primary btn-lg" style="font-size: 22px;" onclick="selectSpending">Generate report</button>
+                </div>
+                <div class="col-md-auto">
+                    <a href='{% url 'home' %}' class="btn btn-primary btn-lg" style="font-size: 22px;">Return home</a>
                 </div>
             </div>
         </form>
