@@ -35,7 +35,7 @@ class PostModelTestCase(TestCase):
         self._assert_post_is_invalid()
 
     def test_post_owner_cannot_be_blank(self):
-        self.post.user = None
+        self.post.author = None
         self._assert_post_is_invalid()
 
     def test_content_cannot_be_blank(self):

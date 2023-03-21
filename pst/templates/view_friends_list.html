@@ -8,9 +8,11 @@
         {% for user in users %}
           <tr>
             <td>
-              <img src="{{ user.mini_gravatar }}" alt="Gravatar of {{ user.username }}" class="rounded-circle" >
+              <!-- <img src="{{ user.mini_gravatar }}" alt="Gravatar of {{ user.username }}" class="rounded-circle" > -->
+            
+              <img src="{{ user.gravatar }}" alt="Gravatar of {{ user.username }}" class="rounded-circle" >
             </td>
-            <td>{{ user.full_name }}</td>
+            <td>{{ user.get_total_task_points }}</td>
             <td><a href="{% url 'show_user' user.id %}">{{ user.username }}</a></td>
           </tr>
         {% endfor %}

@@ -67,8 +67,9 @@ class User(AbstractUser):
     total_task_points = models.IntegerField(default=0)
     consecutive_login_days = models.IntegerField(default=1)
     logged_in_once_daily = models.BooleanField(default = False)
-
-
+    followers = models.ManyToManyField(
+        'self', symmetrical=False, related_name='followees'
+    )
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
@@ -83,12 +84,47 @@ class User(AbstractUser):
         self.total_task_points -= value
         self.save()
 
+    def get_total_task_points(self):
+        return "task credits: " + str(self.total_task_points)
 
     def gravatar(self, size=120):
         """Return a URL to the user's gravatar."""
         gravatar_object = Gravatar(self.email)
         gravatar_url = gravatar_object.get_image(size=size, default='mp')
         return gravatar_url
+
+    def mini_gravatar(self):
+        """Return a URL to a miniature version of the user's gravatar."""
+        return self.gravatar(size=60)
+
+    def toggle_follow(self, followee):
+        """Toggles whether self follows the given followee."""
+
+        if followee==self:
+            return
+        if self.is_following(followee):
+            self._unfollow(followee)
+        else:
+            self._follow(followee)
+
+    def _follow(self, user):
+        user.followers.add(self)
+
+    def _unfollow(self, user):
+        user.followers.remove(self)
+
+    def is_following(self, user):
+        return user in self.followees.all()
+
+    def follower_count(self):
+        return self.followers.count()
+
+    def followee_count(self):
+        return self.followees.count()
+
+    def username(self):
+        return self.first_name + ' ' + self.last_name
+
 
     @property
 
@@ -256,7 +292,7 @@ class Reward(models.Model):
 class Post(models.Model):
 
     # this field store the user when sent this post
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
 
     # this field store the title of the post
     # the title are not expected to be very long and can be empty if user don't want to have a title
