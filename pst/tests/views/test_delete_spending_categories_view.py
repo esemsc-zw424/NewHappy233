@@ -15,7 +15,7 @@ class DeleteSpendingCategoriesTestCase(TestCase):
 
     def test_delete_spending_categories_url(self):
         # Test that the URL for delele spending categories is correct
-        self.assertEqual(self.url, f'/delete_spending_categories/{self.categories.id}')
+        self.assertEqual(self.url, f'/delete_spending_categories/{self.categories.id}/')
 
     def test_access_delete_not_default_categories_expenditure_when_log_in_as_user(self):
         # Log in as the test user

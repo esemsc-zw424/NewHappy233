@@ -869,6 +869,8 @@ def add_post(request):
                     post=post,
                     file=file
                 )
+            messages.add_message(request, messages.SUCCESS,
+                                 "post has been successfully added!")
             return redirect('forum')
     else:
         form = PostForm()
@@ -876,7 +878,6 @@ def add_post(request):
 
 @login_required
 def delete_post(request, post_id):
-
     delete_post = get_object_or_404(Post, id=post_id)
     delete_post.delete()
     messages.warning(request, "post has been deleted")
@@ -885,12 +886,11 @@ def delete_post(request, post_id):
 
 @login_required
 def post_detail(request, post_id):
-    #post = get_object_or_404(Post, id=post_id)
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return HttpResponseNotFound()
-    replies = Reply.objects.filter(parent_post=post)
+    replies = Reply.objects.filter(parent_post=post).order_by('reply_date')
     paginator = Paginator(replies, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -988,6 +988,8 @@ def add_reply_to_post(request, post_id):
             reply.user = request.user
             reply.parent_post = post
             reply.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 "reply has been successfully added!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = ReplyForm()
@@ -1008,6 +1010,8 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
             reply.parent_post = post
             reply.parent_reply = parent_reply
             reply.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 "reply has been successfully added!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = ReplyForm()
@@ -1017,7 +1021,6 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
 
 @login_required
 def delete_reply(request, reply_id):
-
     delete_reply = get_object_or_404(Reply, id=reply_id)
     delete_reply.delete()
     messages.warning(request, "reply has been deleted")
