@@ -1,3 +1,4 @@
+from datetime import timedelta
 from enum import Enum
 
 from django.db import models
@@ -83,14 +84,29 @@ class User(AbstractUser):
         self.total_task_points -= value
         self.save()
 
+    def get_number_days_from_register(self):
+        date_joined = self.date_joined
+        num_days = (timezone.now() - date_joined).days + 1
+        if  num_days == 0:
+            num_days = 1
+
+        return num_days
+    
+    def check_already_logged_in_once_daily(self):
+        # if over a day since last login
+        if timezone.now() - self.last_login > timedelta(hours=24):
+            self.logged_in_once_daily = False
+            self.save()
+        else:
+            self.logged_in_once_daily = True
+            self.save()
+
 
     def gravatar(self, size=120):
         """Return a URL to the user's gravatar."""
         gravatar_object = Gravatar(self.email)
         gravatar_url = gravatar_object.get_image(size=size, default='mp')
         return gravatar_url
-
-
 
     def __str__(self):
         return self.email
@@ -298,7 +314,7 @@ class Reply(models.Model):
     parent_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reply', blank = False)
 
     # if this reply is the reply for another reply under the same post, then this field will be use to mark the parent reply
-    parent_reply = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    parent_reply = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
 
     # this field store the content of the post
     # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
@@ -336,8 +352,8 @@ class Like(models.Model):
 
 class DeliveryAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    address = models.CharField(max_length=200, blank=True)
-    phone_number = models.IntegerField(blank=True)
+    address = models.CharField(max_length=200, blank=False)
+    phone_number = models.IntegerField(blank=False)
 
 # class TotalBudget(models.Model):
 #     name = models.CharField(max_length=100, default='')

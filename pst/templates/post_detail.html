@@ -76,7 +76,7 @@
                         </div>
                     {% endif %}
                 <div class="author">
-                    <a href="{% url 'view_post_user' r.user.id r.id %}" style="text-decoration:none; font-weight:bold; color:black;">
+                    <a href="{% url 'view_post_user' r.user.id post.id %}" style="text-decoration:none; font-weight:bold; color:black;">
                         <img src="{{ user.gravatar }}" class="rounded-circle profile-image" width="30" height="30"/>
                         {{ r.user.get_full_name }} 
                     </a>

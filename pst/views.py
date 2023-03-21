@@ -1,3 +1,4 @@
+from django.conf import settings
 from audioop import reverse
 import datetime
 from django.db.models import Sum
@@ -10,7 +11,6 @@ from django.urls import reverse
 from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
 
 from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
@@ -34,6 +34,7 @@ from .forms import *
 from django.views import View
 from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
 
@@ -50,8 +51,7 @@ nltk.download('wordnet')
 
 
 
-high_task_points = 30
-normal_task_points = 10
+
 current_datetime = timezone.now()
 
 @login_required
@@ -123,92 +123,76 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
                'income_amount': income_sum}
     return context
 
-def get_login_task_status(request):
-    pos = int(request.GET.get("pos", 0))
-    task_statuses  = DailyTaskStatus.objects.filter(
-    day__number__lte=pos,
-    task_type=TaskType.LOGIN.name,
-    task__user=request.user,
 
-    )
 
-    # Create a dictionary with day numbers as keys and completed status as values
-    task_status_dict = {
-        task_status.day.number: True
-        for task_status in task_statuses
-    }
+class GetLoginTaskStatusView(View):
+    
+    def get(self, request):
+        pos = self.get_position(request)
+        task_statuses = self.get_task_statuses(request, pos)
+        task_status_dict = self.build_task_status_dict(task_statuses)
+        data = self.build_data(pos, task_status_dict)
+        return JsonResponse(data)
+    
 
-    # Create a list of dictionaries for each day from 1 to pos, with their completion status
-    data = {
-        "task_statuses": [
-            {
-                "day": day,
-                "completed": task_status_dict.get(day, False),
-            }
+    def get_position(self, request):
+        return int(request.GET.get("pos", 0))
+    
+
+    def get_task_statuses(self, request, pos):
+        return DailyTaskStatus.objects.filter(
+            day__number__lte=pos,
+            task_type=TaskType.LOGIN.name,
+            task__user=request.user,
+        )
+    
+
+    def build_task_status_dict(self, task_statuses):
+        return {task_status.day.number: True for task_status in task_statuses}
+    
+
+    def build_data(self, pos, task_status_dict):
+        task_statuses = [
+            {"day": day, "completed": task_status_dict.get(day, False)}
             for day in range(1, pos + 1)
         ]
-    }
+        if not task_status_dict.get(pos) and len(task_statuses) > 0:
+            task_statuses.pop()
+        return {"task_statuses": task_statuses}
+    
+    
 
-    if not task_status_dict.get(pos) and len(data['task_statuses']) > 0:
-        data['task_statuses'].pop()
-
-    return JsonResponse(data)
-
-@login_required
-@csrf_exempt
+    
 def add_login_task_points(request):
     if request.method == 'POST':
-
         user = request.user
-        login_task = DailyTask.objects.create(user=user)
-        current_day = get_number_days_from_register(request)
-        day, _ = Day.objects.get_or_create(number=current_day)
-        print(day)
-        # give user extra points if user has login consecutive for seven days
-        if user.consecutive_login_days > 7:
-            daily_task_status = DailyTaskStatus.objects.create(
-                task=login_task,
-                day=day,
-                task_points=high_task_points,
-                task_type=TaskType.LOGIN.name
-            )
-
-        else:
-
-            daily_task_status = DailyTaskStatus.objects.create(
-                task=login_task,
-                day=day,
-                task_points=normal_task_points,
-                task_type=TaskType.LOGIN.name
-            )
-
-
-
+        login_task = create_login_task(user)
+        create_daily_task_status(request, login_task)
         return JsonResponse({"status": "success"})
+    
+
+def create_login_task(user):
+    return DailyTask.objects.create(user=user)
 
 
-def check_already_logged_in_once_daily(request):
-    user = request.user
-    # if over a day since last login
-    if current_datetime - user.last_login > timedelta(hours=24):
-        user.logged_in_once_daily = False
-        user.save()
+def create_daily_task_status(request, login_task):
+    current_day = request.user.get_number_days_from_register()
+    day, _ = Day.objects.get_or_create(number=current_day)
+    if request.user.consecutive_login_days > 7:
+        task_points = settings.HIGH_TASK_POINTS
     else:
-        user.logged_in_once_daily = True
-        user.save()
+        task_points = settings.NORMAL_TASK_POINTS
+    return DailyTaskStatus.objects.create(
+        task=login_task,
+        day=day,
+        task_points=task_points,
+        task_type=TaskType.LOGIN.name
+    )   
 
-
-def get_number_days_from_register(request):
-    date_joined = request.user.date_joined
-    num_days = (current_datetime - date_joined).days + 1
-    if  num_days == 0:
-        num_days = 1
-
-    return num_days
 
 
 def get_position_in_daily_reward(request):
-    pos = get_number_days_from_register(request)
+    pos = request.user.get_number_days_from_register()
     return pos % 35
 
 
@@ -269,7 +253,7 @@ def home(request):
 
     daily_reward_context = {"pos": pos, "super_task_pos": super_task_pos, "week_list": week_list,
                             "weekday_list": weekday_list, "current_datetime": current_day,
-                            "high_task_points": high_task_points, "normal_task_points": normal_task_points}
+                            "high_task_points": settings.HIGH_TASK_POINTS, "normal_task_points": settings.NORMAL_TASK_POINTS}
 
     calendar_context = get_spending_calendar_context(request)
 
@@ -307,6 +291,7 @@ def edit_spending(request, spending_id):
     return render(request, "edit_spending.html", {'form': form, 'spending': spending})
 
 
+
 @login_prohibited
 def log_in(request):
     if request.method == 'POST':
@@ -322,7 +307,7 @@ def log_in(request):
                 redirect_url = next or 'home'
                 next = request.GET.get('next') or ''
                 add_consecutive_login_days(request)
-                check_already_logged_in_once_daily(request)
+                user.check_already_logged_in_once_daily()
                 user.last_login = timezone.now()
                 user.save()
 
@@ -869,6 +854,8 @@ def add_post(request):
                     post=post,
                     file=file
                 )
+            messages.add_message(request, messages.SUCCESS,
+                                 "post has been successfully added!")
             return redirect('forum')
     else:
         form = PostForm()
@@ -876,7 +863,6 @@ def add_post(request):
 
 @login_required
 def delete_post(request, post_id):
-
     delete_post = get_object_or_404(Post, id=post_id)
     delete_post.delete()
     messages.warning(request, "post has been deleted")
@@ -885,12 +871,11 @@ def delete_post(request, post_id):
 
 @login_required
 def post_detail(request, post_id):
-    #post = get_object_or_404(Post, id=post_id)
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return HttpResponseNotFound()
-    replies = Reply.objects.filter(parent_post=post)
+    replies = Reply.objects.filter(parent_post=post).order_by('reply_date')
     paginator = Paginator(replies, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -988,6 +973,8 @@ def add_reply_to_post(request, post_id):
             reply.user = request.user
             reply.parent_post = post
             reply.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 "reply has been successfully added!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = ReplyForm()
@@ -1008,6 +995,8 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
             reply.parent_post = post
             reply.parent_reply = parent_reply
             reply.save()
+            messages.add_message(request, messages.SUCCESS,
+                                 "reply has been successfully added!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = ReplyForm()
@@ -1017,7 +1006,6 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
 
 @login_required
 def delete_reply(request, reply_id):
-
     delete_reply = get_object_or_404(Reply, id=reply_id)
     delete_reply.delete()
     messages.warning(request, "reply has been deleted")

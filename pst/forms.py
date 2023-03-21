@@ -291,7 +291,9 @@ class TotalBudgetForm(forms.ModelForm):
         model = TotalBudget
         fields = ['limit', 'start_date', 'end_date']
         widgets = {
-            'end_date': forms.DateInput(attrs={'placeholder': 'Default is 30 days later.'}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'value': date.today().strftime('%Y-%m-%d')}),
+            'end_date': forms.DateInput(attrs={'placeholder': 'Default is 30 days later.', 'type': 'date',
+                                               'value': date.today().strftime('%Y-%m-%d')}),
         }
 
     def __init__(self, user, *args, **kwargs):
