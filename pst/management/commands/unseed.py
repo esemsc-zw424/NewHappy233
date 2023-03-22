@@ -3,8 +3,7 @@ from pst.models import User, Spending, SpendingFile, Categories, Budget, Reward,
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        #User.objects.all().delete()
-        User.objects.exclude(is_superuser=True).delete()
+        User.objects.all().delete()
         Spending.objects.all().delete()
         SpendingFile.objects.all().delete()
         Categories.objects.all().delete()
