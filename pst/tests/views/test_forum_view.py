@@ -61,7 +61,6 @@ class ForumTestCase(TestCase):
         new_post = Post.objects.create(
             user=self.user,
             content='This is new example post',
-            created_date='2023-3-30'
         )
 
         # Count the number of posts after create one
@@ -110,7 +109,6 @@ class ForumTestCase(TestCase):
         posts = [Post.objects.create(
                 user=self.user,
                 content=f'Test Post {i}',
-                created_date='2024-3-30'
             ) for i in range(13)]
 
         # Log in as the test user and get the first page of the forum

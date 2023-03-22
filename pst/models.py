@@ -262,7 +262,7 @@ class BasePostReplyModel(models.Model):
     likes = GenericRelation('Like')
 
     # Date when this reply or post create 
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(default=timezone.now)
 
     class Meta:
         abstract = True

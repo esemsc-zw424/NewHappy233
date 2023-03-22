@@ -84,4 +84,37 @@ class AddSpendingCategoriesTestCase(TestCase):
         category = Categories.objects.last()
         self.assertEqual(category.owner, self.user)
         self.assertEqual(category.categories_type, 'Income')
-            
+
+    def test_number_of_categories_cannot_exceed_30(self):
+        # Log in as the test user
+        self.client.login(username=self.user.email, password="Password123")
+
+        # Add 30 categories
+        categories = [Categories.objects.create(
+                owner=self.user,
+                name = 'xxx',
+                categories_type = 'Income',
+            ) for i in range(30)]
+
+        # Modify the valid data to create a new category with the 'Income' spending type
+        self.valid_data['categories_type'] = 'Income'
+
+        # Count the number of categories before adding a new one
+        spending_categories_count_before = Categories.objects.count()
+
+        # Send a POST request to the view to create a new category
+        response = self.client.post(self.url, self.valid_data, follow=True)
+
+        # Test that the view returns a success status code and a success message
+        self.assertEqual(response.status_code, 200)
+        messages_list = list(response.context.get('messages'))
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(str(messages_list[0]), 'You can only have a maximum of 30 categories')
+        self.assertEqual(messages_list[0].level, messages.ERROR)
+
+        # Test that a new category has been created with the expected attributes
+        spending_categories_count_after = Categories.objects.count()
+        self.assertEqual(spending_categories_count_after, spending_categories_count_before)
+
+    
+        
