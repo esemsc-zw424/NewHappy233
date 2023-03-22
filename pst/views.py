@@ -237,7 +237,7 @@ def home(request):
     if (not revenue):
         monthly_revenue = 0
     else:
-        monthly_revenue = revenue.aggregate(nums=Sum('amount')).get('nums')
+        monthly_revenue = round(revenue.aggregate(nums=Sum('amount')).get('nums'), 2)
 
     expense = Spending.objects.filter(
         spending_owner=request.user,
@@ -248,7 +248,7 @@ def home(request):
     if (not expense):
         monthly_expense = 0
     else:
-        monthly_expense = expense.aggregate(nums=Sum('amount')).get('nums')
+        monthly_expense = round(expense.aggregate(nums=Sum('amount')).get('nums'), 2)
 
     context = {'user': user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
@@ -725,7 +725,7 @@ def show_budget(request):
     # the budget will be refreshed automatically after the end date
     # of your last budget
     category_budgets = get_category_budgets(request, total_budget)
-    sorted_category_budgets = sort_catrgory_budget(request, selected_sort, category_budgets)
+    sorted_category_budgets = sort_category_budget(request, selected_sort, category_budgets)
     form = TotalBudgetForm(request.user)
     specific_form = BudgetForm(request.user)
 
@@ -1085,7 +1085,7 @@ def get_category_budgets(request, total_budget):
         budget = Budget.objects.filter(spending_category=category).last()
         if budget:
             # print(category.name + str(budget.limit))
-            spending_sum = Spending.objects.filter(
+            result = Spending.objects.filter(
                 spending_owner=request.user,
                 # date__month=current_month,
                 date__range=(total_budget.start_date, total_budget.end_date),
@@ -1093,6 +1093,7 @@ def get_category_budgets(request, total_budget):
                 spending_category=category,
             ).aggregate(nums=Sum('amount')).get('nums') or 0
 
+            spending_sum = round(result, 2)
             # print(budget.limit)
             category_budgets.append({
                 'name': category.name,
@@ -1104,11 +1105,14 @@ def get_category_budgets(request, total_budget):
             })
         else:
             if total_budget:
-                spending_sum = Spending.objects.filter(spending_owner=request.user,
+                result = Spending.objects.filter(spending_owner=request.user,
                                                        date__range=(total_budget.start_date, total_budget.end_date),
                                                        spending_type=Spending_type.EXPENDITURE,
                                                        spending_category=category,
                                                        ).aggregate(nums=Sum('amount')).get('nums') or 0
+
+                spending_sum = round(result, 2)
+                
                 category_budgets.append({
                     'name': category.name,
                     'budget': 'Not set yet',
@@ -1125,7 +1129,7 @@ def get_category_budgets(request, total_budget):
     return category_budgets
 
 @login_required
-def sort_catrgory_budget(request, selected_sort, category_budgets):
+def sort_category_budget(request, selected_sort, category_budgets):
     if selected_sort == '-budget':
         sorted_category_budgets = sorted(
             category_budgets,
