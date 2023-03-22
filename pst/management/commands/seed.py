@@ -160,6 +160,7 @@ class Command(BaseCommand):
                 user=user,
                 title= f'post of {user.last_name}',
                 content= f'content writteb by {user.last_name}',
+
                 )
         print('finish creating posts for all user')
     
