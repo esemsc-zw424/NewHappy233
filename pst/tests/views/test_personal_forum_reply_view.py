@@ -65,7 +65,7 @@ class PersonalForumReplyTestCase(TestCase):
             content='This is new example reply',
             parent_post=self.post,
             parent_reply=self.parent_reply,
-            reply_date='2023-3-30'
+            created_date='2023-3-30'
         )
 
         # Count the number of posts after create one
@@ -86,7 +86,7 @@ class PersonalForumReplyTestCase(TestCase):
                 user=self.user,
                 parent_post=self.post,
                 content=f'Test Reply {i}',
-                reply_date='2024-3-30'
+                created_date='2024-3-30'
             ) for i in range(13)]
 
         # Log in as the test user and get the first page of the personal forum reply
