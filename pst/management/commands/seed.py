@@ -139,7 +139,6 @@ class Command(BaseCommand):
                             user=self.special_user,
                             title='Alice, Can you see my post?',
                             content="I am sure you can!",
-                            post_date=self.start_date,
                         )
          # create image for the post
         with open('static/seed_image/question_mark.png', 'rb') as f:
@@ -161,7 +160,7 @@ class Command(BaseCommand):
                 user=user,
                 title= f'post of {user.last_name}',
                 content= f'content writteb by {user.last_name}',
-                post_date=self.start_date + timedelta(days=random.randint(0, self.days_between)),
+
                 )
         print('finish creating posts for all user')
     
@@ -290,7 +289,6 @@ class Command(BaseCommand):
                             user=self.alice_doe,
                             title='Demonstration for forum post function',
                             content="This picture shows the home page of the application.",
-                            post_date=self.start_date,
                         )
 
         # create image for the post
@@ -318,7 +316,6 @@ class Command(BaseCommand):
             user=self.special_user,
             parent_post=self.alice_post,
             content='This is demo for reply function.',
-            reply_date=datetime.now()
         )
         like = Like.objects.create(
             user=self.alice_doe,
@@ -331,7 +328,6 @@ class Command(BaseCommand):
                             user=self.alice_doe,
                             parent_post=self.alice_post,
                             content='Received. This is demo for replying a reply function.',
-                            reply_date=datetime.now()
         )
         like = Like.objects.create(
             user=self.special_user,
