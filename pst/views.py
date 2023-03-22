@@ -801,7 +801,7 @@ def add_address(request):
 
 @login_required
 def forum(request):
-    posts = Post.objects.all().order_by('-post_date')
+    posts = Post.objects.all().order_by('-created_date')
     paginator = Paginator(posts, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -813,7 +813,7 @@ def forum(request):
 
 @login_required
 def personal_forum(request):
-    posts = Post.objects.filter(user=request.user).order_by('-post_date')
+    posts = Post.objects.filter(user=request.user).order_by('-created_date')
     paginator = Paginator(posts, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -826,7 +826,7 @@ def personal_forum(request):
 @login_required
 def personal_forum_reply(request):
     reply_page_number = request.GET.get('reply_page')
-    replies = Reply.objects.filter(user=request.user).order_by('-reply_date')
+    replies = Reply.objects.filter(user=request.user).order_by('-created_date')
     reply_paginator = Paginator(replies, 5)
     reply_page_obj = reply_paginator.get_page(reply_page_number)
 
@@ -867,7 +867,7 @@ def post_detail(request, post_id):
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return HttpResponseNotFound()
-    replies = Reply.objects.filter(parent_post=post).order_by('reply_date')
+    replies = Reply.objects.filter(parent_post=post).order_by('created_date')
     paginator = Paginator(replies, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

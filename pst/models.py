@@ -250,12 +250,31 @@ class Reward(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.points_required} points)"
+    
+
+# Abstract base model for both reply and post
+class BasePostReplyModel(models.Model):
+
+    # Some common fields
+    # User that this reply or post belongs to
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s')
+
+    # Content of the Reply or Post
+    content = models.TextField(blank=False)
+
+    # Likes other user gave
+    likes = GenericRelation('Like')
+
+    # Date when this reply or post create 
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
 
 # this model is for posts in the forum
-class Post(models.Model):
-
-    # this field store the user when sent this post
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
+class Post(BasePostReplyModel):
 
     # this field store the title of the post
     # the title are not expected to be very long and can be empty if user don't want to have a title
@@ -263,17 +282,6 @@ class Post(models.Model):
         blank = True,
         max_length= 150,
     )
-
-    # this field store the content of the post
-    content = models.TextField( # for stroing the content of the post
-        blank = False,
-    )
-
-    # this field store the likes from other user
-    likes = GenericRelation('Like')
-
-    # this field store the date and time when this post sent
-    post_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.content
@@ -303,30 +311,14 @@ def delete_file(sender, instance, **kwargs):
         if os.path.exists(path):
             os.remove(path)
 
-
 # this model is for replies under a post
-class Reply(models.Model):
-
-    # this field store the user when sent this reply
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reply', blank = False)
+class Reply(BasePostReplyModel):
 
     # this field store the post where this reply belongs to
     parent_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reply', blank = False)
 
     # if this reply is the reply for another reply under the same post, then this field will be use to mark the parent reply
     parent_reply = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
-
-    # this field store the content of the post
-    # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
-    content = models.TextField(
-        blank = False,
-    )
-
-    # this field store the likes from other user
-    likes = GenericRelation('Like')
-
-    # this field store the date and time when this reply sent
-    reply_date = models.DateTimeField(auto_now_add=True, blank = False)
 
     def __str__(self):
         return self.content
