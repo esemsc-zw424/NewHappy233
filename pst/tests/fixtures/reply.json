@@ -16,7 +16,7 @@
         "fields": {
             "user": 1,
             "content": "This is example post 1",
-            "post_date": "2023-01-31"
+            "created_date": "2023-01-31"
         }
     },
     {
@@ -27,7 +27,7 @@
             "parent_post": 2,
             "parent_reply": null,
             "content": "This is example reply 1",
-            "reply_date": "2023-01-31"
+            "created_date": "2023-01-31"
         }
     },
     {
@@ -38,7 +38,7 @@
             "parent_post": 2,
             "parent_reply": 3,
             "content": "This is example reply 2",
-            "reply_date": "2023-02-01"
+            "created_date": "2023-02-01"
         }
     }
 ]
