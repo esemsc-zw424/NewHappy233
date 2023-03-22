@@ -114,12 +114,12 @@ class DayAdmin(admin.ModelAdmin):
 @admin.register(TotalBudget)
 class TotalBudgetAdmin(admin.ModelAdmin):
     list_display = [
-        'limit', 'start_date', 'end_date', 'created_at', 'updated_at', 'budget_owner'
+        'limit', 'start_date', 'end_date', 'budget_owner'
     ]
 
 @admin.register(Budget)
 class BudgetAdmin(admin.ModelAdmin):
     list_display = [
-        'limit', 'created_at', 'budget_owner', 'spending_category'
+        'limit', 'budget_owner', 'spending_category'
     ]
  

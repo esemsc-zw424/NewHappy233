@@ -31,7 +31,7 @@ class UserManager(BaseUserManager):
 
         email = self.normalize_email(email)
         user = self.model(first_name=first_name,
-                          last_name=last_name, email=email)
+                          last_name=last_name, email=email, **extra_fields)
         user.set_password(password)
         user.save()
         return user
@@ -39,7 +39,7 @@ class UserManager(BaseUserManager):
 
 
     def create_superuser(self, first_name, last_name, email, password, **extra_fields):
-        user = self.create_user(first_name, last_name, email, password)
+        user = self.create_user(first_name, last_name, email, password, **extra_fields)
         user.is_staff = True
         user.is_superuser = True
         user.save()
@@ -62,8 +62,7 @@ class User(AbstractUser):
     ]
     gender = models.CharField(
         max_length=20, choices=GENDER_CHOICES, blank=True)
-    phone_regex = RegexValidator(regex=r'^\d{10,15}$', message="Phone number must be entered in the format: '9999999999' and maximum 15 digits allowed.")
-    phone_number = models.CharField(validators=[phone_regex], max_length=15, blank=True)
+    phone_number = models.CharField(max_length=15, blank=True)
     address = models.CharField(max_length=100, blank=True)
     total_task_points = models.IntegerField(default=0)
     consecutive_login_days = models.IntegerField(default=1)
@@ -208,7 +207,7 @@ class Spending(models.Model):
         blank=False,
     )
     spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  
-
+    
 
 class SpendingFile(models.Model):
     spending = models.ForeignKey(
@@ -227,8 +226,6 @@ class Budget(models.Model):
     limit = models.PositiveIntegerField()
     # start_date = models.DateField(default=timezone.now)
     # end_date = models.DateField(default=timezone.now)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(  # user which this budget belongs to
         User, on_delete=models.CASCADE
     )
@@ -353,7 +350,7 @@ class Like(models.Model):
 class DeliveryAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     address = models.CharField(max_length=200, blank=False)
-    phone_number = models.IntegerField(blank=False)
+    phone_number = models.CharField(max_length=15, blank=True)
 
 
 
@@ -361,8 +358,6 @@ class TotalBudget(models.Model):
     limit = models.PositiveIntegerField()
     start_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)  # make end_date optional
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='total_budgets'  # add related name
     )
