@@ -208,7 +208,7 @@ class Command(BaseCommand):
             gender = 'Female',
             address = "Street ABC",
             phone_number= "01111111111",
-            total_task_points=10,
+            total_task_points=0,
             password=Command.PASSWORD,
             date_joined= datetime.now() - timedelta(days=7) # Calculate the date and time that is seven days before the current date and time
         )
