@@ -33,6 +33,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         self._create_specified_number_of_users()
+        self._create_a_post_made_by_special_user()
 
 
         # # create spending
@@ -195,6 +196,26 @@ class Command(BaseCommand):
     def _email(self, first_name, last_name):
         email = f'{first_name}.{last_name}@example.org'
         return email
+
+
+    # this is a post of special user, the purpose is to make sure that Alice can see others' post as well.
+    def _create_a_post_made_by_special_user(self):
+        self.special_user_post=Post.objects.create(
+                            user=self.special_user,
+                            title='Alice, Can you see my post?',
+                            content="I am sure you can!",
+                            post_date=self.start_date,
+                        )
+         # create image for the post
+        with open('static/seed_image/question_mark.png', 'rb') as f:
+            image = SimpleUploadedFile('seed_demonstration_image_2.png', f.read(), content_type='image/png')
+            f.close()
+
+        PostImage.objects.create(
+            post=self.special_user_post,
+            file=image
+        )
+        print('finish adding post of another user')
 
         #  ----------------------Setup of Alice Doe----------------------
 
