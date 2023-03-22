@@ -18,7 +18,7 @@ from pst.signals import create_default_categories
 
 class Command(BaseCommand):
     PASSWORD = "Password123"
-    USER_COUNT = 2
+    USER_COUNT = 98
 
     def __init__(self):
         super().__init__()
@@ -31,132 +31,36 @@ class Command(BaseCommand):
        
 
     def handle(self, *args, **options):
-
-        self._create_specified_number_of_users()
-
-
-        # # create spending
-        # for _ in range(10):
-        #     spending = Spending.objects.create(
-        #         title=self.faker.word(),
-        #         spending_owner=User.objects.order_by('?').first(),
-        #         amount=Decimal(random.uniform(1, 1000)),
-        #         descriptions=self.faker.text(max_nb_chars=500),
-        #         date=self.faker.date_between('-1y', 'today'),
-        #         spending_type=random.choice(Spending_type.choices),
-        #         spending_category=random.choice(self.categories)
-        #     )
-                 
-        # # create spending files
-        # for _ in range(random.randint(0, 3)):
-        #     file_name = f'{self.faker.word()}.txt'
-        #     file_content = io.StringIO('example file content')
-        #     file = ContentFile(file_content.read().encode('utf-8'), name=file_name)
-        #     SpendingFile.objects.create(
-        #         spending=spending,
-        #         file=file
-        #     )    
-            
-        # print(f'Successfully created 100 spendings for user {user.email}')
-
-        #  # categories_name= [food, drink]
-        # # create categories
-        # if not Categories.objects.exists():
-        #     self.categories = [
-        #         Categories.objects.create(
-        #             name=self.faker.word(),
-        #             owner=User.objects.order_by('?').first(),
-        #             categories_type=random.choice(['Expenditure', 'Income']),
-        #             default_category=False
-        #         ) for _ in range(10)
-        #     ]
-        # else:
-        #     self.categories = Categories.objects.all()
-            
-        # # create posts and post images
-        # for i in range(20):
-        #     post = Post.objects.create(
-        #         user=random.choice(users),
-        #         title=self.faker.sentence() if random.choice([True, False]) else '',
-        #         content=self.faker.text(max_nb_chars=500)
-        #     )
-        #     print(f'Created post {post.id}')
-        #     for j in range(random.randint(0, 5)):
-        #         image = PostImage.objects.create(
-        #             post=post,
-        #             image=f'img/image-{random.randint(1,10)}.jpg'
-        #         )
-        #         print(f'Created image {image.id} for post {post.id}')
-        # # create replies
-        # for i in range(10):
-        #     post = Post.objects.order_by('?').first()
-        #     reply = Reply.objects.create(
-        #         user=random.choice(users),
-        #         parent_post=post,
-        #         content=self.faker.text(max_nb_chars=200)
-        #     )
-        #     print(f'Created reply {reply.id} for post {post.id}')
-        # # create nested replies
-        # for j in range(random.randint(0, 2)):
-        #     parent_reply = Reply.objects.filter(parent_post=post).order_by('?').first()
-        #     reply = Reply.objects.create(
-        #         user=random.choice(users),
-        #         parent_post=post,
-        #         parent_reply=parent_reply,
-        #         content=self.faker.text(max_nb_chars=200)
-        #     )
-        #     print(f'Created nested reply {reply.id} for reply {parent_reply.id}')    
-        # # create likes for posts and replies
-        # all_posts_and_replies = list(Post.objects.all()) + list(Reply.objects.all())
-        # for item in all_posts_and_replies:
-        #     for l in range(random.randint(0, 10)):
-        #         user = random.choice(users)
-        #         like, created = Like.objects.get_or_create(
-        #             user=user,
-        #             content_type=ContentType.objects.get_for_model(item),
-        #             object_id=item.id
-        #         )
-        #         if created:
-        #             print(f'Created like {like.id} for {item.__class__.__name__} {item.id}')
-        #         else:
-        #             print(f'Like for {item.__class__.__name__} {item.id} already exists for user {user.email}')
-        # # create budgets
-        # for user in users:
-        #     categories = Categories.objects.filter(owner=user)
-        #     for _ in range(5):
-        #         budget = Budget.objects.create(
-        #             name=self.faker.word(),
-        #             limit=random.randint(500, 10000),
-        #             start_date=timezone.now(),
-        #             end_date=timezone.now() + timezone.timedelta(days=random.randint(30, 180)),
-        #             budget_owner=user,
-        #             spending_category=random.choice(self.categories)
-        #         )
-        #         print(f'Created budget {budget.id} for user {user.email}')
-        # # create total budgets
-        # for user in users:
-        #     total_budget = TotalBudget.objects.create(
-        #         name=self.faker.word(),
-        #         limit=random.randint(1000, 50000),
-        #         start_date=timezone.now(),
-        #         end_date=timezone.now() + timezone.timedelta(days=random.randint(30, 365)),
-        #         budget_owner=user,
-        #     )
-        #     print(f'Created total budget {total_budget.id} for user {user.email}')
-
-        # create all information about Alice Doe
+        
+        # create all users and related information, ALice Doe is created here because users need to information about Alice
+        print('Start seeding, please wait about 20 seconds... ')
         self._create_alice_doe()
+        self._create_specified_number_of_users()
+        
+        self._create_spendings_for_all_users()
+        
+
+        self._create_posts_for_all_users()
+        self._create_total_budget_for_all_users()
+        self._create_budget_for_all_users()
+        
+        # create all information about Alice Doe        
         self._create_spending_for_alice_doe()
         self._create_customised_category_for_alice_doe()
+        self._create_a_post_made_by_special_user() # it is meant to put here in order to display in the first page in pagination
         self._create_post_for_alice_doe()
         self._create_like_for_alice_post()
         self._create_reply_for_alice_post()
         self._create_reply_for_a_reply()
         self._create_budget_for_alice_doe()
         self._create_delievery_address_for_alice_doe()
-        print('finish seeding complete information for Alice Doe')
+
+        
+        print('Everything is done, enjoy the application :) ')
     
-        #  ----------------------Helper Method----------------------
+    #  ----------------------Helper Method----------------------
+
+   
     
     def _create_specified_number_of_users(self):
         # create 99 users
@@ -170,8 +74,8 @@ class Command(BaseCommand):
         
         
         # special user is the one who will have his/her own post, and who will like and reply Alice's post
-        self.special_user = User.objects.exclude(email='alice.doe@example.org').order_by('?').first()
-
+        self.special_user = User.objects.exclude(email='Alice.Doe@example.org').order_by('?').first()
+        self.users=User.objects.exclude(email='Alice.Doe@example.org')
         print('finish seeding users')
 
 
@@ -196,19 +100,115 @@ class Command(BaseCommand):
         email = f'{first_name}.{last_name}@example.org'
         return email
 
-        #  ----------------------Setup of Alice Doe----------------------
+
+    def _create_spendings_for_all_users(self):
+        
+        # since all users all have same default categories, just exploit Alice Doe to get all common categories.
+        self.default_expenditure_category_list = Categories.objects.filter(owner=self.alice_doe, categories_type=Spending_type.EXPENDITURE, default_category=True)
+        self.default_income_category_list = Categories.objects.filter(owner=self.alice_doe, categories_type=Spending_type.INCOME, default_category=True)
+        POSSIBILITY_OF_HAVING_SPENDING = 0.6
+        # random.choice([Spending_type.EXPENDITURE, Spending_type.INCOME])
+
+        for user in self.users:
+            if random.random() < POSSIBILITY_OF_HAVING_SPENDING:
+
+                # choose spending_type and spending_category
+                if random.choice([Spending_type.EXPENDITURE, Spending_type.INCOME]) == Spending_type.EXPENDITURE:
+                    spending_type = Spending_type.EXPENDITURE
+                    spending_category = self.default_expenditure_category_list.order_by('?').first()
+                else:
+                    spending_type = Spending_type.INCOME
+                    spending_category=self.default_income_category_list.order_by('?').first()
+
+                # generate spending
+                for i in range(random.randint(1, 10)):
+                    spending = Spending.objects.create(
+                    title=f"Spending {i}",
+                    spending_owner=user,
+                    amount=random.random() * 100,
+                    descriptions=f"This is spending {i}",
+                    date=self.start_date + timedelta(days=random.randint(0, self.days_between)),
+                    spending_type=spending_type,
+                    spending_category=spending_category
+                    )
+   
+
+    # this is a post of special user, the purpose is to make sure that Alice can see others' post as well.
+    def _create_a_post_made_by_special_user(self):
+        self.special_user_post=Post.objects.create(
+                            user=self.special_user,
+                            title='Alice, Can you see my post?',
+                            content="I am sure you can!",
+                            post_date=self.start_date,
+                        )
+         # create image for the post
+        with open('static/seed_image/question_mark.png', 'rb') as f:
+            image = SimpleUploadedFile('seed_demonstration_image_2.png', f.read(), content_type='image/png')
+            f.close()
+
+        PostImage.objects.create(
+            post=self.special_user_post,
+            file=image
+        )
+        print('finish adding post of the special user')
+    
+
+    def _create_posts_for_all_users(self):
+        POSSIBILITY_OF_POST = 0.9 #0.12
+        for user in self.users:
+            if random.random() <= POSSIBILITY_OF_POST:
+                Post.objects.create(
+                user=user,
+                title= f'post of {user.last_name}',
+                content= f'content writteb by {user.last_name}',
+                post_date=self.start_date + timedelta(days=random.randint(0, self.days_between)),
+                )
+        print('finish creating posts for all user')
+    
+    def _create_total_budget_for_all_users(self):
+        for user in self.users:
+            TotalBudget.objects.create(
+                limit=1200,
+                start_date=datetime.today().replace(day=1),
+                end_date=datetime.today().replace(day=30),
+                budget_owner=user
+        )
+        print('finish createing total budget for all users')
+    
+    def _create_budget_for_all_users(self):
+        POSSIBILITY_OF_HAVING_CATEGORY_BUDGET= 0.5
+
+        for user in self.users:
+            if random.random() <= 0.5:
+                if random.choice([Spending_type.EXPENDITURE, Spending_type.INCOME]) == Spending_type.EXPENDITURE:
+                    spending_category = self.default_expenditure_category_list
+                else:
+                    spending_category = self.default_income_category_list
+
+                for category_budget in spending_category:
+                    Budget.objects.create(
+                        limit=120,
+                        budget_owner=user,
+                        spending_category=category_budget
+                    )
+
+
+
+
+
+    #  ----------------------helper method for the setup of Alice Doe----------------------
 
     def _create_alice_doe(self):
 
         self.alice_doe = User.objects.create_user(
             first_name="Alice",
             last_name="Doe",
-            email='alice.doe@example.org',
+            email='Alice.Doe@example.org',
             bio="This is Alice Doe's account",
             gender = 'Female',
             address = "Street ABC",
             phone_number= "01111111111",
-            total_task_points=10,
+            total_task_points=0,
             password=Command.PASSWORD,
             date_joined= datetime.now() - timedelta(days=7) # Calculate the date and time that is seven days before the current date and time
         )
@@ -223,8 +223,8 @@ class Command(BaseCommand):
     
     def _create_spending_for_alice_doe(self):
         # get the spending category alice doe has
-        self.default_expenditure_category_list = Categories.objects.filter(owner=self.alice_doe, categories_type=Spending_type.EXPENDITURE) #default_category=True)
-        self.default_income_category_list = Categories.objects.filter(owner=self.alice_doe, categories_type=Spending_type.INCOME) # default_category=True
+        self.alice_expenditure_category_list = Categories.objects.filter(owner=self.alice_doe, categories_type=Spending_type.EXPENDITURE) #default_category=True)
+        self.alice_income_category_list = Categories.objects.filter(owner=self.alice_doe, categories_type=Spending_type.INCOME) # default_category=True
 
         POSSIBILITY_OF_HAVING_FILE = 0.1 
         
@@ -235,11 +235,11 @@ class Command(BaseCommand):
             if is_expenditure:
                 spending_type = Spending_type.EXPENDITURE
                 file_content = f"This is the file content{i} for expenditure".encode('utf-8')
-                spending_category = self.default_expenditure_category_list.order_by('?').first()
+                spending_category = self.alice_expenditure_category_list.order_by('?').first()
             else:
                 spending_type = Spending_type.INCOME
                 file_content = f"This is the file content{i} for income".encode('utf-8')
-                spending_category=self.default_income_category_list.order_by('?').first()
+                spending_category=self.alice_income_category_list.order_by('?').first()
 
              # Create the spending object
             spending = Spending.objects.create(
@@ -284,7 +284,8 @@ class Command(BaseCommand):
         print("finish creating customised category")
 
     def _create_post_for_alice_doe(self):
-        
+    
+        # create Alice's post
         self.alice_post = Post.objects.create(
                             user=self.alice_doe,
                             title='Demonstration for forum post function',
@@ -344,16 +345,16 @@ class Command(BaseCommand):
 
         # create overall budget
         self.alice_total_budget= TotalBudget.objects.create(
-            limit=6000,
+            limit=360,
             start_date=datetime.today().replace(day=1),
             end_date=datetime.today().replace(day=30),
             budget_owner=self.alice_doe
         )
 
         # create budget for each individual budget
-        for category_budget in self.default_expenditure_category_list:
+        for category_budget in self.alice_expenditure_category_list:
             Budget.objects.create(
-                limit=500,
+                limit=30,
                 budget_owner=self.alice_doe,
                 spending_category=category_budget
             )
