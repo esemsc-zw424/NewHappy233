@@ -15,8 +15,7 @@
         "pk": 2,
         "fields": {
             "user": 1,
-            "content": "This is example post 1",
-            "created_date": "2023-01-31"
+            "content": "This is example post 1"
         }
     },
     {
@@ -26,8 +25,7 @@
             "user": 1,
             "parent_post": 2,
             "parent_reply": null,
-            "content": "This is example reply 1",
-            "created_date": "2023-01-31"
+            "content": "This is example reply 1"
         }
     },
     {
@@ -37,8 +35,7 @@
             "user": 1,
             "parent_post": 2,
             "parent_reply": 3,
-            "content": "This is example reply 2",
-            "created_date": "2023-02-01"
+            "content": "This is example reply 2"
         }
     }
 ]

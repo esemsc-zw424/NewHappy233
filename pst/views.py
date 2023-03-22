@@ -516,16 +516,18 @@ def add_spending_categories(request):
     if request.method == 'POST':
         form = CategoriesForm(request.POST)
         if form.is_valid():
-            category = form.save(commit=False)
-            category.owner = request.user
-            category.save()
-            messages.add_message(request, messages.SUCCESS,
-                             "Category successfully added")
+            if Categories.objects.filter(owner=request.user).count() < 30:
+                category = form.save(commit=False)
+                category.owner = request.user
+                category.save()
+                messages.add_message(request, messages.SUCCESS, "Category successfully added")
+            else:
+                messages.add_message(request, messages.ERROR, "You can only have a maximum of 30 categories")
             return redirect('view_spending_categories')
-
     else:
         form = CategoriesForm()
     return render(request, 'view_spending_categories.html', {'form': form})
+
 
 @login_required
 def get_categories_by_type(request):
