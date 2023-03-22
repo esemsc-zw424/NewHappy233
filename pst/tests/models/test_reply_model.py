@@ -48,19 +48,10 @@ class ReplyModelTestCase(TestCase):
         self.reply.content = ""
         self._assert_reply_is_invalid()
 
-
-    # def test_likes_can_be_zero(self):
-    #     self.reply.likes = 0
-    #     self._assert_reply_is_valid()
-
-    # def test_likes_can_be_positive_integer(self):
-    #     self.reply.likes = 10
-    #     self._assert_reply_is_valid()
-
-    # def test_likes_cannot_be_negative_integer(self):
-    #     self.reply.likes = -1
-    #     self._assert_reply_is_invalid()
-
     def test_reply_date_can_be_blank(self):
-        self.reply.reply_date = None
+        self.reply.created_date = None
         self._assert_reply_is_valid()
+
+    def test_content_of_the_reply(self):
+        expected_str = 'This is example reply 2'
+        self.assertEqual(str(self.reply), expected_str)
