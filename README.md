@@ -61,6 +61,10 @@ The packages used by this application are specified in `requirements.txt`
 ## Reference List
 1. display forms in modal: https://getbootstrap.com/docs/5.3/components/modal/#how-it-works
 2. UI Design Software: https://www.figma.com/file/jDj72Y4uRZvLfLLkMNpNQQ/Personal-Spending-Tracker?node-id=0-1&t=PKtTdIEeHb0jUHUW-0
+3. login with google account: https://www.youtube.com/watch?v=56w8p0goIfs
+4. How to dockerise Django application: https://www.youtube.com/watch?v=W5Ov0H7E_o4&t=978s
+5. Deploy Django Docker Image to Heroku: https://www.youtube.com/watch?v=Oy71OgKZbOQ&t=3600s
+6. add static file in heroku: https://stackoverflow.com/questions/68965981/django-static-files-when-hosting-in-heroku
 
 
 # NewHappy
