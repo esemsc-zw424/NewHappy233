@@ -3,6 +3,8 @@ from django.urls import reverse
 from datetime import date, timedelta
 from pst.models import Spending, Categories, User
 
+import datetime
+
 class SpendingReportTestCase(TestCase):
     fixtures = ['pst/tests/fixtures/users.json']
 
@@ -115,6 +117,201 @@ class SpendingReportTestCase(TestCase):
         self.assertContains(response, 'test_expenditure')
         self.assertContains(response, 'test_category')
         self.assertContains(response, '10.00')
+
+    def test_spending_report_sorts_by_date(self):
+        spending_list = [
+            Spending.objects.create(
+            title='test_spending1',
+            spending_owner=self.user,
+            amount=100.00,
+            date=datetime.date(2023, 3, 19),
+            spending_category=Categories.objects.create(
+                name='test_expenditure',
+                owner=self.user,
+                categories_type='Expenditure',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending2',
+            spending_owner=self.user,
+            amount=200.00,
+            date=datetime.date(2023, 3, 31),
+            spending_category=Categories.objects.create(
+                name='test_expenditure',
+                owner=self.user,
+                categories_type='Expenditure',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending3',
+            spending_owner=self.user,
+            amount=300.00,
+            date=datetime.date(2023, 3, 10),
+            spending_category=Categories.objects.create(
+                name='test_income',
+                owner=self.user,
+                categories_type='Income',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending4',
+            spending_owner=self.user,
+            amount=600.00,
+            date=datetime.date(2023, 2, 20),
+            spending_category=Categories.objects.create(
+                name='test_income',
+                owner=self.user,
+                categories_type='Income',
+                default_category=False
+            ),
+            descriptions='')
+        ]
+        sorted_list = sorted(spending_list, key=lambda x: x.date)
+
+        self.client.login(username=self.user.email, password='Password123')
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'spending_report.html')
+
+        self.assertNotEqual(spending_list, sorted_list)
+        self.assertEqual(sorted_list, sorted(spending_list, key=lambda x: x.date))
+
+    def test_spending_report_sorts_by_amount(self):
+        spending_list = [
+            Spending.objects.create(
+            title='test_spending1',
+            spending_owner=self.user,
+            amount=500.00,
+            date=datetime.date(2023, 3, 19),
+            spending_category=Categories.objects.create(
+                name='test_expenditure',
+                owner=self.user,
+                categories_type='Expenditure',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending2',
+            spending_owner=self.user,
+            amount=200.00,
+            date=datetime.date(2023, 3, 31),
+            spending_category=Categories.objects.create(
+                name='test_expenditure',
+                owner=self.user,
+                categories_type='Expenditure',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending3',
+            spending_owner=self.user,
+            amount=300.00,
+            date=datetime.date(2023, 3, 10),
+            spending_category=Categories.objects.create(
+                name='test_income',
+                owner=self.user,
+                categories_type='Income',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending4',
+            spending_owner=self.user,
+            amount=600.00,
+            date=datetime.date(2023, 2, 20),
+            spending_category=Categories.objects.create(
+                name='test_income',
+                owner=self.user,
+                categories_type='Income',
+                default_category=False
+            ),
+            descriptions='')
+        ]
+        sorted_list = sorted(spending_list, key=lambda x: x.amount)
+
+        self.client.login(username=self.user.email, password='Password123')
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'spending_report.html')
+
+        self.assertNotEqual(spending_list, sorted_list)
+        self.assertEqual(sorted_list, sorted(spending_list, key=lambda x: x.amount))
+
+    def test_spending_report_sorts_by_spending_category(self):
+        spending_list = [
+            Spending.objects.create(
+            title='test_spending2',
+            spending_owner=self.user,
+            amount=500.00,
+            date=datetime.date(2023, 3, 19),
+            spending_category=Categories.objects.create(
+                name='test_expenditure',
+                owner=self.user,
+                categories_type='Expenditure',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending1',
+            spending_owner=self.user,
+            amount=200.00,
+            date=datetime.date(2023, 3, 31),
+            spending_category=Categories.objects.create(
+                name='test_expenditure',
+                owner=self.user,
+                categories_type='Expenditure',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending4',
+            spending_owner=self.user,
+            amount=300.00,
+            date=datetime.date(2023, 3, 10),
+            spending_category=Categories.objects.create(
+                name='test_income',
+                owner=self.user,
+                categories_type='Income',
+                default_category=False
+            ),
+            descriptions=''),
+
+            Spending.objects.create(
+            title='test_spending3',
+            spending_owner=self.user,
+            amount=600.00,
+            date=datetime.date(2023, 2, 20),
+            spending_category=Categories.objects.create(
+                name='test_income',
+                owner=self.user,
+                categories_type='Income',
+                default_category=False
+            ),
+            descriptions='')
+        ]
+        sorted_list = sorted(spending_list, key=lambda x: x.title)
+
+        self.client.login(username=self.user.email, password='Password123')
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'spending_report.html')
+
+        self.assertNotEqual(spending_list, sorted_list)
+        self.assertEqual(sorted_list, sorted(spending_list, key=lambda x: x.title))
 
     def test_paginator(self):
         sorted_spendings = [Spending.objects.create(

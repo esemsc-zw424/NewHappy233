@@ -2,7 +2,6 @@ import calendar
 from django.test import TestCase, Client
 from django.urls import reverse
 from datetime import datetime, date
-from django.utils import timezone
 from pst.models import Spending, Categories, User
 
 class GetSpendingCalendarContextTestCase(TestCase):
