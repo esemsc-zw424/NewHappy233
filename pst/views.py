@@ -651,8 +651,9 @@ def spending_report(request):
     elif sorted == 'date':
         sorted_spendings = selected_spendings.order_by('date')
     else:
-        sorted_spendings = selected_spendings
+        sorted_spendings = selected_spendings.order_by('-date')
 
+    # Add paginator so every page contains only 10 rows of spending data
     paginator = Paginator(sorted_spendings, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
