@@ -65,6 +65,8 @@ The packages used by this application are specified in `requirements.txt`
 4. How to dockerise Django application: https://www.youtube.com/watch?v=W5Ov0H7E_o4&t=978s
 5. Deploy Django Docker Image to Heroku: https://www.youtube.com/watch?v=Oy71OgKZbOQ&t=3600s
 6. add static file in heroku: https://stackoverflow.com/questions/68965981/django-static-files-when-hosting-in-heroku
-
+7. spending report charts: https://www.chartjs3.com/docs/chart/getting-started/
+8. processing url for sort and filter functions: https://www.youtube.com/watch?v=uwWmvGDHS-8&list=PLWTW5qCM-AkRDmoDJ0E-agVYufq1CtSZh&index=5
+9. setting up spending calendar: https://github.com/RTopolowski/SEG-Small_Group_Project
 
 # NewHappy
