@@ -68,12 +68,12 @@
                         <div>
                             {% if request.user.is_authenticated %}
                                 {% if request.user in post.likes.all %}
-                                    <form method="post" action="{% url 'like_post' post.id %}">
+                                    <form method="post" action="{% url 'like' post.id %}">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-outline-primary btn-sm" name="like_action" value="unlike"><i class="far fa-thumbs-up"></i> {{ post.likes.count }} Unlike</button>
                                     </form>
                                 {% else %}
-                                    <form method="post" action="{% url 'like_post' post.id %}">
+                                    <form method="post" action="{% url 'like' post.id %}">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-primary btn-sm" name="like_action" value="like"><i class="far fa-thumbs-up"></i> {{ post.likes.count }} Like</button>
                                     </form>
