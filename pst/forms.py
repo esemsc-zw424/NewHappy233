@@ -178,7 +178,8 @@ class EditSpendingForm(forms.ModelForm):
         required=False,
     )
 
-    delete_file = forms.BooleanField(label='Delete file', required=False)
+    # the field gives user choice whether they want to delete the file he/she have uploaded
+    delete_file = forms.BooleanField(label='Delete file', required=False) 
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -277,14 +278,6 @@ class AddressForm(forms.ModelForm):
         model = DeliveryAddress
         fields = ['address', 'phone_number']
 
-# class TotalBudgetForm(forms.ModelForm):
-#     class Meta:
-#         model = TotalBudget
-#         fields = ['name','limit', 'start_date', 'end_date']
-#
-#     def __init__(self, user, *args, **kwargs):
-#         self.user = user
-#         super().__init__(*args, **kwargs)
 
 class TotalBudgetForm(forms.ModelForm):
     class Meta:
