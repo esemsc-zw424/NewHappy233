@@ -179,7 +179,7 @@ USE_TZ = True
 #     os.path.join(BASE_DIR, 'static/rewards'),
 #     os.path.join(BASE_DIR, 'static/favicon.ico'),
 # ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 # Extra places for collectstatic to find static files.
