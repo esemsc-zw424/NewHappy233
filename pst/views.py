@@ -1,49 +1,32 @@
-from django.conf import settings
 from audioop import reverse
 import datetime
-from django.db.models import Sum
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 
 from django.urls import reverse
-from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 
-from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Sum
-from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Max, Sum, Subquery, OuterRef
 
 import calendar
-from datetime import date, datetime
+from datetime import datetime
 import datetime as dt
 
-from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType, DeliveryAddress
+from .models import Reward, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType
 
 from .forms import *
 from django.views import View
-from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
 
-import os
-from django.db.models.signals import pre_delete
-from django.dispatch import receiver
 from django.conf import settings
-from NewHappy.settings import MEDIA_ROOT
-from django.http import HttpResponse
 import random
 import nltk
 nltk.download('punkt')
