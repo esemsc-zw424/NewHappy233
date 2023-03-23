@@ -169,7 +169,7 @@ class Command(BaseCommand):
     
 
     def _create_posts_for_all_users(self):
-        POSSIBILITY_OF_POST = 0.9 #0.12
+        POSSIBILITY_OF_POST = 0.12
         for user in self.users:
             if random.random() <= POSSIBILITY_OF_POST:
                 Post.objects.create(
@@ -250,8 +250,8 @@ class Command(BaseCommand):
 
         POSSIBILITY_OF_HAVING_FILE = 0.1 
         
-        for i in range(1, 41):
-            is_expenditure = i <= 20
+        for i in range(1, 31):
+            is_expenditure = i <= 15
 
             # Determine spending type and file content based on expenditure/income
             if is_expenditure:
@@ -267,7 +267,7 @@ class Command(BaseCommand):
             spending = Spending.objects.create(
                     title=f"Spending {i}",
                     spending_owner=self.alice_doe,
-                    amount=random.random() * 100,
+                    amount=random.random() * 150,
                     descriptions=f"This is spending {i}",
                     date=self.start_date + timedelta(days=random.randint(0, self.days_between)),
                     spending_type=spending_type,

@@ -501,7 +501,7 @@ def add_spending(request):
             spending = form.save(commit=False)
             spending.spending_owner = request.user
             spending.save()
-            # create SpendingFile object to contain the file(s) the user upload
+            # create SpendingFile object to contain the file(s) the user
             for file in request.FILES.getlist('file'):
                 SpendingFile.objects.create(
                     spending=spending,
