@@ -61,7 +61,9 @@ The packages used by this application are specified in `requirements.txt`
 
 ## Reference List
 1. display forms in modal: https://getbootstrap.com/docs/5.3/components/modal/#how-it-works
-
+2. UI Design Software: https://www.figma.com/file/jDj72Y4uRZvLfLLkMNpNQQ/Personal-Spending-Tracker?node-id=0-1&t=PKtTdIEeHb0jUHUW-0
+3. spending report charts: https://www.chartjs3.com/docs/chart/getting-started/
+4. processing url for sort and filter functions: https://www.youtube.com/watch?v=uwWmvGDHS-8&list=PLWTW5qCM-AkRDmoDJ0E-agVYufq1CtSZh&index=5
 
 
 # NewHappy
