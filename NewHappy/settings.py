@@ -23,7 +23,7 @@ SECRET_KEY = 'django-insecure-!c^^0#c10-#w*5i3(a1(9dam)p6p85(#3*2wd(d!o99jcz1s)y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'arcane-taiga-74484.herokuapp.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'newhappy233.herokuapp.com']
 
 
 # Application definition
@@ -151,8 +151,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-
-ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = False
+# GOOGLE_AUTH_REDIRECT_URI = 'https://arcane-taiga-74484.herokuapp.com/accounts/google/login/?action=reauthenticate'
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -213,4 +213,5 @@ MESSAGE_TAGS = {
 HIGH_TASK_POINTS = 30
 NORMAL_TASK_POINTS = 10
 
-CORS_ALLOWED_ORIGINS = ["https://arcane-taiga-74484.herokuapp.com",]
+CORS_ALLOWED_ORIGINS = ["https://newhappy233.herokuapp.com",]
+CSRF_TRUSTED_ORIGINS = ["https://newhappy233.herokuapp.com",]

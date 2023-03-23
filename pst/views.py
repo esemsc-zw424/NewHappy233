@@ -1082,14 +1082,11 @@ def get_category_budgets(request, total_budget):
             ).aggregate(nums=Sum('amount')).get('nums') or 0
 
             spending_sum = round(result, 2)
-            # print(budget.limit)
             category_budgets.append({
                 'name': category.name,
                 'budget': budget.limit,
                 'spending': spending_sum,
                 'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
-                # 'start_date': total_budget.start_date,
-                # 'end_date': total_budget.end_date,
             })
         else:
             if total_budget:
@@ -1106,8 +1103,6 @@ def get_category_budgets(request, total_budget):
                     'budget': 'Not set yet',
                     'spending': spending_sum,
                     'percentage': None,
-                    # 'start_date': None,
-                    # 'end_date': None,
                 })
             else:
                 category_budgets.append(
@@ -1121,8 +1116,7 @@ def sort_category_budget(request, selected_sort, category_budgets):
     if selected_sort == '-budget':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
+            key=lambda k: (k['budget'] != 'Not set yet',
                 float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
             ),
             reverse=True
@@ -1130,26 +1124,21 @@ def sort_category_budget(request, selected_sort, category_budgets):
     elif selected_sort == 'budget':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
+            key=lambda k: (k['budget'] != 'Not set yet',
                 float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
             )
         )
     elif selected_sort == '-spending':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
+            key=lambda k: (k['spending'] != 'Please set a total budget first',
                 float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
             ),
             reverse=True
         )
     elif selected_sort == 'spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+        sorted_category_budgets = sorted(category_budgets, key=lambda k: (k['spending'] != 'Please set a total budget first',
+        float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
             ),
         )
     elif selected_sort == '':
