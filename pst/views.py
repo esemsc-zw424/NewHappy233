@@ -125,8 +125,6 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
     return context
 
 
-
-
 class GetLoginTaskStatusView(View):
     
     def get(self, request):
@@ -615,7 +613,25 @@ def edit_profile(request):
 
 @login_required
 def user_guideline(request):
-    return render(request, 'user_guideline.html')
+    guide_list = [
+    "1. If you want to get the daily point, simply click on the cute pig image on the overview page.",
+    "2. Tracking your spending is easy! Just head over to the overview page and click on \"Bookkeeping\". Then, fill in the Title, amount, description, date, Spending type, and Spending category for each spending you make and hit \"Add\".",
+    "3. If you want to see your history activities, just Go to the \"Report\" page to view a summary of your Expenditure and Income.",
+    "4. To set your budget limit, go to the \"My Plan\" page and click on \"Set Total Budget\". Then, simply enter the amount you want to spend, choose how long you want the budget to last, "
+    "and save your changes. After that, click on set specific budget Button to set your category budget.",
+    "5. Don't worry about having to manually refresh your budget, it'll automatically be reset to the same limit once the time period you chose is up.",
+    "6. Want to add a profile picture to your account? You can easily do so by visiting https://en.gravatar.com/ and following the instructions there.",
+    "7. If you'd like to share your daily accounting routine and inspire others, why not try using our forum feature? It's a great way to connect with other users and exchange helpful tips and advice!",
+    "8. We have a lot of exciting features waiting for you to discover in the Settings page. So why not take a look and explore all the possibilities?",
+    "9. Need help navigating our app? Try using some keywords like \"hello\", \"budget\", \"expense\", \"track\", \"saving\", \"finance\", \"bye\", or anything else you have questions about, to chat with our helpful chatbot.",
+    "10. Ready to cash in your daily points for some awesome rewards? Simply click on the 'Reward' button and choose from our selection of great prizes. It's that easy!"
+    ]
+    sorted_guide_list = sorted(guide_list, key=lambda x: float(x.split()[0].replace('.', '')))
+
+    paginator = Paginator(sorted_guide_list, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'user_guideline.html', {'page_obj': page_obj})
 
 
 @login_required
