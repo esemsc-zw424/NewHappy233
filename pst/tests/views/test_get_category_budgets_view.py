@@ -13,6 +13,10 @@ class TestGetCategoryBudgets(TestCase):
             name='Groceries', owner=self.user, categories_type=Spending_type.EXPENDITURE)
         self.category2 = Categories.objects.create(
             name='Salary', owner=self.user, categories_type=Spending_type.INCOME)
+        self.category3 = Categories.objects.create(
+            name='Sport', owner=self.user, categories_type=Spending_type.EXPENDITURE)
+        self.category4 = Categories.objects.create(
+            name='Entertainment', owner=self.user, categories_type=Spending_type.EXPENDITURE)
 
     def test_get_category_budgets_with_none_total_budget(self):
         self.client.login(username='lll@example.org', password='Password123')

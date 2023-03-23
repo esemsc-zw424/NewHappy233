@@ -1,5 +1,6 @@
-from django.test import TestCase, Client
-from pst.models import Categories, Spending_type, User, TotalBudget
+from django.test import Client
+from django.test import TestCase
+from pst.models import Categories, Spending_type, User
 from pst.views import sort_category_budget
 
 class TestSortCategoryBudgets(TestCase):
