@@ -436,7 +436,7 @@ def view_spendings(request):
     elif selected_sort:
         spending = unsorted_spending.order_by(selected_sort)
     else:
-        spending = unsorted_spending
+        spending = unsorted_spending.order_by('date')
 
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
