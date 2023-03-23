@@ -16,11 +16,11 @@ class LikeReplyTestCase(TestCase):
         self.parent_reply = Reply.objects.get(content='This is example reply 1')
         self.reply = Reply.objects.get(content='This is example reply 2')
         self.user = User.objects.get(email="johndoe@example.org")
-        self.url = reverse('like_reply', kwargs={'reply_id': self.reply.id, 'post_id': self.post.id})
+        self.url = reverse('like_reply', kwargs={'post_reply_id': self.reply.id, 'post_id': self.post.id})
 
     def test_like_reply_url(self):
         # Test that the URL for like reply is correct
-        self.assertEqual(self.url, f'/like_reply/{self.reply.id}/{self.post.id}/')
+        self.assertEqual(self.url, f'/like/{self.reply.id}/{self.post.id}/')
 
     def test_like_reply(self):
         # Log in as the test user
