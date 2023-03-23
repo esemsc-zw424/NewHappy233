@@ -125,8 +125,6 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
     return context
 
 
-
-
 class GetLoginTaskStatusView(View):
     
     def get(self, request):
@@ -445,7 +443,7 @@ def view_spendings(request):
     elif selected_sort:
         spending = unsorted_spending.order_by(selected_sort)
     else:
-        spending = unsorted_spending
+        spending = unsorted_spending.order_by('date')
 
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
@@ -630,7 +628,36 @@ def edit_profile(request):
 
 @login_required
 def user_guideline(request):
-    return render(request, 'user_guideline.html')
+    guide_list = [
+    "1. We have a lot of exciting features waiting for you to discover in the Settings page. So why not take a look and explore all the possibilities?",
+    "2. If you want to get the daily point, simply click on the piggy image on the overview page.",
+    "3. Tracking your spending is easy! Just head over to the overview page and click on \"Bookkeeping\". Then, fill in the Title, amount, description, date, "
+    "Spending type, and Spending category for each spending you make and hit \"Add\".",
+    "4. If you want to see your history activities, just Go to the \"Report\" page to view a summary of your Expenditure and Income.",
+    "5. To set your budget limit, go to the \"My Plan\" page and click on \"Set Total Budget\". Then, simply enter the amount you want to spend, "
+    "choose how long you want the budget to last, and save your changes. After that, click on set specific budget Button to set your category budget.",
+    "6. Don't worry about having to manually refresh your budget, it'll automatically be reset to the same limit once the time period you chose is up.",
+    "7. If you really want to reset your budget manually, you can go to settings page and change your total budget limit in the \"Reset Total Budget\" section",
+    "8. Want to add a profile picture to your account? You can easily do so by visiting https://en.gravatar.com/ and following the instructions there.",
+    "9. If you'd like to share your daily accounting routine and inspire others, why not try using our forum feature? "
+    "It's a great way to connect with other users and exchange helpful tips and advice!",
+    "10. Need help navigating our app? Try using some keywords like \"hello\", \"budget\", \"expense\", \"track\", \"saving\", \"finance\", \"bye\", "
+    "or anything else you have questions about, to chat with our helpful chatbot.",
+    "11. Ready to cash in your daily points for some awesome rewards? Simply click on the 'Reward' button and choose from our selection of great prizes. It's that easy!",
+    "12. The calendar at the home page shows your spendings of each day in the current month, you can also click on the link on top of the calendar to get access to all "
+    "the months' spending calendars.",
+    "13. The \"Monthly Revenue\" and \"Monthly Expense\" sections in the home page shows your total amount of income and expenditure of the current month respectively. "
+    "And the \"My Plan\" section shows the total budget you set."
+    "14. If you wish to edit your personal information, then you can submit your information through \"My Profile\" section",
+    "15. Remember you can always reset your password by clicking on the \"Edit Password\" option from the drop down list under your user icon image!"
+    ]
+    sorted_guide_list = sorted(guide_list, key=lambda x: float(x.split()[0].replace('.', '')))
+
+    # Add a paginator so a single page only shows at most 5 user guide lines
+    paginator = Paginator(sorted_guide_list, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'user_guideline.html', {'page_obj': page_obj})
 
 
 @login_required
@@ -666,8 +693,9 @@ def spending_report(request):
     elif sorted == 'date':
         sorted_spendings = selected_spendings.order_by('date')
     else:
-        sorted_spendings = selected_spendings
+        sorted_spendings = selected_spendings.order_by('-date')
 
+    # Add paginator so every page contains only 10 rows of spending data
     paginator = Paginator(sorted_spendings, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
