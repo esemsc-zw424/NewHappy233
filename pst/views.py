@@ -1,49 +1,32 @@
-from django.conf import settings
 from audioop import reverse
 import datetime
-from django.db.models import Sum
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 
 from django.urls import reverse
-from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 
-from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Sum
-from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Max, Sum, Subquery, OuterRef
 
 import calendar
-from datetime import date, datetime
+from datetime import datetime
 import datetime as dt
 
-from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType, DeliveryAddress
+from .models import Reward, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType
 
 from .forms import *
 from django.views import View
-from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
 
-import os
-from django.db.models.signals import pre_delete
-from django.dispatch import receiver
 from django.conf import settings
-from NewHappy.settings import MEDIA_ROOT
-from django.http import HttpResponse
 import random
 import nltk
 nltk.download('punkt')
@@ -1003,6 +986,8 @@ def spending_calendar(request, year=datetime.now().year, month=datetime.now().mo
     context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
 
+
+# This method allows a logged-in user to set a specific budget for a spending category.
 @login_required
 def set_specific_budget(request):
     if request.method == 'POST':
@@ -1016,6 +1001,11 @@ def set_specific_budget(request):
         form = BudgetForm(request.user)
     return render(request, 'specific_budget_set.html', {'form': form})
 
+
+# This method allows a user to change their password if they are already authenticated.
+# It checks if the current password entered is correct and validates the new password according to certain criteria.
+# If everything is valid, it updates the password and logs in the user with the new password.
+# Finally, a template with a password form will be rendered.
 @login_required
 def password(request):
     if request.user.is_authenticated:
@@ -1041,6 +1031,11 @@ def password(request):
         form = PasswordForm()
         return render(request, 'password.html', {'form': form})
 
+
+# This function creates a new budget for the user if their current budget has ended.
+# It checks if the user has a current budget and if the end date of the budget has passed.
+# If so, it creates a new budget for the user with the same limit, a start date of today's date,
+# an end date of 30 days from today's date, and assigns the budget to the user.
 @login_required
 def create_new_budget_if_needed(request):
     current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
@@ -1052,6 +1047,14 @@ def create_new_budget_if_needed(request):
             budget_owner=request.user,
         )
 
+
+# This function gets all expenditure categories belonging to the current user and returns a list of dictionaries
+# containing the category name, budget limit, spending amount, and percentage of spending (if applicable).
+# It calculates the spending amount by querying the Spending model for expenses
+# within the current total budget period and sums up the amounts for each category.
+# If the category has no budget set, the budget value is set to "Not set yet",
+# and the spending percentage is set to None.
+# If there is no total budget set, the spending value is set to "Please set a total budget first".
 @login_required
 def get_category_budgets(request, total_budget):
     categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
@@ -1059,24 +1062,19 @@ def get_category_budgets(request, total_budget):
     for category in categories:
         budget = Budget.objects.filter(spending_category=category).last()
         if budget:
-            # print(category.name + str(budget.limit))
             result = Spending.objects.filter(
                 spending_owner=request.user,
-                # date__month=current_month,
                 date__range=(total_budget.start_date, total_budget.end_date),
                 spending_type=Spending_type.EXPENDITURE,
                 spending_category=category,
             ).aggregate(nums=Sum('amount')).get('nums') or 0
 
             spending_sum = round(result, 2)
-            # print(budget.limit)
             category_budgets.append({
                 'name': category.name,
                 'budget': budget.limit,
                 'spending': spending_sum,
                 'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
-                # 'start_date': total_budget.start_date,
-                # 'end_date': total_budget.end_date,
             })
         else:
             if total_budget:
@@ -1093,8 +1091,6 @@ def get_category_budgets(request, total_budget):
                     'budget': 'Not set yet',
                     'spending': spending_sum,
                     'percentage': None,
-                    # 'start_date': None,
-                    # 'end_date': None,
                 })
             else:
                 category_budgets.append(
@@ -1103,13 +1099,14 @@ def get_category_budgets(request, total_budget):
                      })
     return category_budgets
 
+
+# This function sorts the list of dictionaries based on the selected sorting option and returns the sorted list.
 @login_required
 def sort_category_budget(request, selected_sort, category_budgets):
     if selected_sort == '-budget':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
+            key=lambda k: (k['budget'] != 'Not set yet',
                 float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
             ),
             reverse=True
@@ -1117,26 +1114,21 @@ def sort_category_budget(request, selected_sort, category_budgets):
     elif selected_sort == 'budget':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
+            key=lambda k: (k['budget'] != 'Not set yet',
                 float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
             )
         )
     elif selected_sort == '-spending':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
+            key=lambda k: (k['spending'] != 'Please set a total budget first',
                 float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
             ),
             reverse=True
         )
     elif selected_sort == 'spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+        sorted_category_budgets = sorted(category_budgets, key=lambda k: (k['spending'] != 'Please set a total budget first',
+        float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
             ),
         )
     elif selected_sort == '':
