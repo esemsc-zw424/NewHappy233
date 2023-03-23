@@ -1,49 +1,32 @@
-from django.conf import settings
 from audioop import reverse
 import datetime
-from django.db.models import Sum
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 
 from django.urls import reverse
-from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 
-from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Sum
-from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Max, Sum, Subquery, OuterRef
 
 import calendar
-from datetime import date, datetime
+from datetime import datetime
 import datetime as dt
 
-from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType, DeliveryAddress
+from .models import Reward, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType
 
 from .forms import *
 from django.views import View
-from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
 
-import os
-from django.db.models.signals import pre_delete
-from django.dispatch import receiver
 from django.conf import settings
-from NewHappy.settings import MEDIA_ROOT
-from django.http import HttpResponse
 import random
 import nltk
 nltk.download('punkt')
@@ -1069,14 +1052,11 @@ def get_category_budgets(request, total_budget):
             ).aggregate(nums=Sum('amount')).get('nums') or 0
 
             spending_sum = round(result, 2)
-            # print(budget.limit)
             category_budgets.append({
                 'name': category.name,
                 'budget': budget.limit,
                 'spending': spending_sum,
                 'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
-                # 'start_date': total_budget.start_date,
-                # 'end_date': total_budget.end_date,
             })
         else:
             if total_budget:
@@ -1093,8 +1073,6 @@ def get_category_budgets(request, total_budget):
                     'budget': 'Not set yet',
                     'spending': spending_sum,
                     'percentage': None,
-                    # 'start_date': None,
-                    # 'end_date': None,
                 })
             else:
                 category_budgets.append(
@@ -1108,8 +1086,7 @@ def sort_category_budget(request, selected_sort, category_budgets):
     if selected_sort == '-budget':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
+            key=lambda k: (k['budget'] != 'Not set yet',
                 float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
             ),
             reverse=True
@@ -1117,26 +1094,21 @@ def sort_category_budget(request, selected_sort, category_budgets):
     elif selected_sort == 'budget':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
+            key=lambda k: (k['budget'] != 'Not set yet',
                 float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
             )
         )
     elif selected_sort == '-spending':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
+            key=lambda k: (k['spending'] != 'Please set a total budget first',
                 float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
             ),
             reverse=True
         )
     elif selected_sort == 'spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+        sorted_category_budgets = sorted(category_budgets, key=lambda k: (k['spending'] != 'Please set a total budget first',
+        float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
             ),
         )
     elif selected_sort == '':
