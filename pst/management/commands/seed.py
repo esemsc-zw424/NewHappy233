@@ -37,7 +37,7 @@ class Command(BaseCommand):
         self._create_alice_doe()
         self._create_specified_number_of_users()
         
-        self._create_spendings_for_all_users()
+        self._create_spending_for_all_users()
         
 
         self._create_posts_for_all_users()
@@ -53,7 +53,7 @@ class Command(BaseCommand):
         self._create_reply_for_alice_post()
         self._create_reply_for_a_reply()
         self._create_budget_for_alice_doe()
-        self._create_delievery_address_for_alice_doe()
+        self._create_delivery_address_for_alice_doe()
 
         
         print('Everything is done, enjoy the application :) ')
@@ -101,7 +101,7 @@ class Command(BaseCommand):
         return email
 
 
-    def _create_spendings_for_all_users(self):
+    def _create_spending_for_all_users(self):
         
         # since all users all have same default categories, just exploit Alice Doe to get all common categories.
         self.default_expenditure_category_list = Categories.objects.filter(owner=self.alice_doe, categories_type=Spending_type.EXPENDITURE, default_category=True)
@@ -175,8 +175,7 @@ class Command(BaseCommand):
         print('finish createing total budget for all users')
     
     def _create_budget_for_all_users(self):
-        POSSIBILITY_OF_HAVING_CATEGORY_BUDGET= 0.5
-
+    
         for user in self.users:
             if random.random() <= 0.5:
                 if random.choice([Spending_type.EXPENDITURE, Spending_type.INCOME]) == Spending_type.EXPENDITURE:
@@ -357,7 +356,7 @@ class Command(BaseCommand):
         
         print("finish creating budgets")
     
-    def _create_delievery_address_for_alice_doe(self):
+    def _create_delivery_address_for_alice_doe(self):
         DeliveryAddress.objects.create(
             user=self.alice_doe,
             address=self.alice_doe.address,
