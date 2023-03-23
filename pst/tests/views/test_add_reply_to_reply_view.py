@@ -64,5 +64,5 @@ class AddReplyToReplyTestCase(TestCase):
         # Check that the message correctly display
         messages_list = list(response.context['messages'])
         self.assertEqual(len(messages_list), 1)
-        self.assertEqual(str(messages_list[0]), 'reply has been successfully added!')
+        self.assertEqual(str(messages_list[0]), 'Reply has been successfully added!')
         self.assertEqual(messages_list[0].level, messages.SUCCESS)
