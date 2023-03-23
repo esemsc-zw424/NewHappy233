@@ -522,7 +522,9 @@ def add_spending_categories(request):
         form = CategoriesForm()
     return render(request, 'view_spending_categories.html', {'form': form})
 
-
+# This function is a helper function user when add spending
+# It auto change the content of the dropdown menu for categories automatically
+# When the content in spending_type change
 @login_required
 def get_categories_by_type(request):
     spending_type = request.GET.get('spending_type', '')
@@ -537,7 +539,8 @@ def get_categories_by_type(request):
     return JsonResponse(data)
 
 
-
+# This function is for viewing all the categories belongs to current user
+# The list of categories are passing into the html base on their spending_type
 @login_required
 def view_spending_categories(request):
     form = CategoriesForm()
@@ -549,7 +552,10 @@ def view_spending_categories(request):
                   {'categories_expenditure': categories_expenditure, 'categories_income': categories_income,
                    'form': form})
 
-
+# This function is for deleting an existing category
+# The category is delete base on its id
+# Message will be automatically generate base on whether the category has been deleted successfully
+# User cannot delete default category
 @login_required
 def delete_spending_categories(request, category_id):
     category = Categories.objects.get(id=category_id)
@@ -562,7 +568,10 @@ def delete_spending_categories(request, category_id):
                              "You can not delete default category!")
     return redirect('view_spending_categories')
 
-
+# This function is for updating an existing category
+# The category is update base on its id
+# Message will be automatically generate base on whether the category has been updated successfully
+# User cannot update default category
 @login_required
 def update_spending_categories(request, category_id):
     category = Categories.objects.get(id=category_id)
@@ -828,7 +837,11 @@ def add_address(request):
         form = AddressForm()
     return render(request, "index.html", {'form': form})
 
-
+# This function retrieves all posts from the database and orders them by their creation date, from newest to oldest
+# It uses a pagination feature to display only a set number of posts per page, which is set to 5 posts per page
+# The function then retrieves the page number from the GET request and uses it to return the corresponding page of posts
+# For each post on the current page, the function retrieves all replies that belong to that post
+# The function then renders the forum.html template and passes in the current page of posts as the page_obj variable for the template to use
 @login_required
 def forum(request):
     posts = Post.objects.all().order_by('-created_date')
@@ -840,7 +853,11 @@ def forum(request):
 
     return render(request, 'forum.html', {'page_obj': page_obj})
 
-
+# This view function displays a list of forum posts created by the current logged-in user
+# It first retrieves all posts created by the user and orders them by their creation date, with the most recent posts displayed first
+# The function then uses Django's pagination feature to split the list of posts into pages, displaying 5 posts per page
+# For each post, the function retrieves all replies to that post and assigns them to a 'replies' attribute of the post object
+# Finally, the function renders the 'personal_forum.html' template with the paginated list of posts and their associated replies
 @login_required
 def personal_forum(request):
     posts = Post.objects.filter(user=request.user).order_by('-created_date')
@@ -852,7 +869,11 @@ def personal_forum(request):
 
     return render(request, 'personal_forum.html', {'page_obj': page_obj})
 
-
+# This function displays a page that shows all the replies made by the user in the forum
+# The function first gets the page number for the replies from the request
+# It then filters the replies made by the user and orders them by their creation date
+# The function uses the Django Paginator class to paginate the replies and get the page object for the specified page number
+# The function then renders the personal_forum_reply.html template and passes the page object for the replies as context
 @login_required
 def personal_forum_reply(request):
     reply_page_number = request.GET.get('reply_page')
@@ -862,7 +883,11 @@ def personal_forum_reply(request):
 
     return render(request, 'personal_forum_reply.html', {'reply_page_obj': reply_page_obj})
 
-
+# This view function allows users to add a new post to the forum
+# If the user submits a valid form, the function creates a new Post object and associates it with the current user
+# If the user also uploaded images, the function creates new PostImage objects for each image and associates them with the Post
+# The function then redirects the user to the forum with a success message
+# If the user accesses the view via GET request, the function displays an empty PostForm for the user to fill out.
 @login_required
 def add_post(request):
     if request.method == 'POST':
@@ -883,6 +908,10 @@ def add_post(request):
         form = PostForm()
     return render(request, 'add_post.html',  {'form': form})
 
+# This function allows users to delete their own posts
+# It first retrieves the post that the user wants to delete using its id
+# Then it deletes the post from the database
+# Finally, it displays a warning message indicating that the post has been deleted and redirects the user to their personal forum page
 @login_required
 def delete_post(request, post_id):
     delete_post = get_object_or_404(Post, id=post_id)
@@ -890,7 +919,11 @@ def delete_post(request, post_id):
     messages.warning(request, "post has been deleted")
     return redirect('personal_forum')
 
-
+# This function retrieves details of a specific post and its replies based on the post_id parameter
+# If the post does not exist, the function returns an HTTP 404 error
+# The function retrieves all replies for the post and paginates them
+# The resulting page number is obtained from the GET request parameters
+# The function then renders the post detail page with the post, its replies, and the pagination object
 @login_required
 def post_detail(request, post_id):
     try:
@@ -904,7 +937,12 @@ def post_detail(request, post_id):
     context = {'post': post, 'replies': replies, 'page_obj': page_obj}
     return render(request, 'post_detail.html', context)
 
-
+# This function allows users to like or unlike a post or reply
+# The function checks whether the user has already liked the post or reply before
+# If the user has already liked the post or reply, the function deletes the like
+# If the user has not liked the post or reply, the function creates a new like
+# The function then redirects the user to the page where the post or reply was originally displayed
+# If the user is liking a reply, the function requires the post ID to redirect the user back to the correct post
 @login_required
 def like(request, post_reply_id, post_id=None):
     obj = None
@@ -935,6 +973,12 @@ def like(request, post_reply_id, post_id=None):
         'HTTP_REFERER', reverse('post_detail', args=[post_id])) if post_id else request.META.get('HTTP_REFERER', reverse('forum'))
     return redirect(redirect_url)
 
+# This function allows users to like or unlike a post or reply
+# The function checks whether the user has already liked the post or reply before
+# If the user has already liked the post or reply, the function deletes the like
+# If the user has not liked the post or reply, the function creates a new like
+# The function then redirects the user to the page where the post or reply was originally displayed
+# If the user is liking a reply, the function requires the post ID to redirect the user back to the correct post
 @login_required
 def add_reply(request, post_id, parent_reply_id=None):
     post = get_object_or_404(Post, id=post_id)
@@ -958,6 +1002,9 @@ def add_reply(request, post_id, parent_reply_id=None):
     template_name = 'add_reply_to_reply.html' if parent_reply else 'add_reply_to_post.html'
     return render(request, template_name, context)
 
+# This view function deletes a reply and redirects the user to their personal forum reply page
+# It first retrieves the reply object based on the given reply_id and then deletes it
+# A message is added to indicate that the reply has been deleted and the user is redirected to their personal forum reply page
 @login_required
 def delete_reply(request, reply_id):
     delete_reply = get_object_or_404(Reply, id=reply_id)
@@ -965,7 +1012,9 @@ def delete_reply(request, reply_id):
     messages.warning(request, "reply has been deleted")
     return redirect('personal_forum_reply')
 
-
+# This function displays the details of a post created by a particular user
+# It takes the user_id and post_id as input parameters and retrieves the corresponding user and post objects
+# The function then renders the 'view_post_user.html' template with the retrieved user and post objects as context data
 @login_required
 def view_post_user(request, user_id, post_id):
     user = User.objects.get(id=user_id)
