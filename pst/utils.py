@@ -2,11 +2,26 @@
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.shortcuts import redirect
 
+from pst.models import SpendingFile
+
+
+
+class SpendingFileMixin:
+    def handle_files(self, spending, request):
+        file_list = request.FILES.getlist('file')
+        if file_list:
+            SpendingFile.objects.filter(spending=spending).delete()
+            for file in file_list:
+                SpendingFile.objects.create(
+                    spending=spending,
+                    file=file
+                )
+        if self.form.cleaned_data['delete_file']:
+            SpendingFile.objects.filter(spending=spending).delete()
+
 
 
 class LoginProhibitedMixin:
-
-
     redirect_when_logged_in_url = None
 
     def dispatch(self, *args, **kwargs):
@@ -29,3 +44,6 @@ class LoginProhibitedMixin:
             )
         else:
             return self.redirect_when_logged_in_url
+        
+
+

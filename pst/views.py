@@ -38,7 +38,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
-from pst.utils import LoginProhibitedMixin
+from pst.utils import LoginProhibitedMixin, SpendingFileMixin
 import os
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -61,9 +61,6 @@ def user_feed(request):
 
 
 
-
-
-
 class SignUpView(LoginProhibitedMixin, FormView):
 
     template_name = "visitor_signup.html"
@@ -77,6 +74,7 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+        
 
 # Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def get_spending_calendar_context(request, year=datetime.now().year, month=datetime.now().month):
@@ -127,6 +125,37 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
                'exp_amount': exp_sum,
                'income_amount': income_sum}
     return context
+
+
+
+
+class EditSpendingView(LoginRequiredMixin, SpendingFileMixin, UpdateView):
+    template_name = "view_spending.html"
+    form_class = EditSpendingForm
+    context_object_name = 'spending'
+    pk_url_kwarg = 'spending_id'
+    success_message = 'Change made successfully'
+
+    def get_queryset(self):
+        return Spending.objects.filter(spending_owner=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.handle_files(self.object, self.request)
+        messages.success(self.request, self.success_message)
+        return response
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+    
+    
+    def get_success_url(self):
+        return reverse('view_spendings')
 
 
 
@@ -275,26 +304,7 @@ def visitor_introduction(request):
 
 
 
-@login_required
-def edit_spending(request, spending_id):
-    # if request.method == 'POST':
-    #     form = EditSpendingForm(request.POST)
-    #     if form.is_valid():
-    try:
-        spending = Spending.objects.get(id = spending_id)
-    except ObjectDoesNotExist:
-        return render(request, 'view_spendings.html')
 
-    if request.method == 'POST':
-        form = EditSpendingForm(request.POST, instance=spending)
-        if form.is_valid():
-            form.save()
-            request.spending.save()
-            messages.success(request, 'success')
-            return redirect('view_spendings')
-    else:
-        form = EditSpendingForm(instance=spending)
-    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
 
 
 
@@ -456,37 +466,8 @@ def view_spendings(request):
         return render(request, 'spending_table.html', context)
     else:
         return render(request, 'view_spendings.html', context)
+    
 
-
-@login_required
-def edit_spending(request, spending_id):
-    try:
-        spending = Spending.objects.get(id = spending_id)
-    except ObjectDoesNotExist:
-        return redirect('view_spendings')
-        
-
-    if request.method == 'POST':
-        form = EditSpendingForm(
-            request.user, request.POST, request.FILES, instance=spending)
-        
-        if form.is_valid():
-            form.save()
-            file_list = request.FILES.getlist('file')
-            if file_list:
-                SpendingFile.objects.filter(spending=spending).delete()
-                for file in file_list:
-                    SpendingFile.objects.create(
-                        spending=spending,
-                        file=file
-                    )
-            if form.cleaned_data['delete_file']:
-                SpendingFile.objects.filter(spending=spending).delete()
-            messages.success(request, 'Change made successfully')
-            return redirect('view_spendings')
-    else:
-        form = EditSpendingForm(user=request.user)
-    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
 
 
 @login_required
@@ -625,6 +606,7 @@ def edit_profile(request):
 @login_required
 def user_guideline(request):
     return render(request, 'user_guideline.html')
+
 
 
 @login_required
