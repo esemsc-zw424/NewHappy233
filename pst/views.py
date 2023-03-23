@@ -442,7 +442,7 @@ def view_spendings(request):
     page_obj = paginator.get_page(page_number)
 
     add_form = AddSpendingForm(user=request.user)
-    edit_form = EditSpendingForm(user=request.user, instance=spending)
+    edit_form = EditSpendingForm(user=request.user)
     context = {'add_form': add_form, 'edit_form': edit_form, 'spending': spending, 'page_obj': page_obj}
 
     # if the request was sent by Ajax, render spending table html
