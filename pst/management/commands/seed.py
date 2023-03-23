@@ -25,6 +25,14 @@ class Command(BaseCommand):
         super().__init__()
         self.faker = Faker('en_GB')
 
+        # create an admin account
+        User.objects.create_superuser(
+            first_name="0",
+            last_name="0",
+            email='admin@example.org',
+            password="Admin123"
+        )
+
         self.timezone = pytz.timezone('Europe/London')
         self.start_date = (datetime.today().replace(day=1) - timedelta(days=1)).replace(day=1)
         if not self.start_date.tzinfo:
