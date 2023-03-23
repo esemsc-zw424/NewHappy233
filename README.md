@@ -14,7 +14,7 @@ The members of the team are:
 - Shijia Xu (shijia.xu@kcl.ac.uk)
 
 ## Short Description
-The application 
+This software is designed to help users track their spending and manage their budget effectively. Set a limit for the budget, track the spending and see where the money is going.
 
 ## Project structure
 The project is called `NewHappy`. It currently consists of a single app `pst`(Personal Spending Tracker) where all functionality resides.
