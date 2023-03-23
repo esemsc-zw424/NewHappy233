@@ -256,9 +256,6 @@ def visitor_introduction(request):
 
 @login_required
 def edit_spending(request, spending_id):
-    # if request.method == 'POST':
-    #     form = EditSpendingForm(request.POST)
-    #     if form.is_valid():
     try:
         spending = Spending.objects.get(id = spending_id)
     except ObjectDoesNotExist:
@@ -403,6 +400,7 @@ def view_spendings(request):
     end_date = request.GET.get('end_date')
     selected_sort = request.GET.get('sorted')
 
+    # retrieve spending in given time interval if user specified start date and end date
     if start_date and end_date:
         start_date = dt.datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = dt.datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -412,6 +410,7 @@ def view_spendings(request):
         unsorted_spending = Spending.objects.filter(
             spending_owner=request.user).order_by('-date')
 
+    # retrieve spending by filtered type
     if selected_sort == 'Income':
         spending = unsorted_spending.filter(spending_type=Spending_type.INCOME)
     elif selected_sort == 'Expenditure':
@@ -428,6 +427,8 @@ def view_spendings(request):
     add_form = AddSpendingForm(user=request.user)
     edit_form = EditSpendingForm(user=request.user)
     context = {'add_form': add_form, 'edit_form': edit_form, 'spending': spending, 'page_obj': page_obj}
+
+    # if the request was sent by Ajax, render spending table html
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'spending_table.html', context)
     else:
@@ -449,6 +450,7 @@ def edit_spending(request, spending_id):
         if form.is_valid():
             form.save()
             file_list = request.FILES.getlist('file')
+            # create new SpendingFile object associated with the spending object and replace the old SpendingFile
             if file_list:
                 SpendingFile.objects.filter(spending=spending).delete()
                 for file in file_list:
@@ -456,6 +458,7 @@ def edit_spending(request, spending_id):
                         spending=spending,
                         file=file
                     )
+            # delete file(s) the user upload if delete_file field is selected                    
             if form.cleaned_data['delete_file']:
                 SpendingFile.objects.filter(spending=spending).delete()
             messages.success(request, 'Change made successfully')
@@ -467,7 +470,6 @@ def edit_spending(request, spending_id):
 
 @login_required
 def delete_spending(request, spending_id):
-
     delete_spending = get_object_or_404(Spending, id = spending_id)
     delete_spending.delete()
     messages.warning(request, "spending has been deleted")
@@ -482,6 +484,7 @@ def add_spending(request):
             spending = form.save(commit=False)
             spending.spending_owner = request.user
             spending.save()
+            # create SpendingFile object to contain the file(s) the user
             for file in request.FILES.getlist('file'):
                 SpendingFile.objects.create(
                     spending=spending,
