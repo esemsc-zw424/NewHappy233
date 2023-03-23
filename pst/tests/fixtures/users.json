@@ -10,7 +10,8 @@
             "bio": "bio1",
             "gender": "Male",
             "phone_number": "0111111111",
-            "address": "Street ABC"
+            "address": "Street ABC",
+            "cur_login_day": "2023-03-23T10:30:00Z"
         }
     },
     {
@@ -24,7 +25,8 @@
             "bio": "bio2",
             "gender": "Female",
             "phone_number": "0111111112",
-            "address": "Street BCD"
+            "address": "Street BCD",
+            "cur_login_day": "2023-03-15T10:30:00Z"
         }
     }
 ]

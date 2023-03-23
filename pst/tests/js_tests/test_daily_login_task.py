@@ -1,34 +1,38 @@
-# from django.contrib.staticfiles.testing import LiveServerTestCase
-# from selenium import webdriver
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-#
-#
-# class DailyLoginTaskTestCase(LiveServerTestCase):
-#
-#     def setUp(self):
-#         self.selenium = webdriver.Chrome()
-#         self.selenium.get("http://127.0.0.1:8000/home/")
-#
-#         # Trigger the show_login_task_modal function by clicking a button or another element
-#         trigger_element = self.selenium.find_element_by_id("login_task")
-#         trigger_element.click()
-#
-#         # Wait for the modal to be shown
-#         WebDriverWait(self.selenium, 10).until(
-#             EC.visibility_of_element_located((By.ID, "daily_login_task"))
-#         )
-#
-#     def tearDown(self):
-#         self.selenium.quit()
-#
-#     def test_show_login_task_modal(self):
-#
-#         # Assert the modal is visible
-#         modal = self.selenium.find_element_by_id("daily_login_task")
-#         self.assertTrue(modal.is_displayed())
 
+# from django.test import TestCase
+# from django.conf import settings
+# import requests_mock
+
+# class TestLoginTaskStatusTestCase(TestCase):
+#     def test_get_login_task_status(self):
+#         # mock the response from the server
+#         with requests_mock.Mocker() as m:
+#             url = f"{settings.STATIC_URL}get_login_task_status/"
+#             pos = 1
+#             expected_response = {"task_statuses": [{"day": "Monday", "completed": True}]}
+#             m.get(f"{url}?pos={pos}", json=expected_response)
+
+#             # call the get_login_task_status function and capture the console output
+#             captured_output = self._get_console_output(f"get_login_task_status({pos})")
+
+#             # assert that the task point status is fetched correctly
+#             self.assertIn("✓", captured_output)
+#             self.assertIn("Monday", captured_output)
+#             self.assertIn("get!!!", captured_output)
+
+#     def test_update_modal(self):
+#         # create a mock task point element
+#         task_point = f"<div id='task_point-normal-Monday'></div>"
+
+#         # call the update_modal function and capture the console output
+#         captured_output = self._get_console_output("update_modal({task_statuses: [{day: 'Monday', completed: false}]})")
+
+#         # assert that the task point status is updated correctly
+#         self.assertIn("x", captured_output)
+#         self.assertIn("Monday", captured_output)
+#         self.assertIn("miss", captured_output)
+
+    
 
 
 

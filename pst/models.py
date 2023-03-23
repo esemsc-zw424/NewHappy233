@@ -67,7 +67,7 @@ class User(AbstractUser):
     total_task_points = models.IntegerField(default=0)
     consecutive_login_days = models.IntegerField(default=1)
     logged_in_once_daily = models.BooleanField(default = False)
-    cur_login_day = models.DateTimeField(auto_now_add=True)
+    cur_login_day = models.DateTimeField(auto_now_add=True, blank=True)
 
 
     objects = UserManager()

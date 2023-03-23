@@ -7,17 +7,19 @@ from pst.models import SpendingFile
 
 
 class SpendingFileMixin:
-    def handle_files(self, spending, request):
+    def handle_files(self,spending,form, request):
         file_list = request.FILES.getlist('file')
         if file_list:
-            SpendingFile.objects.filter(spending=spending).delete()
+            SpendingFile.objects.filter(spending=spending[0]).delete()
             for file in file_list:
                 SpendingFile.objects.create(
-                    spending=spending,
+                    spending=spending[0],
                     file=file
                 )
-        if self.form.cleaned_data['delete_file']:
-            SpendingFile.objects.filter(spending=spending).delete()
+        if form.cleaned_data['delete_file']:
+          
+            SpendingFile.objects.filter(spending=spending[0]).delete()
+        
 
 
 
