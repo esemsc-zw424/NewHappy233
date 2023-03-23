@@ -332,9 +332,10 @@ def log_out(request):
 
 
 # Chatbot is a simple virtual help assistant that can answer user's question base on keywords
+# User can type in some quesiton, and by identifing key words in the question, chatbot can provide user with relevant answer
 @login_required
 def chat_bot(request):
-    chat_history = []  # this is use to store all the chat history between user and chatbot
+    chat_history = []  # this is use to store response from chatbot and print it out in the web
     if request.method == 'POST':
         user_input = request.POST['user_input']
         chat_bot_response = respond(request, user_input)
@@ -342,6 +343,13 @@ def chat_bot(request):
         return render(request, 'chat_bot.html', {'chat_history': chat_history})
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
 
+# This function receives user input and responds with pre-defined messages based on identified keywords or phrases
+# The function first checks if the user input matches any pre-defined keywords or synonyms
+# If it does, the function returns a pre-defined response 
+# If not, the function attempts to match the input to possible keywords by lemmatizing the input and 
+# comparing it to the synonyms of each keyword. If the function finds a possible keyword, it returns a message asking if the user 
+# meant that keyword. If there are multiple possible keywords, the function selects the first one that has a pre-defined response and returns a random response from its list of responses
+# If the user input does not match any pre-defined keywords or possible keywords, the function returns a default error message
 @login_required
 def respond(request, user_input):
     lemmatizer = WordNetLemmatizer()
@@ -384,6 +392,8 @@ def respond(request, user_input):
         "hello": ["Hello! How may I help you?"],
         "bye": ["Goodbye! Have a great day!"],
     }
+
+    # The keyword can still be identify no matter it is in capital letter or lower letter
     if user_input:
         for keyword, synonyms in keywords.items():
             if user_input.lower() in [s.lower() for s in synonyms]:
@@ -510,7 +520,7 @@ def add_spending(request):
         form = AddSpendingForm()
     return render(request, 'view_spendings.html', {'form': form})
 
-
+# This view function allow user to add a new spending category to their list of categories
 @login_required
 def add_spending_categories(request):
     if request.method == 'POST':
@@ -882,14 +892,20 @@ def post_detail(request, post_id):
 
 
 @login_required
-def like_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+def like(request, post_reply_id, post_id=None):
+    obj = None
+    content_type = None
+    if post_id:
+        obj = get_object_or_404(Reply, id=post_reply_id)
+        content_type = ContentType.objects.get_for_model(Reply)
+    else:
+        obj = get_object_or_404(Post, id=post_reply_id)
+        content_type = ContentType.objects.get_for_model(Post)
     user = request.user
-    content_type = ContentType.objects.get_for_model(Post)
     try:
         like = Like.objects.get(
             content_type=content_type,
-            object_id=post_id,
+            object_id=post_reply_id,
             user=user,
         )
         like.delete()
@@ -897,66 +913,12 @@ def like_post(request, post_id):
     except Like.DoesNotExist:
         like = Like.objects.create(
             content_type=content_type,
-            object_id=post_id,
+            object_id=post_reply_id,
             user=user,
         )
         created = True
-    like_count = post.likes.count()
-
-    return redirect(request.META.get('HTTP_REFERER', reverse('forum')))
-
-
-@login_required
-def like_post_details(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    user = request.user
-    content_type = ContentType.objects.get_for_model(Post)
-    try:
-        like = Like.objects.get(
-            content_type=content_type,
-            object_id=post_id,
-            user=user,
-        )
-        like.delete()
-        created = False
-    except Like.DoesNotExist:
-        like = Like.objects.create(
-            content_type=content_type,
-            object_id=post_id,
-            user=user,
-        )
-        created = True
-    like_count = post.likes.count()
-
     redirect_url = request.META.get(
-        'HTTP_REFERER', reverse('post_detail', args=[post_id]))
-    return redirect(redirect_url)
-
-
-@login_required
-def like_reply(request, reply_id, post_id):
-    reply = get_object_or_404(Reply, id=reply_id)
-    post = get_object_or_404(Post, id=post_id)
-    user = request.user
-    content_type = ContentType.objects.get_for_model(Reply)
-    try:
-        like = Like.objects.get(
-            content_type=content_type,
-            object_id=reply_id,
-            user=user,
-        )
-        like.delete()
-        created = False
-    except Like.DoesNotExist:
-        like = Like.objects.create(
-            content_type=content_type,
-            object_id=reply_id,
-            user=user,
-        )
-        created = True
-    like_count = reply.likes.count()
-    redirect_url = request.META.get(
-        'HTTP_REFERER', reverse('post_detail', args=[post_id]))
+        'HTTP_REFERER', reverse('post_detail', args=[post_id])) if post_id else request.META.get('HTTP_REFERER', reverse('forum'))
     return redirect(redirect_url)
 
 

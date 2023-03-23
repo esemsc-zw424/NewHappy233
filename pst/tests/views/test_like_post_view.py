@@ -15,11 +15,11 @@ class LikePostTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.get(email="johndoe@example.org")
         self.post = Post.objects.get(content='This is example post 1')
-        self.url = reverse('like_post', kwargs={'post_id': self.post.id})
+        self.url = reverse('like', kwargs={'post_reply_id': self.post.id})
 
     def test_like_post_url(self):
         # Test that the URL for like post is correct
-        self.assertEqual(self.url, f'/like_post/{self.post.id}/')
+        self.assertEqual(self.url, f'/like/{self.post.id}/')
 
     def test_like_post(self):
         # Log in as the test user
