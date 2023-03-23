@@ -23,7 +23,7 @@ from django.db.models import Sum
 from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Max, Sum, Subquery, OuterRef
-
+from django.views.generic.edit import CreateView, FormView, UpdateView
 import calendar
 from datetime import date, datetime
 import datetime as dt
@@ -37,7 +37,7 @@ from pst.helpers.auth import login_prohibited
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
-
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 import os
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -59,20 +59,60 @@ def user_feed(request):
     return render(request, 'user_feed.html')
 
 
-@login_prohibited
-def visitor_signup(request):
-    if request.method == 'POST':
-        form = VisitorSignupForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('home')
-        else:
-            return render(request, 'visitor_signup.html', {'form': form})
-    else:
-        form = VisitorSignupForm()
-        return render(request, 'visitor_signup.html', {'form': form})
+# @login_prohibited
+# def visitor_signup(request):
+#     if request.method == 'POST':
+#         form = VisitorSignupForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+#             return redirect('home')
+#         else:
+#             return render(request, 'visitor_signup.html', {'form': form})
+#     else:
+#         form = VisitorSignupForm()
+#         return render(request, 'visitor_signup.html', {'form': form})
 
+class LoginProhibitedMixin:
+
+
+    redirect_when_logged_in_url = None
+
+    def dispatch(self, *args, **kwargs):
+        """Redirect when logged in, or dispatch as normal otherwise."""
+        if self.request.user.is_authenticated:
+            return self.handle_already_logged_in(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
+
+    def handle_already_logged_in(self, *args, **kwargs):
+        url = self.get_redirect_when_logged_in_url()
+        return redirect(url)
+
+    def get_redirect_when_logged_in_url(self):
+        """Returns the url to redirect to when not logged in."""
+        if self.redirect_when_logged_in_url is None:
+            raise ImproperlyConfigured(
+                "LoginProhibitedMixin requires either a value for "
+                "'redirect_when_logged_in_url', or an implementation for "
+                "'get_redirect_when_logged_in_url()'."
+            )
+        else:
+            return self.redirect_when_logged_in_url
+
+
+class SignUpView(LoginProhibitedMixin, FormView):
+
+    template_name = "visitor_signup.html"
+    form_class = VisitorSignupForm
+    redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
+
+    def form_valid(self, form):
+        self.object = form.save()
+        auth.login(self.request, self.object, backend='django.contrib.auth.backends.ModelBackend')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
 # Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def get_spending_calendar_context(request, year=datetime.now().year, month=datetime.now().month):
@@ -291,6 +331,9 @@ def edit_spending(request, spending_id):
     else:
         form = EditSpendingForm(instance=spending)
     return render(request, "edit_spending.html", {'form': form, 'spending': spending})
+
+
+
 
 
 
