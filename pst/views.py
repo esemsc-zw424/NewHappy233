@@ -924,32 +924,11 @@ def like(request, post_reply_id, post_id=None):
         'HTTP_REFERER', reverse('post_detail', args=[post_id])) if post_id else request.META.get('HTTP_REFERER', reverse('forum'))
     return redirect(redirect_url)
 
-
 @login_required
-def add_reply_to_post(request, post_id):
+def add_reply(request, post_id, parent_reply_id=None):
     post = get_object_or_404(Post, id=post_id)
+    parent_reply = get_object_or_404(Reply, id=parent_reply_id) if parent_reply_id else None
 
-    if request.method == 'POST':
-        form = ReplyForm(request.POST)
-        if form.is_valid():
-            reply = form.save(commit=False)
-            reply.user = request.user
-            reply.parent_post = post
-            reply.save()
-            messages.add_message(request, messages.SUCCESS,
-                                 "reply has been successfully added!")
-            return redirect('post_detail', post_id=post.id)
-    else:
-        form = ReplyForm()
-
-    context = {'form': form, 'post': post}
-    return render(request, 'add_reply_to_post.html', context)
-
-
-@login_required
-def add_reply_to_reply(request, post_id, parent_reply_id):
-    post = get_object_or_404(Post, id=post_id)
-    parent_reply = get_object_or_404(Reply, id=parent_reply_id)
     if request.method == 'POST':
         form = ReplyForm(request.POST)
         if form.is_valid():
@@ -959,13 +938,14 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
             reply.parent_reply = parent_reply
             reply.save()
             messages.add_message(request, messages.SUCCESS,
-                                 "reply has been successfully added!")
+                                 "Reply has been successfully added!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = ReplyForm()
 
     context = {'form': form, 'post': post, 'parent_reply': parent_reply}
-    return render(request, 'add_reply_to_reply.html', context)
+    template_name = 'add_reply_to_reply.html' if parent_reply else 'add_reply_to_post.html'
+    return render(request, template_name, context)
 
 @login_required
 def delete_reply(request, reply_id):
