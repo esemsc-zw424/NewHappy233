@@ -213,7 +213,7 @@ def create_login_task(user):
 def create_daily_task_status(request, login_task):
     current_day = request.user.get_number_days_from_register()
     day, _ = Day.objects.get_or_create(number=current_day)
-    if request.user.consecutive_login_days > 7:
+    if request.user.consecutive_login_days >= 7:
         task_points = settings.HIGH_TASK_POINTS
     else:
         task_points = settings.NORMAL_TASK_POINTS
@@ -240,12 +240,12 @@ def get_super_task_point_position(request):
 
 def add_consecutive_login_days(request):
     user = request.user
-    if current_datetime - user.last_login < timedelta(hours=24) and user.logged_in_once_daily == False:
+    if current_datetime.day - user.cur_login_day.day == 1 and user.logged_in_once_daily == False and user.date_joined.day != user.cur_login_day.day:
         user.consecutive_login_days += 1
 
         # user has not logged in consecutively
-    elif current_datetime - user.last_login >= timedelta(hours=24):
-        user.consecutive_login_days = 1
+    elif current_datetime.day - user.cur_login_day.day > 1:
+        user.consecutive_login_days = 1 
     user.save()
 
 
@@ -323,11 +323,11 @@ def log_in(request):
             user = authenticate(username=email, password=password)
             if user is not None:
                 login(request, user)
+                user.check_already_logged_in_once_daily()
+                add_consecutive_login_days(request)
+                user.cur_login_day = current_datetime
                 redirect_url = next or 'home'
                 next = request.GET.get('next') or ''
-                add_consecutive_login_days(request)
-                user.check_already_logged_in_once_daily()
-                user.last_login = timezone.now()
                 user.save()
 
                 return redirect(redirect_url)

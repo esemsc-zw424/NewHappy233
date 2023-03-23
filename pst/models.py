@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, timedelta
 from enum import Enum
 
 from django.db import models
@@ -67,7 +67,7 @@ class User(AbstractUser):
     total_task_points = models.IntegerField(default=0)
     consecutive_login_days = models.IntegerField(default=1)
     logged_in_once_daily = models.BooleanField(default = False)
-
+    cur_login_day = models.DateTimeField(auto_now_add=True)
 
 
     objects = UserManager()
@@ -85,7 +85,7 @@ class User(AbstractUser):
 
     def get_number_days_from_register(self):
         date_joined = self.date_joined
-        num_days = (timezone.now() - date_joined).days + 1
+        num_days = (timezone.now().day - date_joined.day) + 1
         if  num_days == 0:
             num_days = 1
 
@@ -93,7 +93,7 @@ class User(AbstractUser):
     
     def check_already_logged_in_once_daily(self):
         # if over a day since last login
-        if timezone.now() - self.last_login > timedelta(hours=24):
+        if timezone.now().day - self.cur_login_day.day >= 1:
             self.logged_in_once_daily = False
             self.save()
         else:
@@ -178,7 +178,7 @@ class DailyTaskStatus(models.Model):
     task_type = models.CharField(choices=TaskType.choices(), default=TaskType.LOGIN.name, max_length=10)
 
     def save(self, *args, **kwargs):
-        user = self.task.user  # Assuming that there is a 'user' foreign key field in the 'DailyTask' model
+        user = self.task.user  
         user.total_task_points += self.task_points
         user.save()
         super().save(*args, **kwargs)
