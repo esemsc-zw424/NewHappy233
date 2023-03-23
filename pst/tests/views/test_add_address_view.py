@@ -9,7 +9,7 @@ class AddAddressViewTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.get(email='lll@example.org')
-        self.address_data = {'address': 'Test Address', 'phone_number': '1234567890'}
+        self.address_data = {'address': 'Test Address', 'phone_number': '01111111111'}
         self.url = reverse('add_address')
 
     def test_add_address_with_valid_data(self):
@@ -22,7 +22,7 @@ class AddAddressViewTestCase(TestCase):
         addresses = DeliveryAddress.objects.filter(user=self.user)
         self.assertEqual(addresses.count(), 1)
         self.assertEqual(addresses.first().address, self.address_data['address'])
-        self.assertEqual(addresses.first().phone_number, 1234567890)
+        self.assertEqual(addresses.first().phone_number, '01111111111')
 
     def test_add_address_with_invalid_data(self):
         self.client.login(username='lll@example.org', password='Password123')

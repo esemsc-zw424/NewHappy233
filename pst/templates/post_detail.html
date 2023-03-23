@@ -39,7 +39,7 @@
                 <img src="{{ i.file.url }}" width="200" height="200">
                 {% endfor %}
             </div>
-            <div class="info">{{ post.post_date|date:'d M Y, H:i'}}</div>
+            <div class="info">{{ post.created_date|date:'d M Y, H:i'}}</div>
             <div class="info">{{ post.reply.count }} replies | {{ post.likes.count}} likes</div>
             <div>
                 {% if request.user.is_authenticated %}
@@ -82,7 +82,7 @@
                     </a>
                 </div>
                 <div class="content">{{ r.content }}</div>
-                <div class="info">in {{ r.reply_date|date:'d M Y, H:i' }}</div>
+                <div class="info">in {{ r.created_date|date:'d M Y, H:i' }}</div>
                 <div class="reply-actions d-flex justify-content-between">
                     {% if request.user.is_authenticated %}
                         {% if request.user in r.likes.all %}

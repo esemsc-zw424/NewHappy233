@@ -46,22 +46,6 @@ class PostModelTestCase(TestCase):
         self.post.content = 'x' * 4001
         self._assert_post_is_valid()
 
-    # def test_likes_cannot_be_blank(self):
-    #     self.post.likes = ''
-    #     self._assert_post_is_invalid()
-
-    # def test_likes_can_be_zero(self):
-    #     self.post.likes = 0
-    #     self._assert_post_is_valid()
-
-    # def test_likes_cannot_be_some_number_bigger_than_zero(self):
-    #     self.post.likes = 100
-    #     self._assert_post_is_valid()
-
-    # def test_likes_cannot_be_less_than_zero(self):
-    #     self.post.likes = -100
-    #     self._assert_post_is_invalid()
-
     def test_post_date_cannot_be_blank(self):
         self.post.post_date = None
         self._assert_post_is_valid()

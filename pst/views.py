@@ -235,7 +235,7 @@ def home(request):
     if (not revenue):
         monthly_revenue = 0
     else:
-        monthly_revenue = revenue.aggregate(nums=Sum('amount')).get('nums')
+        monthly_revenue = round(revenue.aggregate(nums=Sum('amount')).get('nums'), 2)
 
     expense = Spending.objects.filter(
         spending_owner=request.user,
@@ -246,7 +246,7 @@ def home(request):
     if (not expense):
         monthly_expense = 0
     else:
-        monthly_expense = expense.aggregate(nums=Sum('amount')).get('nums')
+        monthly_expense = round(expense.aggregate(nums=Sum('amount')).get('nums'), 2)
 
     context = {'user': user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
@@ -271,9 +271,6 @@ def visitor_introduction(request):
 
 @login_required
 def edit_spending(request, spending_id):
-    # if request.method == 'POST':
-    #     form = EditSpendingForm(request.POST)
-    #     if form.is_valid():
     try:
         spending = Spending.objects.get(id = spending_id)
     except ObjectDoesNotExist:
@@ -418,6 +415,7 @@ def view_spendings(request):
     end_date = request.GET.get('end_date')
     selected_sort = request.GET.get('sorted')
 
+    # retrieve spending in given time interval if user specified start date and end date
     if start_date and end_date:
         start_date = dt.datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = dt.datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -427,6 +425,7 @@ def view_spendings(request):
         unsorted_spending = Spending.objects.filter(
             spending_owner=request.user).order_by('-date')
 
+    # retrieve spending by filtered type
     if selected_sort == 'Income':
         spending = unsorted_spending.filter(spending_type=Spending_type.INCOME)
     elif selected_sort == 'Expenditure':
@@ -443,6 +442,8 @@ def view_spendings(request):
     add_form = AddSpendingForm(user=request.user)
     edit_form = EditSpendingForm(user=request.user)
     context = {'add_form': add_form, 'edit_form': edit_form, 'spending': spending, 'page_obj': page_obj}
+
+    # if the request was sent by Ajax, render spending table html
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'spending_table.html', context)
     else:
@@ -464,6 +465,7 @@ def edit_spending(request, spending_id):
         if form.is_valid():
             form.save()
             file_list = request.FILES.getlist('file')
+            # create new SpendingFile object associated with the spending object and replace the old SpendingFile
             if file_list:
                 SpendingFile.objects.filter(spending=spending).delete()
                 for file in file_list:
@@ -471,6 +473,7 @@ def edit_spending(request, spending_id):
                         spending=spending,
                         file=file
                     )
+            # delete file(s) the user upload if delete_file field is selected                    
             if form.cleaned_data['delete_file']:
                 SpendingFile.objects.filter(spending=spending).delete()
             messages.success(request, 'Change made successfully')
@@ -482,7 +485,6 @@ def edit_spending(request, spending_id):
 
 @login_required
 def delete_spending(request, spending_id):
-
     delete_spending = get_object_or_404(Spending, id = spending_id)
     delete_spending.delete()
     messages.warning(request, "spending has been deleted")
@@ -497,6 +499,7 @@ def add_spending(request):
             spending = form.save(commit=False)
             spending.spending_owner = request.user
             spending.save()
+            # create SpendingFile object to contain the file(s) the user
             for file in request.FILES.getlist('file'):
                 SpendingFile.objects.create(
                     spending=spending,
@@ -514,16 +517,18 @@ def add_spending_categories(request):
     if request.method == 'POST':
         form = CategoriesForm(request.POST)
         if form.is_valid():
-            category = form.save(commit=False)
-            category.owner = request.user
-            category.save()
-            messages.add_message(request, messages.SUCCESS,
-                             "Category successfully added")
+            if Categories.objects.filter(owner=request.user).count() < 30:
+                category = form.save(commit=False)
+                category.owner = request.user
+                category.save()
+                messages.add_message(request, messages.SUCCESS, "Category successfully added")
+            else:
+                messages.add_message(request, messages.ERROR, "You can only have a maximum of 30 categories")
             return redirect('view_spending_categories')
-
     else:
         form = CategoriesForm()
     return render(request, 'view_spending_categories.html', {'form': form})
+
 
 @login_required
 def get_categories_by_type(request):
@@ -753,7 +758,7 @@ def show_budget(request):
     # the budget will be refreshed automatically after the end date
     # of your last budget
     category_budgets = get_category_budgets(request, total_budget)
-    sorted_category_budgets = sort_catrgory_budget(request, selected_sort, category_budgets)
+    sorted_category_budgets = sort_category_budget(request, selected_sort, category_budgets)
     form = TotalBudgetForm(request.user)
     specific_form = BudgetForm(request.user)
 
@@ -833,7 +838,7 @@ def add_address(request):
 
 @login_required
 def forum(request):
-    posts = Post.objects.all().order_by('-post_date')
+    posts = Post.objects.all().order_by('-created_date')
     paginator = Paginator(posts, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -845,7 +850,7 @@ def forum(request):
 
 @login_required
 def personal_forum(request):
-    posts = Post.objects.filter(user=request.user).order_by('-post_date')
+    posts = Post.objects.filter(user=request.user).order_by('-created_date')
     paginator = Paginator(posts, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -858,7 +863,7 @@ def personal_forum(request):
 @login_required
 def personal_forum_reply(request):
     reply_page_number = request.GET.get('reply_page')
-    replies = Reply.objects.filter(user=request.user).order_by('-reply_date')
+    replies = Reply.objects.filter(user=request.user).order_by('-created_date')
     reply_paginator = Paginator(replies, 5)
     reply_page_obj = reply_paginator.get_page(reply_page_number)
 
@@ -899,7 +904,7 @@ def post_detail(request, post_id):
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return HttpResponseNotFound()
-    replies = Reply.objects.filter(parent_post=post).order_by('reply_date')
+    replies = Reply.objects.filter(parent_post=post).order_by('created_date')
     paginator = Paginator(replies, 4)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -1113,7 +1118,7 @@ def get_category_budgets(request, total_budget):
         budget = Budget.objects.filter(spending_category=category).last()
         if budget:
             # print(category.name + str(budget.limit))
-            spending_sum = Spending.objects.filter(
+            result = Spending.objects.filter(
                 spending_owner=request.user,
                 # date__month=current_month,
                 date__range=(total_budget.start_date, total_budget.end_date),
@@ -1121,6 +1126,7 @@ def get_category_budgets(request, total_budget):
                 spending_category=category,
             ).aggregate(nums=Sum('amount')).get('nums') or 0
 
+            spending_sum = round(result, 2)
             # print(budget.limit)
             category_budgets.append({
                 'name': category.name,
@@ -1132,11 +1138,14 @@ def get_category_budgets(request, total_budget):
             })
         else:
             if total_budget:
-                spending_sum = Spending.objects.filter(spending_owner=request.user,
+                result = Spending.objects.filter(spending_owner=request.user,
                                                        date__range=(total_budget.start_date, total_budget.end_date),
                                                        spending_type=Spending_type.EXPENDITURE,
                                                        spending_category=category,
                                                        ).aggregate(nums=Sum('amount')).get('nums') or 0
+
+                spending_sum = round(result, 2)
+                
                 category_budgets.append({
                     'name': category.name,
                     'budget': 'Not set yet',
@@ -1153,7 +1162,7 @@ def get_category_budgets(request, total_budget):
     return category_budgets
 
 @login_required
-def sort_catrgory_budget(request, selected_sort, category_budgets):
+def sort_category_budget(request, selected_sort, category_budgets):
     if selected_sort == '-budget':
         sorted_category_budgets = sorted(
             category_budgets,

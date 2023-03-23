@@ -8,7 +8,7 @@ class DeliveryAddressModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.get(email = 'lll@example.org')
         self.delivery_address = DeliveryAddress.objects.create(
-            user=self.user, address='123 Main St', phone_number=1234567890
+            user=self.user, address='123 Main St', phone_number="01111111111"
         )
 
     def test_delivery_address_obj(self):
@@ -21,4 +21,4 @@ class DeliveryAddressModelTest(TestCase):
         self.assertEqual(self.delivery_address.address, '123 Main St')
 
     def test_delivery_address_phone_number(self):
-        self.assertEqual(self.delivery_address.phone_number, 1234567890)
+        self.assertEqual(self.delivery_address.phone_number, "01111111111")

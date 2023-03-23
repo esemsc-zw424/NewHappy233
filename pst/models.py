@@ -31,7 +31,7 @@ class UserManager(BaseUserManager):
 
         email = self.normalize_email(email)
         user = self.model(first_name=first_name,
-                          last_name=last_name, email=email)
+                          last_name=last_name, email=email, **extra_fields)
         user.set_password(password)
         user.save()
         return user
@@ -39,7 +39,7 @@ class UserManager(BaseUserManager):
 
 
     def create_superuser(self, first_name, last_name, email, password, **extra_fields):
-        user = self.create_user(first_name, last_name, email, password)
+        user = self.create_user(first_name, last_name, email, password, **extra_fields)
         user.is_staff = True
         user.is_superuser = True
         user.save()
@@ -62,8 +62,7 @@ class User(AbstractUser):
     ]
     gender = models.CharField(
         max_length=20, choices=GENDER_CHOICES, blank=True)
-    phone_regex = RegexValidator(regex=r'^\d{10,15}$', message="Phone number must be entered in the format: '9999999999' and maximum 15 digits allowed.")
-    phone_number = models.CharField(validators=[phone_regex], max_length=15, blank=True)
+    phone_number = models.CharField(max_length=15, blank=True)
     address = models.CharField(max_length=100, blank=True)
     total_task_points = models.IntegerField(default=0)
     consecutive_login_days = models.IntegerField(default=1)
@@ -190,7 +189,7 @@ class DailyTaskStatus(models.Model):
 
 class Spending(models.Model):
     title = models.CharField(max_length=30, blank=False)
-    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') 
+    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') # specify who create the spending
     amount = models.DecimalField(  
         blank=False,
         max_digits=8,
@@ -206,10 +205,11 @@ class Spending(models.Model):
         choices=Spending_type.choices,
         default=Spending_type.EXPENDITURE,
         blank=False,
-    )
-    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  
+    ) # specify the type of the spending
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  # specify the category of the spending
+    
 
-
+# SpendingFile replaces a single FileField in Spending in order to allow multiple files be uploaded to be more easily managed.
 class SpendingFile(models.Model):
     spending = models.ForeignKey(
         Spending, on_delete=models.CASCADE, related_name='files')
@@ -227,8 +227,6 @@ class Budget(models.Model):
     limit = models.PositiveIntegerField()
     # start_date = models.DateField(default=timezone.now)
     # end_date = models.DateField(default=timezone.now)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(  # user which this budget belongs to
         User, on_delete=models.CASCADE
     )
@@ -251,11 +249,29 @@ class Reward(models.Model):
     def __str__(self):
         return f"{self.name} ({self.points_required} points)"
 
-# this model is for posts in the forum
-class Post(models.Model):
+# Abstract base model for both reply and post
+class BasePostReplyModel(models.Model):
 
-    # this field store the user when sent this post
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post', blank = False)
+    # Some common fields
+    # User that this reply or post belongs to
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s')
+
+    # Content of the Reply or Post
+    content = models.TextField(blank=False)
+
+    # Likes other user gave
+    likes = GenericRelation('Like')
+
+    # Date when this reply or post create 
+    created_date = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        abstract = True
+
+
+
+# this model is for posts in the forum
+class Post(BasePostReplyModel):
 
     # this field store the title of the post
     # the title are not expected to be very long and can be empty if user don't want to have a title
@@ -263,17 +279,6 @@ class Post(models.Model):
         blank = True,
         max_length= 150,
     )
-
-    # this field store the content of the post
-    content = models.TextField( # for stroing the content of the post
-        blank = False,
-    )
-
-    # this field store the likes from other user
-    likes = GenericRelation('Like')
-
-    # this field store the date and time when this post sent
-    post_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.content
@@ -303,30 +308,14 @@ def delete_file(sender, instance, **kwargs):
         if os.path.exists(path):
             os.remove(path)
 
-
 # this model is for replies under a post
-class Reply(models.Model):
-
-    # this field store the user when sent this reply
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reply', blank = False)
+class Reply(BasePostReplyModel):
 
     # this field store the post where this reply belongs to
     parent_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reply', blank = False)
 
     # if this reply is the reply for another reply under the same post, then this field will be use to mark the parent reply
     parent_reply = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
-
-    # this field store the content of the post
-    # and the reason why the content for reply is charfield is becasue reply are expect to have a shorter length
-    content = models.TextField(
-        blank = False,
-    )
-
-    # this field store the likes from other user
-    likes = GenericRelation('Like')
-
-    # this field store the date and time when this reply sent
-    reply_date = models.DateTimeField(auto_now_add=True, blank = False)
 
     def __str__(self):
         return self.content
@@ -349,11 +338,10 @@ class Like(models.Model):
     class Meta:
         unique_together = [['user', 'content_type', 'object_id']]
 
-
 class DeliveryAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     address = models.CharField(max_length=200, blank=False)
-    phone_number = models.IntegerField(blank=False)
+    phone_number = models.CharField(max_length=15, blank=True)
 
 
 
@@ -361,8 +349,6 @@ class TotalBudget(models.Model):
     limit = models.PositiveIntegerField()
     start_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)  # make end_date optional
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     budget_owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='total_budgets'  # add related name
     )
