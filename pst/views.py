@@ -692,6 +692,8 @@ def spending_report(request):
         }
     return render(request, 'spending_report.html', context)
 
+
+# This method allows user to set a total budget with a selected time frame
 @login_required
 def set_budget(request):
     if request.method == 'POST':
@@ -706,8 +708,8 @@ def set_budget(request):
     return render(request, 'budget_set.html', {'form': form})
 
 
+# This method calculates percentage of spending
 def calculate_budget(request):
-    # budget = sum(category_budgets.values_list('total_budget', flat=True))
     budget = TotalBudget.objects.filter(budget_owner=request.user).last()
     if budget:
         total = Spending.objects.filter(
@@ -764,6 +766,10 @@ def show_budget(request):
     })
 
 
+# This function retrieves the last delivery address for the current user and populates an instance of AddressForm
+# with the address data. Then, it checks if there are any rewards in the database and creates some if there are none.
+# Finally, it retrieves all the rewards from the database and passes them, along with the form, address,
+# and total task points of the user, as context to the index.html template.
 @login_required
 def index(request):
     address = DeliveryAddress.objects.filter(user=request.user).last()
@@ -790,6 +796,7 @@ def index(request):
     return render(request, 'index.html', context)
 
 
+# This function is used to redeem a reward with the specified reward_id.
 @login_required
 def redeem(request, reward_id):
     user = request.user
@@ -813,6 +820,7 @@ def redeem(request, reward_id):
         return redirect('index')
 
 
+# This method is used to add delivery address in index page
 def add_address(request):
     if request.method == 'POST':
         form = AddressForm(request.POST)
