@@ -345,12 +345,6 @@ def chat_bot(request):
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
 
 # This function receives user input and responds with pre-defined messages based on identified keywords or phrases
-# The function first checks if the user input matches any pre-defined keywords or synonyms
-# If it does, the function returns a pre-defined response 
-# If not, the function attempts to match the input to possible keywords by lemmatizing the input and 
-# comparing it to the synonyms of each keyword. If the function finds a possible keyword, it returns a message asking if the user 
-# meant that keyword. If there are multiple possible keywords, the function selects the first one that has a pre-defined response and returns a random response from its list of responses
-# If the user input does not match any pre-defined keywords or possible keywords, the function returns a default error message
 @login_required
 def respond(request, user_input):
     lemmatizer = WordNetLemmatizer()
@@ -514,9 +508,7 @@ def add_spending_categories(request):
         form = CategoriesForm()
     return render(request, 'view_spending_categories.html', {'form': form})
 
-# This function is a helper function user when add spending
-# It auto change the content of the dropdown menu for categories automatically
-# When the content in spending_type change
+# This function is a helper function user when add spending. It auto change the content of the dropdown menu for categories automatically when the content in spending_type change
 @login_required
 def get_categories_by_type(request):
     spending_type = request.GET.get('spending_type', '')
@@ -545,9 +537,6 @@ def view_spending_categories(request):
                    'form': form})
 
 # This function is for deleting an existing category
-# The category is delete base on its id
-# Message will be automatically generate base on whether the category has been deleted successfully
-# User cannot delete default category
 @login_required
 def delete_spending_categories(request, category_id):
     category = Categories.objects.get(id=category_id)
@@ -561,9 +550,6 @@ def delete_spending_categories(request, category_id):
     return redirect('view_spending_categories')
 
 # This function is for updating an existing category
-# The category is update base on its id
-# Message will be automatically generate base on whether the category has been updated successfully
-# User cannot update default category
 @login_required
 def update_spending_categories(request, category_id):
     category = Categories.objects.get(id=category_id)
@@ -734,10 +720,8 @@ def calculate_budget(request):
 @login_required
 def show_budget(request):
     selected_sort = request.GET.get('sorted')
-    # the budget will be refreshed automatically after the end date
-    # of your last budget
+    # the budget will be refreshed automatically after the end date of your last budget
     create_new_budget_if_needed(request)
-    # current_month = datetime.now().month
     total_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
     percentage = calculate_budget(request)
     # check if a message with the INFO level already exists
@@ -751,8 +735,6 @@ def show_budget(request):
         messages.add_message(request, messages.INFO,
                              'you have exceeded the limit')
 
-    # the budget will be refreshed automatically after the end date
-    # of your last budget
     category_budgets = get_category_budgets(request, total_budget)
     sorted_category_budgets = sort_category_budget(request, selected_sort, category_budgets)
     form = TotalBudgetForm(request.user)
@@ -767,10 +749,7 @@ def show_budget(request):
     })
 
 
-# This function retrieves the last delivery address for the current user and populates an instance of AddressForm
-# with the address data. Then, it checks if there are any rewards in the database and creates some if there are none.
-# Finally, it retrieves all the rewards from the database and passes them, along with the form, address,
-# and total task points of the user, as context to the index.html template.
+# This function create and show rewards in index page.
 @login_required
 def index(request):
     address = DeliveryAddress.objects.filter(user=request.user).last()
@@ -837,11 +816,7 @@ def add_address(request):
         form = AddressForm()
     return render(request, "index.html", {'form': form})
 
-# This function retrieves all posts from the database and orders them by their creation date, from newest to oldest
-# It uses a pagination feature to display only a set number of posts per page, which is set to 5 posts per page
-# The function then retrieves the page number from the GET request and uses it to return the corresponding page of posts
-# For each post on the current page, the function retrieves all replies that belong to that post
-# The function then renders the forum.html template and passes in the current page of posts as the page_obj variable for the template to use
+# This function retrieves all posts from the database and orders them by their creation date, from newest to oldest, and attach with one reply
 @login_required
 def forum(request):
     posts = Post.objects.all().order_by('-created_date')
@@ -854,10 +829,6 @@ def forum(request):
     return render(request, 'forum.html', {'page_obj': page_obj})
 
 # This view function displays a list of forum posts created by the current logged-in user
-# It first retrieves all posts created by the user and orders them by their creation date, with the most recent posts displayed first
-# The function then uses Django's pagination feature to split the list of posts into pages, displaying 5 posts per page
-# For each post, the function retrieves all replies to that post and assigns them to a 'replies' attribute of the post object
-# Finally, the function renders the 'personal_forum.html' template with the paginated list of posts and their associated replies
 @login_required
 def personal_forum(request):
     posts = Post.objects.filter(user=request.user).order_by('-created_date')
@@ -870,10 +841,6 @@ def personal_forum(request):
     return render(request, 'personal_forum.html', {'page_obj': page_obj})
 
 # This function displays a page that shows all the replies made by the user in the forum
-# The function first gets the page number for the replies from the request
-# It then filters the replies made by the user and orders them by their creation date
-# The function uses the Django Paginator class to paginate the replies and get the page object for the specified page number
-# The function then renders the personal_forum_reply.html template and passes the page object for the replies as context
 @login_required
 def personal_forum_reply(request):
     reply_page_number = request.GET.get('reply_page')
@@ -884,10 +851,6 @@ def personal_forum_reply(request):
     return render(request, 'personal_forum_reply.html', {'reply_page_obj': reply_page_obj})
 
 # This view function allows users to add a new post to the forum
-# If the user submits a valid form, the function creates a new Post object and associates it with the current user
-# If the user also uploaded images, the function creates new PostImage objects for each image and associates them with the Post
-# The function then redirects the user to the forum with a success message
-# If the user accesses the view via GET request, the function displays an empty PostForm for the user to fill out.
 @login_required
 def add_post(request):
     if request.method == 'POST':
@@ -909,9 +872,6 @@ def add_post(request):
     return render(request, 'add_post.html',  {'form': form})
 
 # This function allows users to delete their own posts
-# It first retrieves the post that the user wants to delete using its id
-# Then it deletes the post from the database
-# Finally, it displays a warning message indicating that the post has been deleted and redirects the user to their personal forum page
 @login_required
 def delete_post(request, post_id):
     delete_post = get_object_or_404(Post, id=post_id)
@@ -920,10 +880,6 @@ def delete_post(request, post_id):
     return redirect('personal_forum')
 
 # This function retrieves details of a specific post and its replies based on the post_id parameter
-# If the post does not exist, the function returns an HTTP 404 error
-# The function retrieves all replies for the post and paginates them
-# The resulting page number is obtained from the GET request parameters
-# The function then renders the post detail page with the post, its replies, and the pagination object
 @login_required
 def post_detail(request, post_id):
     try:
@@ -938,11 +894,6 @@ def post_detail(request, post_id):
     return render(request, 'post_detail.html', context)
 
 # This function allows users to like or unlike a post or reply
-# The function checks whether the user has already liked the post or reply before
-# If the user has already liked the post or reply, the function deletes the like
-# If the user has not liked the post or reply, the function creates a new like
-# The function then redirects the user to the page where the post or reply was originally displayed
-# If the user is liking a reply, the function requires the post ID to redirect the user back to the correct post
 @login_required
 def like(request, post_reply_id, post_id=None):
     obj = None
@@ -973,12 +924,7 @@ def like(request, post_reply_id, post_id=None):
         'HTTP_REFERER', reverse('post_detail', args=[post_id])) if post_id else request.META.get('HTTP_REFERER', reverse('forum'))
     return redirect(redirect_url)
 
-# This function allows users to like or unlike a post or reply
-# The function checks whether the user has already liked the post or reply before
-# If the user has already liked the post or reply, the function deletes the like
-# If the user has not liked the post or reply, the function creates a new like
-# The function then redirects the user to the page where the post or reply was originally displayed
-# If the user is liking a reply, the function requires the post ID to redirect the user back to the correct post
+# This function allows users to reply a post or a reply
 @login_required
 def add_reply(request, post_id, parent_reply_id=None):
     post = get_object_or_404(Post, id=post_id)
@@ -1003,8 +949,6 @@ def add_reply(request, post_id, parent_reply_id=None):
     return render(request, template_name, context)
 
 # This view function deletes a reply and redirects the user to their personal forum reply page
-# It first retrieves the reply object based on the given reply_id and then deletes it
-# A message is added to indicate that the reply has been deleted and the user is redirected to their personal forum reply page
 @login_required
 def delete_reply(request, reply_id):
     delete_reply = get_object_or_404(Reply, id=reply_id)
@@ -1013,8 +957,6 @@ def delete_reply(request, reply_id):
     return redirect('personal_forum_reply')
 
 # This function displays the details of a post created by a particular user
-# It takes the user_id and post_id as input parameters and retrieves the corresponding user and post objects
-# The function then renders the 'view_post_user.html' template with the retrieved user and post objects as context data
 @login_required
 def view_post_user(request, user_id, post_id):
     user = User.objects.get(id=user_id)
@@ -1052,9 +994,6 @@ def set_specific_budget(request):
 
 
 # This method allows a user to change their password if they are already authenticated.
-# It checks if the current password entered is correct and validates the new password according to certain criteria.
-# If everything is valid, it updates the password and logs in the user with the new password.
-# Finally, a template with a password form will be rendered.
 @login_required
 def password(request):
     if request.user.is_authenticated:
@@ -1082,9 +1021,6 @@ def password(request):
 
 
 # This function creates a new budget for the user if their current budget has ended.
-# It checks if the user has a current budget and if the end date of the budget has passed.
-# If so, it creates a new budget for the user with the same limit, a start date of today's date,
-# an end date of 30 days from today's date, and assigns the budget to the user.
 @login_required
 def create_new_budget_if_needed(request):
     current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
@@ -1097,13 +1033,7 @@ def create_new_budget_if_needed(request):
         )
 
 
-# This function gets all expenditure categories belonging to the current user and returns a list of dictionaries
-# containing the category name, budget limit, spending amount, and percentage of spending (if applicable).
-# It calculates the spending amount by querying the Spending model for expenses
-# within the current total budget period and sums up the amounts for each category.
-# If the category has no budget set, the budget value is set to "Not set yet",
-# and the spending percentage is set to None.
-# If there is no total budget set, the spending value is set to "Please set a total budget first".
+# This function gets all expenditure categories belonging to the current user and returns a list of dictionaries.
 @login_required
 def get_category_budgets(request, total_budget):
     categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
