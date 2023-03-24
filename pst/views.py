@@ -39,9 +39,6 @@ nltk.download('wordnet')
 
 current_datetime = timezone.now()
 
-@login_required
-def user_feed(request):
-    return render(request, 'user_feed.html')
 
 
 
@@ -233,55 +230,41 @@ def add_consecutive_login_days(request):
     user.save()
 
 
+def get_monthly_spending(request, spending_type):
+    month = datetime.now().month
+    spending = Spending.objects.filter(
+        spending_owner=request.user,
+        date__month=month,
+        spending_type=spending_type,
+    )
 
+    if not spending:
+        return 0
+
+    return round(spending.aggregate(nums=Sum('amount')).get('nums'), 2)
+
+    
 @login_required
 def home(request):
      # Set up some variables for the template.
     week_list = [1,2,3,4,5]
     weekday_list = [1,2,3,4,5,6,7]
-    current_day = str(timezone.now().day)
     pos = get_position_in_daily_reward(request)
     super_task_pos = get_super_task_point_position(request)
-
-    # Calculate the user's budget for the current month.
-    user = request.user
     percentage = calculate_budget(request)
     month = datetime.now().month
-    revenue = Spending.objects.filter(
-        spending_owner=request.user,
-        date__month=month,
-        spending_type=Spending_type.INCOME,
-    )
-
-    if (not revenue):
-        monthly_revenue = 0
-    else:
-        monthly_revenue = round(revenue.aggregate(nums=Sum('amount')).get('nums'), 2)
-
-    # Add the budget information to the context.
-    expense = Spending.objects.filter(
-        spending_owner=request.user,
-        date__month=month,
-        spending_type=Spending_type.EXPENDITURE,
-    )
-
-    if (not expense):
-        monthly_expense = 0
-    else:
-        monthly_expense = round(expense.aggregate(nums=Sum('amount')).get('nums'), 2)
+    monthly_revenue = get_monthly_spending(request, Spending_type.INCOME)
+    monthly_expense = get_monthly_spending(request, Spending_type.EXPENDITURE)
     # Add additional context for the daily reward and spending calendar.
-    context = {'user': user, 'percentage': percentage,
+    context = {'user': request.user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
-
+               
     daily_reward_context = {"pos": pos, "super_task_pos": super_task_pos, "week_list": week_list,
-                            "weekday_list": weekday_list, "current_datetime": current_day,
-                            "high_task_points": settings.HIGH_TASK_POINTS, "normal_task_points": settings.NORMAL_TASK_POINTS}
+                            "weekday_list": weekday_list,  "high_task_points": settings.HIGH_TASK_POINTS, "normal_task_points": settings.NORMAL_TASK_POINTS}
 
     calendar_context = get_spending_calendar_context(request)
-
     context.update(calendar_context)
     context.update(daily_reward_context)
-
     return render(request, 'home.html', context)
 
 
@@ -624,6 +607,7 @@ def user_guideline(request):
     "the months' spending calendars.",
     "13. The \"Monthly Revenue\" and \"Monthly Expense\" sections in the home page shows your total amount of income and expenditure of the current month respectively. "
     "And the \"My Plan\" section shows the total budget you set."
+    
     "14. If you wish to edit your personal information, then you can submit your information through \"My Profile\" section",
     "15. Remember you can always reset your password by clicking on the \"Edit Password\" option from the drop down list under your user icon image!"
     ]

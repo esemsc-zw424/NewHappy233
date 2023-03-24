@@ -26,7 +26,6 @@ urlpatterns = [
 
     path('', views.visitor_introduction, name='visitor_introduction'),
     path('add_spending/', views.add_spending, name='add_spending'),
-    path('user_feed/', views.user_feed, name='user_feed'),
     path('visitor_signup/', views.SignUpView.as_view(), name='visitor_signup'),
     path('home/', views.home, name='home'),
     path('visitor_introduction/', views.visitor_introduction,
