@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from pst.forms import VisitorSignupForm
 from pst.models import User
+from django.conf import settings
 
 
 class VisitorSignupViewTestCase(TestCase):
@@ -19,6 +20,7 @@ class VisitorSignupViewTestCase(TestCase):
         'password': 'Password123',
         'confirm_password': 'Password123'
     }
+        self.redirect_url = reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
     def test_visitor_signup_url(self):
         self.assertEqual(self.url, '/visitor_signup/')
@@ -63,3 +65,11 @@ class VisitorSignupViewTestCase(TestCase):
 
     def _is_logged_in(self):
         return '_auth_user_id' in self.client.session.keys()
+
+    def test_visitor_signup_view_when_logged_in(self):
+        """Test that a logged-in user is redirected when trying to visit visitor_signup."""
+        self.client.login(email='lll@example.org', password='Password123') 
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.redirect_url)
+    
