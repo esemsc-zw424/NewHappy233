@@ -15,6 +15,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.views.generic.edit import CreateView, FormView, UpdateView
 import calendar
+from django.contrib.auth.mixins import LoginRequiredMixin
 from datetime import datetime
 import datetime as dt
 
