@@ -733,10 +733,8 @@ def calculate_budget(request):
 @login_required
 def show_budget(request):
     selected_sort = request.GET.get('sorted')
-    # the budget will be refreshed automatically after the end date
-    # of your last budget
+    # the budget will be refreshed automatically after the end date of your last budget
     create_new_budget_if_needed(request)
-    # current_month = datetime.now().month
     total_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
     percentage = calculate_budget(request)
     # check if a message with the INFO level already exists
@@ -750,8 +748,6 @@ def show_budget(request):
         messages.add_message(request, messages.INFO,
                              'you have exceeded the limit')
 
-    # the budget will be refreshed automatically after the end date
-    # of your last budget
     category_budgets = get_category_budgets(request, total_budget)
     sorted_category_budgets = sort_category_budget(request, selected_sort, category_budgets)
     form = TotalBudgetForm(request.user)
@@ -766,10 +762,7 @@ def show_budget(request):
     })
 
 
-# This function retrieves the last delivery address for the current user and populates an instance of AddressForm
-# with the address data. Then, it checks if there are any rewards in the database and creates some if there are none.
-# Finally, it retrieves all the rewards from the database and passes them, along with the form, address,
-# and total task points of the user, as context to the index.html template.
+# This function create and show rewards in index page.
 @login_required
 def index(request):
     address = DeliveryAddress.objects.filter(user=request.user).last()
@@ -1011,9 +1004,6 @@ def set_specific_budget(request):
 
 
 # This method allows a user to change their password if they are already authenticated.
-# It checks if the current password entered is correct and validates the new password according to certain criteria.
-# If everything is valid, it updates the password and logs in the user with the new password.
-# Finally, a template with a password form will be rendered.
 @login_required
 def password(request):
     if request.user.is_authenticated:
@@ -1041,9 +1031,6 @@ def password(request):
 
 
 # This function creates a new budget for the user if their current budget has ended.
-# It checks if the user has a current budget and if the end date of the budget has passed.
-# If so, it creates a new budget for the user with the same limit, a start date of today's date,
-# an end date of 30 days from today's date, and assigns the budget to the user.
 @login_required
 def create_new_budget_if_needed(request):
     current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
@@ -1056,13 +1043,7 @@ def create_new_budget_if_needed(request):
         )
 
 
-# This function gets all expenditure categories belonging to the current user and returns a list of dictionaries
-# containing the category name, budget limit, spending amount, and percentage of spending (if applicable).
-# It calculates the spending amount by querying the Spending model for expenses
-# within the current total budget period and sums up the amounts for each category.
-# If the category has no budget set, the budget value is set to "Not set yet",
-# and the spending percentage is set to None.
-# If there is no total budget set, the spending value is set to "Please set a total budget first".
+# This function gets all expenditure categories belonging to the current user and returns a list of dictionaries.
 @login_required
 def get_category_budgets(request, total_budget):
     categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
