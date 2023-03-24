@@ -115,3 +115,8 @@ class EditSpendingTestCase(TestCase):
         # test if file is successfully delete
         self.assertEqual(updated_spending.files.count(), 0)
 
+    def test_edit_spending_not_logged_in(self):
+    # Test that a user who is not logged in is redirected to the login page
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f'/accounts/login/?next={self.url}')
