@@ -21,7 +21,7 @@ class SpendingFileMixin:
         
 
 
-#a mixin that prohibits access to a view if the user is already authenticated.
+#A mixin that prohibits access to a view if the user is already authenticated.
 #  If the user is authenticated, it redirects to the specified URL.
 class LoginProhibitedMixin:
     redirect_when_logged_in_url = None
