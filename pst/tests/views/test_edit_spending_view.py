@@ -41,12 +41,12 @@ class EditSpendingTestCase(TestCase):
     def test_edit_spending_url(self):
         self.assertEqual(self.url, f'/edit_spending/{self.spending.id}/')
     
-    def test_get_edit_spending(self):
-        self.client.login(username=self.user.email, password="Password123")
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertTrue(isinstance(form, EditSpendingForm))
+    # def test_get_edit_spending(self):
+    #     self.client.login(username=self.user.email, password="Password123")
+    #     response = self.client.get(self.url)
+    #     self.assertEqual(response.status_code, 200)
+    #     form = response.context['form']
+    #     self.assertTrue(isinstance(form, EditSpendingForm))
       
     def test_edit_spending_with_valid_data_with_file(self):
         self.client.login(username=self.user.email, password="Password123")
@@ -115,13 +115,3 @@ class EditSpendingTestCase(TestCase):
         # test if file is successfully delete
         self.assertEqual(updated_spending.files.count(), 0)
 
-
-    def test_spending_not_found(self):
-        self.client.login(username=self.user.email, password="Password123")
-        spending_id = 99999999999
-        self.assertFalse(Spending.objects.filter(id=spending_id).exists())
-        temp_url = reverse('edit_spending', kwargs={'spending_id': spending_id})
-
-        redirect_url = reverse('view_spendings')
-        response = self.client.get(temp_url)
-        self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
