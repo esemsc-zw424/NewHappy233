@@ -236,12 +236,14 @@ def add_consecutive_login_days(request):
 
 @login_required
 def home(request):
+     # Set up some variables for the template.
     week_list = [1,2,3,4,5]
     weekday_list = [1,2,3,4,5,6,7]
     current_day = str(timezone.now().day)
     pos = get_position_in_daily_reward(request)
     super_task_pos = get_super_task_point_position(request)
 
+    # Calculate the user's budget for the current month.
     user = request.user
     percentage = calculate_budget(request)
     month = datetime.now().month
@@ -256,6 +258,7 @@ def home(request):
     else:
         monthly_revenue = round(revenue.aggregate(nums=Sum('amount')).get('nums'), 2)
 
+    # Add the budget information to the context.
     expense = Spending.objects.filter(
         spending_owner=request.user,
         date__month=month,
@@ -266,7 +269,7 @@ def home(request):
         monthly_expense = 0
     else:
         monthly_expense = round(expense.aggregate(nums=Sum('amount')).get('nums'), 2)
-
+    # Add additional context for the daily reward and spending calendar.
     context = {'user': user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
 
@@ -296,6 +299,7 @@ def visitor_introduction(request):
 
 
 @login_prohibited
+
 def log_in(request):
     if request.method == 'POST':
         next = request.POST.get('next') or ''
@@ -336,7 +340,8 @@ def log_out(request):
 # User can type in some quesiton, and by identifing key words in the question, chatbot can provide user with relevant answer
 @login_required
 def chat_bot(request):
-    chat_history = []  # this is use to store response from chatbot and print it out in the web
+    # this is use to store response from chatbot and print it out in the web
+    chat_history = [] 
     if request.method == 'POST':
         user_input = request.POST['user_input']
         chat_bot_response = respond(request, user_input)
@@ -463,6 +468,7 @@ def view_spendings(request):
 
 
 @login_required
+#  Allows logged-in users to delete a spending object with the given ID.
 def delete_spending(request, spending_id):
     delete_spending = get_object_or_404(Spending, id = spending_id)
     delete_spending.delete()
@@ -570,7 +576,7 @@ def update_spending_categories(request, category_id):
         form = CategoriesForm(instance=category)
     return redirect('view_spending_categories')
 
-
+#  Displays the user's profile page and how to edit it.
 @login_required
 def user_profile(request):
     user = request.user
@@ -595,7 +601,7 @@ def edit_profile(request):
         form = EditProfileForm(instance=user)
     return render(request, 'edit_profile.html', {'form': form})
 
-
+#A useful user-guideline which contains all the information they may want to know.
 @login_required
 def user_guideline(request):
     guide_list = [
@@ -755,6 +761,7 @@ def index(request):
     address = DeliveryAddress.objects.filter(user=request.user).last()
     form = AddressForm(instance=address)
 
+    # If there are no rewards, create some default rewards.
     if Reward.objects.count() == 0:
         Reward.objects.create(
             name='T-shirt', points_required=10, image='rewards/shirt.jpg')
@@ -765,7 +772,7 @@ def index(request):
         Reward.objects.create(name="AMZ £20 Gift Card",
                               points_required=200, image='rewards/amazon_gift_card.jpg')
 
-#
+ # Get all the rewards and pass them to the template.
     rewards = Reward.objects.all()
     context = {
         'form': form,
@@ -839,6 +846,7 @@ def personal_forum(request):
         post.replies = Reply.objects.filter(parent_post=post)
 
     return render(request, 'personal_forum.html', {'page_obj': page_obj})
+
 
 # This function displays a page that shows all the replies made by the user in the forum
 @login_required
@@ -966,6 +974,8 @@ def view_post_user(request, user_id, post_id):
 
 
 @login_required
+ # Displays the settings page, including a form for updating the user's total budget.
+ 
 def view_settings(request):
     form = TotalBudgetForm(request.user)
     return render(request, 'setting_page.html', {'form': form})

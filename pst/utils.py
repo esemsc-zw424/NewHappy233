@@ -1,4 +1,3 @@
-
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.shortcuts import redirect
 
