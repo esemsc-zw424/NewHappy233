@@ -781,7 +781,7 @@ def redeem(request, reward_id):
     if total_task_points is not None and total_task_points >= reward.points_required:
         user.decrease_total_task_points(reward.points_required)
         messages.add_message(
-            request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address within 7 days.')
+            request, messages.INFO, 'Successfully redeemed.')
     else:
         messages.add_message(
             request, messages.INFO, "You don't have enough reward points to redeem this reward.")
