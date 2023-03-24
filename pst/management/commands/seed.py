@@ -221,11 +221,14 @@ class Command(BaseCommand):
     #  ----------------------helper method for the setup of Alice Doe----------------------
 
     def _create_alice_doe(self):
-        random_timedelta = timedelta(days=random.randint(0, self.days_between))
-        date_joined = self.start_date + random_timedelta
-        date_joined_naive = datetime(date_joined.year, date_joined.month, date_joined.day, 
-                             date_joined.hour, date_joined.minute, date_joined.second,
-                             date_joined.microsecond)
+        # Get today's date
+        today = datetime.now().date()
+        
+        # Subtract 7 days from today's date
+        date_joined = today - timedelta(days=7)
+        
+        # Convert to datetime object
+        date_joined_naive = datetime.combine(date_joined, datetime.min.time())
 
         # localize the naive datetime object to the timezone
         date_joined_localized = self.timezone.localize(date_joined_naive)
