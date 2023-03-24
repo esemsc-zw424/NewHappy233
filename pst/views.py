@@ -40,8 +40,6 @@ nltk.download('wordnet')
 current_datetime = timezone.now()
 
 
-
-
 class SignUpView(LoginProhibitedMixin, FormView):
 
     template_name = "visitor_signup.html"
@@ -134,8 +132,6 @@ class EditSpendingView(LoginRequiredMixin, SpendingFileMixin, UpdateView):
     
     def get_success_url(self):
         return reverse('view_spendings')
-
-
 
 
 class GetLoginTaskStatusView(View):
@@ -240,7 +236,7 @@ def get_monthly_spending(request, spending_type):
 
     return round(spending.aggregate(nums=Sum('amount')).get('nums'), 2)
 
-    
+
 @login_required
 def home(request):
      # Set up some variables for the template.
@@ -255,7 +251,7 @@ def home(request):
     # Add additional context for the daily reward and spending calendar.
     context = {'user': request.user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
-               
+
     daily_reward_context = {"pos": pos, "super_task_pos": super_task_pos, "week_list": week_list,
                             "weekday_list": weekday_list,  "high_task_points": settings.HIGH_TASK_POINTS, "normal_task_points": settings.NORMAL_TASK_POINTS}
 
@@ -268,14 +264,6 @@ def home(request):
 @login_prohibited
 def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
-
-
-
-
-
-
-
-
 
 
 @login_prohibited
@@ -310,7 +298,6 @@ def log_in(request):
     return render(request, 'log_in.html', {'form': form})
 
 
-
 def log_out(request):
     logout(request)
     return redirect('visitor_introduction')
@@ -321,13 +308,14 @@ def log_out(request):
 @login_required
 def chat_bot(request):
     # this is use to store response from chatbot and print it out in the web
-    chat_history = [] 
+    chat_history = []
     if request.method == 'POST':
         user_input = request.POST['user_input']
         chat_bot_response = respond(request, user_input)
         chat_history.append((user_input, chat_bot_response))
         return render(request, 'chat_bot.html', {'chat_history': chat_history})
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
+
 
 # This function receives user input and responds with pre-defined messages based on identified keywords or phrases
 @login_required
@@ -404,6 +392,7 @@ def respond(request, user_input):
         messages.add_message(request, messages.ERROR,
                              "You can not submit empty space!!!")
 
+
 @login_required
 def view_spendings(request):
     start_date = request.GET.get('start_date')
@@ -445,8 +434,6 @@ def view_spendings(request):
         return render(request, 'view_spendings.html', context)
     
 
-
-
 @login_required
 #  Allows logged-in users to delete a spending object with the given ID.
 def delete_spending(request, spending_id):
@@ -476,6 +463,7 @@ def add_spending(request):
         form = AddSpendingForm()
     return render(request, 'view_spendings.html', {'form': form})
 
+
 # This view function allow user to add a new spending category to their list of categories
 @login_required
 def add_spending_categories(request):
@@ -493,6 +481,7 @@ def add_spending_categories(request):
     else:
         form = CategoriesForm()
     return render(request, 'view_spending_categories.html', {'form': form})
+
 
 # This function is a helper function user when add spending. It auto change the content of the dropdown menu for categories automatically when the content in spending_type change
 @login_required
@@ -522,6 +511,7 @@ def view_spending_categories(request):
                   {'categories_expenditure': categories_expenditure, 'categories_income': categories_income,
                    'form': form})
 
+
 # This function is for deleting an existing category
 @login_required
 def delete_spending_categories(request, category_id):
@@ -534,6 +524,7 @@ def delete_spending_categories(request, category_id):
         messages.add_message(request, messages.ERROR,
                              "You can not delete default category!")
     return redirect('view_spending_categories')
+
 
 # This function is for updating an existing category
 @login_required
@@ -614,8 +605,6 @@ def user_guideline(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'user_guideline.html', {'page_obj': page_obj})
-
-
 
 
 @login_required
@@ -740,7 +729,7 @@ def show_budget(request):
                              'you have exceeded the limit')
 
     category_budgets = get_category_budgets(request, total_budget)
-    sorted_category_budgets = sort_category_budget(request, selected_sort, category_budgets)
+    sorted_category_budgets = sort_category_budget( selected_sort, category_budgets)
     form = TotalBudgetForm(request.user)
     specific_form = BudgetForm(request.user)
 
@@ -788,21 +777,15 @@ def redeem(request, reward_id):
     total_task_points = user.total_task_points
     reward = Reward.objects.get(id=reward_id)
 
-    if total_task_points is None:
-
-        messages.add_message(
-            request, messages.INFO, "You don't have enough reward points to redeem this reward.")
-        return redirect('index')
-    elif total_task_points >= reward.points_required:
+    if total_task_points is not None and total_task_points >= reward.points_required:
         user.decrease_total_task_points(reward.points_required)
         messages.add_message(
             request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address within 7 days.')
-        return redirect('index')
     else:
-
         messages.add_message(
             request, messages.INFO, "You don't have enough reward points to redeem this reward.")
-        return redirect('index')
+
+    return redirect('index')
 
 
 # This method is used to add delivery address in index page
@@ -821,6 +804,7 @@ def add_address(request):
         form = AddressForm()
     return render(request, "index.html", {'form': form})
 
+
 # This function retrieves all posts from the database and orders them by their creation date, from newest to oldest, and attach with one reply
 @login_required
 def forum(request):
@@ -832,6 +816,7 @@ def forum(request):
         post.replies = Reply.objects.filter(parent_post=post)
 
     return render(request, 'forum.html', {'page_obj': page_obj})
+
 
 # This view function displays a list of forum posts created by the current logged-in user
 @login_required
@@ -856,6 +841,7 @@ def personal_forum_reply(request):
 
     return render(request, 'personal_forum_reply.html', {'reply_page_obj': reply_page_obj})
 
+
 # This view function allows users to add a new post to the forum
 @login_required
 def add_post(request):
@@ -877,6 +863,7 @@ def add_post(request):
         form = PostForm()
     return render(request, 'add_post.html',  {'form': form})
 
+
 # This function allows users to delete their own posts
 @login_required
 def delete_post(request, post_id):
@@ -884,6 +871,7 @@ def delete_post(request, post_id):
     delete_post.delete()
     messages.warning(request, "post has been deleted")
     return redirect('personal_forum')
+
 
 # This function retrieves details of a specific post and its replies based on the post_id parameter
 @login_required
@@ -898,6 +886,7 @@ def post_detail(request, post_id):
     page_obj = paginator.get_page(page_number)
     context = {'post': post, 'replies': replies, 'page_obj': page_obj}
     return render(request, 'post_detail.html', context)
+
 
 # This function allows users to like or unlike a post or reply
 @login_required
@@ -930,6 +919,7 @@ def like(request, post_reply_id, post_id=None):
         'HTTP_REFERER', reverse('post_detail', args=[post_id])) if post_id else request.META.get('HTTP_REFERER', reverse('forum'))
     return redirect(redirect_url)
 
+
 # This function allows users to reply a post or a reply
 @login_required
 def add_reply(request, post_id, parent_reply_id=None):
@@ -954,6 +944,7 @@ def add_reply(request, post_id, parent_reply_id=None):
     template_name = 'add_reply_to_reply.html' if parent_reply else 'add_reply_to_post.html'
     return render(request, template_name, context)
 
+
 # This view function deletes a reply and redirects the user to their personal forum reply page
 @login_required
 def delete_reply(request, reply_id):
@@ -961,6 +952,7 @@ def delete_reply(request, reply_id):
     delete_reply.delete()
     messages.warning(request, "reply has been deleted")
     return redirect('personal_forum_reply')
+
 
 # This function displays the details of a post created by a particular user
 @login_required
@@ -973,7 +965,7 @@ def view_post_user(request, user_id, post_id):
 
 @login_required
  # Displays the settings page, including a form for updating the user's total budget.
- 
+
 def view_settings(request):
     form = TotalBudgetForm(request.user)
     return render(request, 'setting_page.html', {'form': form})
@@ -1042,7 +1034,6 @@ def create_new_budget_if_needed(request):
 
 
 # This function gets all expenditure categories belonging to the current user and returns a list of dictionaries.
-@login_required
 def get_category_budgets(request, total_budget):
     categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
     category_budgets = []
@@ -1063,63 +1054,64 @@ def get_category_budgets(request, total_budget):
                 'spending': spending_sum,
                 'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
             })
-        else:
-            if total_budget:
-                result = Spending.objects.filter(spending_owner=request.user,
-                                                       date__range=(total_budget.start_date, total_budget.end_date),
-                                                       spending_type=Spending_type.EXPENDITURE,
-                                                       spending_category=category,
-                                                       ).aggregate(nums=Sum('amount')).get('nums') or 0
+        elif total_budget:
+            result = Spending.objects.filter(spending_owner=request.user,
+                                                   date__range=(total_budget.start_date, total_budget.end_date),
+                                                   spending_type=Spending_type.EXPENDITURE,
+                                                   spending_category=category,
+                                                   ).aggregate(nums=Sum('amount')).get('nums') or 0
 
-                spending_sum = round(result, 2)
-                
-                category_budgets.append({
-                    'name': category.name,
-                    'budget': 'Not set yet',
-                    'spending': spending_sum,
-                    'percentage': None,
-                })
-            else:
-                category_budgets.append(
-                    {'name': category.name, 'budget': 'Not set yet', 'spending': 'Please set a total budget first',
-                     'percentage': None,
-                     })
+            spending_sum = round(result, 2)
+
+            category_budgets.append({
+                'name': category.name,
+                'budget': 'Not set yet',
+                'spending': spending_sum,
+                'percentage': None,
+            })
+
+        else:
+            category_budgets.append(
+                {'name': category.name, 'budget': 'Not set yet', 'spending': 'Please set a total budget first',
+                 'percentage': None,
+                 })
     return category_budgets
 
 
 # This function sorts the list of dictionaries based on the selected sorting option and returns the sorted list.
-@login_required
-def sort_category_budget(request, selected_sort, category_budgets):
+def sort_category_budget(selected_sort, category_budgets):
     if selected_sort == '-budget':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (k['budget'] != 'Not set yet',
-                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
-            ),
-            reverse=True
-        )
+        sorted_category_budgets = _sort_by_budget(category_budgets, reverse=True)
     elif selected_sort == 'budget':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (k['budget'] != 'Not set yet',
-                float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
-            )
-        )
+        sorted_category_budgets = _sort_by_budget(category_budgets)
     elif selected_sort == '-spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
-            ),
-            reverse=True
-        )
+        sorted_category_budgets = _sort_by_spending(category_budgets, reverse=True)
     elif selected_sort == 'spending':
-        sorted_category_budgets = sorted(category_budgets, key=lambda k: (k['spending'] != 'Please set a total budget first',
-        float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
-            ),
-        )
+        sorted_category_budgets = _sort_by_spending(category_budgets)
     elif selected_sort == '':
         sorted_category_budgets = category_budgets
     else:
         sorted_category_budgets = category_budgets
     return sorted_category_budgets
+
+
+def _sort_by_budget(category_budgets, reverse=False):
+    return sorted(
+        category_budgets,
+        key=lambda k: (
+            k['budget'] != 'Not set yet',
+            float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
+        ),
+        reverse=reverse
+    )
+
+
+def _sort_by_spending(category_budgets, reverse=False):
+    return sorted(
+        category_budgets,
+        key=lambda k: (
+            k['spending'] != 'Please set a total budget first',
+            float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+        ),
+        reverse=reverse
+    )
