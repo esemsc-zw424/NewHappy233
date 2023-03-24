@@ -57,8 +57,6 @@ class SignUpView(LoginProhibitedMixin, FormView):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
         
 
-
-
 def get_spending_calendar_context(request, year=datetime.now().year, month=datetime.now().month):
     month_calendar_list = get_month_calendar_list(year, month)
     month_name = calendar.month_name[month]
@@ -69,9 +67,11 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
     context = build_context(month_calendar_list, year, month_name, previous_month, previous_year, next_month, next_year)
     return context
 
+
 def get_month_calendar_list(year, month):
     month_calendar = calendar.Calendar()
     return month_calendar.monthdays2calendar(year, month)
+
 
 def calculate_previous_and_next_months(year, month):
     if month == 1:
@@ -85,6 +85,7 @@ def calculate_previous_and_next_months(year, month):
         next_month, next_year = month + 1, year
     return previous_month, previous_year, next_month, next_year
 
+
 def calculate_expense_and_income_sums(month_calendar_list, spendings):
     for i, week in enumerate(month_calendar_list):
         for j, (day, weekday) in enumerate(week):
@@ -93,6 +94,7 @@ def calculate_expense_and_income_sums(month_calendar_list, spendings):
             income_sum = sum(s.amount for s in daily_spendings if s.spending_type == Spending_type.INCOME)
             month_calendar_list[i][j] = (day, weekday, exp_sum, income_sum)
     return month_calendar_list
+
 
 def build_context(month_calendar_list, year, month_name, previous_month, previous_year, next_month, next_year):
     return {
@@ -615,47 +617,72 @@ def user_guideline(request):
     return render(request, 'user_guideline.html', {'page_obj': page_obj})
 
 
+
+
 @login_required
 def spending_report(request):
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
+    start_date, end_date = get_dates(request)
     selected_categories = request.GET.get('selected_categories')
-    sorted = request.GET.get('sorted')
-    # Filter spendings data by timeframe
-    if start_date and end_date:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-        spendings = Spending.objects.filter(spending_owner=request.user, date__range=[start_date, end_date])
-    else:
-        spendings = Spending.objects.filter(spending_owner=request.user)
+    sorted_by = request.GET.get('sorted')
 
-    # Filter spendings data by spending type
-    if selected_categories == 'Income':
-        report_type = 'Income'
-        selected_spendings = spendings.filter(spending_type=Spending_type.INCOME)
-    else:
-        report_type = 'Expenditure'
-        selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
-    spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
+    spendings = filter_spendings(request.user, start_date, end_date)
+    report_type, selected_spendings = filter_by_categories(spendings, selected_categories)
+    spendings_data = aggregate_spendings(selected_spendings)
+    sorted_spendings = sort_spendings(selected_spendings, sorted_by)
+    page_obj = paginate_spendings(sorted_spendings, request.GET.get('page'))
 
-    if sorted is None:
-        sorted_spendings = selected_spendings.order_by('-date')
-    else:
-        sorted_spendings = selected_spendings.order_by(sorted)
-
-    # Add paginator so every page contains only 10 rows of spending data
-    paginator = Paginator(sorted_spendings, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
     context = {
         'report_type': report_type,
         'selected_spendings': selected_spendings,
         'spendings_data': spendings_data,
-        'sorted': sorted,
+        'sorted': sorted_by,
         'sorted_spendings': sorted_spendings,
         'page_obj': page_obj
-        }
+    }
     return render(request, 'spending_report.html', context)
+
+
+def get_dates(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+    return start_date, end_date
+
+
+def filter_spendings(user, start_date, end_date):
+    if start_date and end_date:
+        return Spending.objects.filter(spending_owner=user, date__range=[start_date, end_date])
+    else:
+        return Spending.objects.filter(spending_owner=user)
+
+ # Filter spendings data by spending type
+def filter_by_categories(spendings, selected_categories):
+    if selected_categories == 'Income':
+        report_type = 'Income'
+        return report_type, spendings.filter(spending_type=Spending_type.INCOME)
+    else:
+        report_type = 'Expenditure'
+        return report_type, spendings.filter(spending_type=Spending_type.EXPENDITURE)
+
+
+def aggregate_spendings(spendings):
+    return spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
+
+
+def sort_spendings(spendings, sorted_by):
+    if sorted_by is None:
+        return spendings.order_by('-date')
+    else:
+        return spendings.order_by(sorted_by)
+
+ # Add paginator so every page contains only 10 rows of spending data
+def paginate_spendings(spendings, page_number):
+    paginator = Paginator(spendings, 10)
+    return paginator.get_page(page_number)
 
 
 # This method allows user to set a total budget with a selected time frame
