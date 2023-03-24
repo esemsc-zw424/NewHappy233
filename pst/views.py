@@ -583,7 +583,8 @@ def user_guideline(request):
     "Spending type, and Spending category for each spending you make and hit \"Add\".",
     "4. If you want to see your history activities, just Go to the \"Report\" page to view a summary of your Expenditure and Income.",
     "5. To set your budget limit, go to the \"My Plan\" page and click on \"Set Total Budget\". Then, simply enter the amount you want to spend, "
-    "choose how long you want the budget to last, and save your changes. After that, click on set specific budget Button to set your category budget.",
+    "choose how long you want the budget to last, and save your changes. After that, click on set specific budget Button to set your category budget. "
+    "Remember do not let your specialic budget exceeds your total budget,there will be an error message pop up.",
     "6. Don't worry about having to manually refresh your budget, it'll automatically be reset to the same limit once the time period you chose is up.",
     "7. If you really want to reset your budget manually, you can go to settings page and change your total budget limit in the \"Reset Total Budget\" section",
     "8. Want to add a profile picture to your account? You can easily do so by visiting https://en.gravatar.com/ and following the instructions there.",
@@ -598,6 +599,7 @@ def user_guideline(request):
     "And the \"My Plan\" section shows the total budget you set.",
     "14. If you wish to edit your personal information, then you can submit your information through \"My Profile\" section",
     "15. Remember you can always reset your password by clicking on the \"Edit Password\" option from the drop down list under your user icon image!"
+
     ]
     sorted_guide_list = sorted(guide_list, key=lambda x: float(x.split()[0].replace('.', '')))
 
