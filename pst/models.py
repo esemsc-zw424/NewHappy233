@@ -330,20 +330,13 @@ class Reply(BasePostReplyModel):
 class Like(models.Model):
     # used GenericForeignKey so like can be applied on both reply and post model
 
-    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-
-   
     object_id = models.PositiveIntegerField()
-
-    
     content_object = GenericForeignKey('content_type', 'object_id')
-
     class Meta:
         unique_together = [['user', 'content_type', 'object_id']]
+
 
 class DeliveryAddress(models.Model):
     """
