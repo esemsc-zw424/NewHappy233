@@ -75,7 +75,8 @@ urlpatterns = [
     path('personal_forum_reply/', views.personal_forum_reply, name='personal_forum_reply'),
     path('view_post_user/<user_id>/<post_id>/',
          views.view_post_user, name='view_post_user'),
-
+    path('like/<int:post_reply_id>/', views.like, name='like'),
+    path('like/<int:post_reply_id>/<int:post_id>/', views.like, name='like_reply'),
     path('view_settings/', views.view_settings, name='view_settings'),
 
     path('get_categories_by_type/', views.get_categories_by_type, name='get_categories_by_type'),
@@ -85,9 +86,6 @@ urlpatterns = [
     path('password/', views.password, name='password'),
     path('add_login_task_points/', views.add_login_task_points, name='add_login_task_points'),
     path('get_login_task_status/', GetLoginTaskStatusView.as_view(), name='get_login_task_status'),
-
-    path('like/<int:post_reply_id>/', views.like, name='like'),
-    path('like/<int:post_reply_id>/<int:post_id>/', views.like, name='like_reply'),
 
 ]
 

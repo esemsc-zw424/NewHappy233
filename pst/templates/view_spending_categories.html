@@ -2,101 +2,60 @@
 
 {% block content %}
 
-
-<div class="container">
-      
-    <table class="table">
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/view_categories.css' %}" />
+</head>
+<body> 
+    <div class="container">
         
-        <h1>Your Spending Categories:</h1>
-        <div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_category_modal">+</button>
-            <a href="{% url 'view_settings' %}" class="btn btn-primary"> Settings</a>
-        </div>
-        <!-- modal for add spending category -->
-        <div class="modal fade" id="add_category_modal" tabindex="-1" role="dialog" aria-labelledby="add_category_modal_label">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="add_category_modal_label">Add Category</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="{% url 'add_spending_categories' %}" method="post">
-                            {% csrf_token %}
-                            {{ form.as_p }}
-                            <input type="submit" class="btn btn-primary" value="Add">
-                        </form>
-                    </div>
-                </div>
+        <table class="table">
+            
+            <h1>Your Spending Categories:</h1>
+            <div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_category_modal">+</button>
+                <a href="{% url 'view_settings' %}" class="btn btn-primary"> Settings</a>
             </div>
-        </div>
-        <br>
-        <h3>Expenditure</h3>
-        <thead>
-            <tr>
-                <th scope="col">Category name</th>
-                <th scope="col">Category type</th>
-                <th scope="col">Delete</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for category in categories_expenditure %}
-            <tr class="align-middle">
-                <td>{{ category.name }}</td>
-                <td>{{ category.categories_type }}</td>
-
-                <td>
-                    <input type="hidden" name="category_id" value="{{ category.id }}">
-                    <a href="{% url 'delete_spending_categories' category.id %}" class="btn btn-danger">Delete</a>
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#edit_expenditure_category_modal{{ category.id }}">update</button>         
-                </td>
-                <!-- modal for update expenditure category -->
-                <div class="modal fade" id="edit_expenditure_category_modal{{ category.id }}" tabindex="-1" role="dialog" aria-labelledby="edit_category_modal_label">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="edit_category_modal_label">Edit Category</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form action="{% url 'update_spending_categories' category.id %}" method="post">
-                                    {% csrf_token %}
-                                    {{ form.as_p }}
-                                
-                                    <input type="submit" value="Update category" class = 'btn btn-lg btn-primary'> 
-                                </form>
-                            </div>
+            <!-- modal for add spending category -->
+            <div class="modal fade" id="add_category_modal" tabindex="-1" role="dialog" aria-labelledby="add_category_modal_label">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="add_category_modal_label">Add Category</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{% url 'add_spending_categories' %}" method="post">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <input type="submit" class="btn btn-primary" value="Add">
+                            </form>
                         </div>
                     </div>
                 </div>
-                
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </div>
+            <br>
+            <h3>Expenditure</h3>
+            <thead>
+                <tr>
+                    <th scope="col">Category name</th>
+                    <th scope="col">Category type</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories_expenditure %}
+                <tr class="align-middle">
+                    <td>{{ category.name }}</td>
+                    <td>{{ category.categories_type }}</td>
 
-    <br>
-    <h3>Income</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Category name</th>
-                <th scope="col">Category type</th>
-                <th scope="col">Delete</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for category in categories_income %}
-            <tr class="align-middle">
-                <td>{{ category.name }}</td>
-                <td>{{ category.categories_type }}</td>
-                <td>
-                    <input type="hidden" name="category_id" value="{{ category.id }}">
-                    <a href="{% url 'delete_spending_categories' category.id %}" class="btn btn-danger">Delete</a>
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#edit_income_category_modal{{ category.id }}">update</button>
-                </td>
-                    <!-- modal for update income category -->
-                    <div class="modal fade" id="edit_income_category_modal{{ category.id }}" tabindex="-1" role="dialog" aria-labelledby="edit_category_modal_label">
+                    <td>
+                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                        <a href="{% url 'delete_spending_categories' category.id %}" class="btn btn-danger">Delete</a>
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#edit_expenditure_category_modal{{ category.id }}">update</button>         
+                    </td>
+                    <!-- modal for update expenditure category -->
+                    <div class="modal fade" id="edit_expenditure_category_modal{{ category.id }}" tabindex="-1" role="dialog" aria-labelledby="edit_category_modal_label">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -107,20 +66,66 @@
                                     <form action="{% url 'update_spending_categories' category.id %}" method="post">
                                         {% csrf_token %}
                                         {{ form.as_p }}
+                                    
                                         <input type="submit" value="Update category" class = 'btn btn-lg btn-primary'> 
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </div>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <h3>Income</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Category name</th>
+                    <th scope="col">Category type</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories_income %}
+                <tr class="align-middle">
+                    <td>{{ category.name }}</td>
+                    <td>{{ category.categories_type }}</td>
+                    <td>
+                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                        <a href="{% url 'delete_spending_categories' category.id %}" class="btn btn-danger">Delete</a>
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#edit_income_category_modal{{ category.id }}">update</button>
+                    </td>
+                        <!-- modal for update income category -->
+                        <div class="modal fade" id="edit_income_category_modal{{ category.id }}" tabindex="-1" role="dialog" aria-labelledby="edit_category_modal_label">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="edit_category_modal_label">Edit Category</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{% url 'update_spending_categories' category.id %}" method="post">
+                                            {% csrf_token %}
+                                            {{ form.as_p }}
+                                            <input type="submit" value="Update category" class = 'btn btn-lg btn-primary'> 
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
 
 
-</div>
+    </div>
+</body>
 {% endblock %}
 
 
