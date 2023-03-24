@@ -25,20 +25,20 @@ class TestSortCategoryBudgets(TestCase):
 
     def test_sort_category_budget_with_negative_budget(self):
         selected_sort = '-budget'
-        sort_category_budget(self, selected_sort, self.category_budgets)
+        sort_category_budget(selected_sort, self.category_budgets)
 
     def test_sort_category_budget_with_positive_budget(self):
         selected_sort = 'budget'
-        sort_category_budget(self, selected_sort, self.category_budgets)
+        sort_category_budget( selected_sort, self.category_budgets)
 
     def test_sort_category_budget_with_negative_spending(self):
         selected_sort = '-spending'
-        sort_category_budget(self, selected_sort, self.category_budgets)
+        sort_category_budget(selected_sort, self.category_budgets)
 
     def test_sort_category_budget_with_positive_spending(self):
         selected_sort = 'spending'
-        sort_category_budget(self, selected_sort, self.category_budgets)
+        sort_category_budget( selected_sort, self.category_budgets)
 
     def test_sort_category_budget_with_empty_string(self):
         selected_sort = ''
-        sort_category_budget(self, selected_sort, self.category_budgets)
+        sort_category_budget(selected_sort, self.category_budgets)
