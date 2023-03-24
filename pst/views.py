@@ -13,8 +13,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-
+from django.views.generic.edit import CreateView, FormView, UpdateView
 import calendar
+from django.contrib.auth.mixins import LoginRequiredMixin
 from datetime import datetime
 import datetime as dt
 
@@ -25,7 +26,8 @@ from django.views import View
 from pst.helpers.auth import login_prohibited
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
-
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from pst.utils import LoginProhibitedMixin, SpendingFileMixin
 from django.conf import settings
 import random
 import nltk
@@ -42,20 +44,21 @@ def user_feed(request):
     return render(request, 'user_feed.html')
 
 
-@login_prohibited
-def visitor_signup(request):
-    if request.method == 'POST':
-        form = VisitorSignupForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('home')
-        else:
-            return render(request, 'visitor_signup.html', {'form': form})
-    else:
-        form = VisitorSignupForm()
-        return render(request, 'visitor_signup.html', {'form': form})
 
+class SignUpView(LoginProhibitedMixin, FormView):
+
+    template_name = "visitor_signup.html"
+    form_class = VisitorSignupForm
+    redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
+
+    def form_valid(self, form):
+        self.object = form.save()
+        auth.login(self.request, self.object, backend='django.contrib.auth.backends.ModelBackend')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+        
 
 # Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
 def get_spending_calendar_context(request, year=datetime.now().year, month=datetime.now().month):
@@ -106,6 +109,39 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
                'exp_amount': exp_sum,
                'income_amount': income_sum}
     return context
+
+
+
+
+class EditSpendingView(LoginRequiredMixin, SpendingFileMixin, UpdateView):
+    template_name = "view_spending.html"
+    form_class = EditSpendingForm
+    context_object_name = 'spending'
+    pk_url_kwarg = 'spending_id'
+    success_message = 'Change made successfully'
+
+    def get_queryset(self):
+        return Spending.objects.filter(spending_owner=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.handle_files(self.object,form,self.request)
+        messages.success(self.request, self.success_message)
+        return response
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+    
+    
+    def get_success_url(self):
+        return reverse('view_spendings')
+
+
 
 
 class GetLoginTaskStatusView(View):
@@ -161,7 +197,7 @@ def create_login_task(user):
 def create_daily_task_status(request, login_task):
     current_day = request.user.get_number_days_from_register()
     day, _ = Day.objects.get_or_create(number=current_day)
-    if request.user.consecutive_login_days > 7:
+    if request.user.consecutive_login_days >= 7:
         task_points = settings.HIGH_TASK_POINTS
     else:
         task_points = settings.NORMAL_TASK_POINTS
@@ -188,12 +224,12 @@ def get_super_task_point_position(request):
 
 def add_consecutive_login_days(request):
     user = request.user
-    if current_datetime - user.last_login < timedelta(hours=24) and user.logged_in_once_daily == False:
+    if current_datetime.day - user.cur_login_day.day == 1 and user.logged_in_once_daily == False and user.date_joined.day != user.cur_login_day.day:
         user.consecutive_login_days += 1
 
         # user has not logged in consecutively
-    elif current_datetime - user.last_login >= timedelta(hours=24):
-        user.consecutive_login_days = 1
+    elif current_datetime.day - user.cur_login_day.day > 1:
+        user.consecutive_login_days = 1 
     user.save()
 
 
@@ -252,23 +288,10 @@ def visitor_introduction(request):
 
 
 
-@login_required
-def edit_spending(request, spending_id):
-    try:
-        spending = Spending.objects.get(id = spending_id)
-    except ObjectDoesNotExist:
-        return render(request, 'view_spendings.html')
 
-    if request.method == 'POST':
-        form = EditSpendingForm(request.POST, instance=spending)
-        if form.is_valid():
-            form.save()
-            request.spending.save()
-            messages.success(request, 'success')
-            return redirect('view_spendings')
-    else:
-        form = EditSpendingForm(instance=spending)
-    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
+
+
+
 
 
 
@@ -284,11 +307,11 @@ def log_in(request):
             user = authenticate(username=email, password=password)
             if user is not None:
                 login(request, user)
+                user.check_already_logged_in_once_daily()
+                add_consecutive_login_days(request)
+                user.cur_login_day = current_datetime
                 redirect_url = next or 'home'
                 next = request.GET.get('next') or ''
-                add_consecutive_login_days(request)
-                user.check_already_logged_in_once_daily()
-                user.last_login = timezone.now()
                 user.save()
 
                 return redirect(redirect_url)
@@ -435,39 +458,8 @@ def view_spendings(request):
         return render(request, 'spending_table.html', context)
     else:
         return render(request, 'view_spendings.html', context)
+    
 
-
-@login_required
-def edit_spending(request, spending_id):
-    try:
-        spending = Spending.objects.get(id = spending_id)
-    except ObjectDoesNotExist:
-        return redirect('view_spendings')
-        
-
-    if request.method == 'POST':
-        form = EditSpendingForm(
-            request.user, request.POST, request.FILES, instance=spending)
-        
-        if form.is_valid():
-            form.save()
-            file_list = request.FILES.getlist('file')
-            # create new SpendingFile object associated with the spending object and replace the old SpendingFile
-            if file_list:
-                SpendingFile.objects.filter(spending=spending).delete()
-                for file in file_list:
-                    SpendingFile.objects.create(
-                        spending=spending,
-                        file=file
-                    )
-            # delete file(s) the user upload if delete_file field is selected                    
-            if form.cleaned_data['delete_file']:
-                SpendingFile.objects.filter(spending=spending).delete()
-            messages.success(request, 'Change made successfully')
-            return redirect('view_spendings')
-    else:
-        form = EditSpendingForm(user=request.user)
-    return render(request, "edit_spending.html", {'form': form, 'spending': spending})
 
 
 @login_required

@@ -27,7 +27,7 @@ urlpatterns = [
     path('', views.visitor_introduction, name='visitor_introduction'),
     path('add_spending/', views.add_spending, name='add_spending'),
     path('user_feed/', views.user_feed, name='user_feed'),
-    path('visitor_signup/', views.visitor_signup, name='visitor_signup'),
+    path('visitor_signup/', views.SignUpView.as_view(), name='visitor_signup'),
     path('home/', views.home, name='home'),
     path('visitor_introduction/', views.visitor_introduction,
          name='visitor_introduction'),
@@ -50,7 +50,7 @@ urlpatterns = [
     path('delete_spending_categories/<int:category_id>/', views.delete_spending_categories, name='delete_spending_categories'),
 
     path('edit_spending/<int:spending_id>/',
-         views.edit_spending, name='edit_spending'),
+         views.EditSpendingView.as_view(), name='edit_spending'),
     path('delete_spending/<int:spending_id>/',
          views.delete_spending, name='delete_spending'),
     path('shopping_mall/index/', views.index, name='index'),
