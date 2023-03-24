@@ -57,58 +57,53 @@ class SignUpView(LoginProhibitedMixin, FormView):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
         
 
-# Create a calendar which shows the sum of expenditures and incomes of all spendings of each day in a month
+
+
 def get_spending_calendar_context(request, year=datetime.now().year, month=datetime.now().month):
-    month_calendar = calendar.Calendar()
-    month_calendar_list = month_calendar.monthdays2calendar(year, month)
+    month_calendar_list = get_month_calendar_list(year, month)
     month_name = calendar.month_name[month]
     spendings = Spending.objects.filter(spending_owner=request.user)
-    if month == 1:
-        previous_month = 12
-        previous_year = year - 1
-        next_month = 2
-        next_year = year
-    elif month == 12:
-        previous_month = 11
-        previous_year = year
-        next_month = 1
-        next_year = year + 1
-    else:
-        previous_month = month - 1
-        next_month = month + 1
-        next_year = year
-        previous_year = year
-    
-    for i in range(0, len(month_calendar_list)):
-        for j in range(0, len(month_calendar_list[i])):
-            spendings_daily = []
-            exp_sum = 0
-            income_sum = 0
-            # adds each spending in the database to each date in the calendar
-            for spending in spendings:
-                if spending.date.day == month_calendar_list[i][j][0] and spending.date.month == month and spending.date.year == year:
-                    spendings_daily.append(spending)
-            # calculates the sum of expenditures and sums of all the spendings in a single day
-            for spending_daily in spendings_daily:
-                if spending_daily.spending_type == Spending_type.EXPENDITURE:
-                    exp_sum += spending_daily.amount
-                else:
-                    income_sum += spending_daily.amount
-            month_calendar_list[i][j] = (month_calendar_list[i][j][0], month_calendar_list[i][j][1], exp_sum, income_sum)
-
-    context = {'month_calendar_list': month_calendar_list,
-               'year': year, 
-               'month': month_name,
-               'previous_month': previous_month,
-               'previous_year': previous_year,
-               'next_month': next_month,
-               'next_year': next_year,
-               'exp_amount': exp_sum,
-               'income_amount': income_sum}
+    # spendings = get_spendings_for_month(request.user, year, month)
+    previous_month, previous_year, next_month, next_year = calculate_previous_and_next_months(year, month)
+    month_calendar_list = calculate_expense_and_income_sums(month_calendar_list, spendings)
+    context = build_context(month_calendar_list, year, month_name, previous_month, previous_year, next_month, next_year)
     return context
 
+def get_month_calendar_list(year, month):
+    month_calendar = calendar.Calendar()
+    return month_calendar.monthdays2calendar(year, month)
 
+def calculate_previous_and_next_months(year, month):
+    if month == 1:
+        previous_month, previous_year = 12, year - 1
+        next_month, next_year = 2, year
+    elif month == 12:
+        previous_month, previous_year = 11, year
+        next_month, next_year = 1, year + 1
+    else:
+        previous_month, previous_year = month - 1, year
+        next_month, next_year = month + 1, year
+    return previous_month, previous_year, next_month, next_year
 
+def calculate_expense_and_income_sums(month_calendar_list, spendings):
+    for i, week in enumerate(month_calendar_list):
+        for j, (day, weekday) in enumerate(week):
+            daily_spendings = [s for s in spendings if s.date.day == day]
+            exp_sum = sum(s.amount for s in daily_spendings if s.spending_type == Spending_type.EXPENDITURE)
+            income_sum = sum(s.amount for s in daily_spendings if s.spending_type == Spending_type.INCOME)
+            month_calendar_list[i][j] = (day, weekday, exp_sum, income_sum)
+    return month_calendar_list
+
+def build_context(month_calendar_list, year, month_name, previous_month, previous_year, next_month, next_year):
+    return {
+        'month_calendar_list': month_calendar_list,
+        'year': year,
+        'month': month_name,
+        'previous_month': previous_month,
+        'previous_year': previous_year,
+        'next_month': next_month,
+        'next_year': next_year,
+    }
 
 class EditSpendingView(LoginRequiredMixin, SpendingFileMixin, UpdateView):
     template_name = "view_spending.html"
@@ -607,7 +602,7 @@ def user_guideline(request):
     "the months' spending calendars.",
     "13. The \"Monthly Revenue\" and \"Monthly Expense\" sections in the home page shows your total amount of income and expenditure of the current month respectively. "
     "And the \"My Plan\" section shows the total budget you set."
-    
+
     "14. If you wish to edit your personal information, then you can submit your information through \"My Profile\" section",
     "15. Remember you can always reset your password by clicking on the \"Edit Password\" option from the drop down list under your user icon image!"
     ]
@@ -643,17 +638,10 @@ def spending_report(request):
         selected_spendings = spendings.filter(spending_type=Spending_type.EXPENDITURE)
     spendings_data = selected_spendings.values('spending_category__name').annotate(exp_amount=Sum('amount'))
 
-    # Sort spendings data by spending category, amount, or date
-    if sorted == 'spending_category':
-        sorted_spendings = selected_spendings.order_by('spending_category')
-    elif sorted == 'amount':
-        sorted_spendings = selected_spendings.order_by('amount')
-    elif sorted == '-amount':
-        sorted_spendings = selected_spendings.order_by('-amount')
-    elif sorted == 'date':
-        sorted_spendings = selected_spendings.order_by('date')
-    else:
+    if sorted is None:
         sorted_spendings = selected_spendings.order_by('-date')
+    else:
+        sorted_spendings = selected_spendings.order_by(sorted)
 
     # Add paginator so every page contains only 10 rows of spending data
     paginator = Paginator(sorted_spendings, 10)
