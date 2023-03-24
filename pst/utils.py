@@ -1,11 +1,10 @@
-
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.shortcuts import redirect
 
 from pst.models import SpendingFile
 
 
-
+#method to handle uploaded files related to a spending instance.
 class SpendingFileMixin:
     def handle_files(self,spending,form, request):
         file_list = request.FILES.getlist('file')
@@ -22,7 +21,8 @@ class SpendingFileMixin:
         
 
 
-
+#A mixin that prohibits access to a view if the user is already authenticated.
+#  If the user is authenticated, it redirects to the specified URL.
 class LoginProhibitedMixin:
     redirect_when_logged_in_url = None
 

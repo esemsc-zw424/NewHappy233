@@ -224,51 +224,41 @@ def add_consecutive_login_days(request):
     user.save()
 
 
+def get_monthly_spending(request, spending_type):
+    month = datetime.now().month
+    spending = Spending.objects.filter(
+        spending_owner=request.user,
+        date__month=month,
+        spending_type=spending_type,
+    )
+
+    if not spending:
+        return 0
+
+    return round(spending.aggregate(nums=Sum('amount')).get('nums'), 2)
+
+
 @login_required
 def home(request):
+     # Set up some variables for the template.
     week_list = [1,2,3,4,5]
     weekday_list = [1,2,3,4,5,6,7]
-    current_day = str(timezone.now().day)
     pos = get_position_in_daily_reward(request)
     super_task_pos = get_super_task_point_position(request)
-
-    user = request.user
     percentage = calculate_budget(request)
     month = datetime.now().month
-    revenue = Spending.objects.filter(
-        spending_owner=request.user,
-        date__month=month,
-        spending_type=Spending_type.INCOME,
-    )
-
-    if (not revenue):
-        monthly_revenue = 0
-    else:
-        monthly_revenue = round(revenue.aggregate(nums=Sum('amount')).get('nums'), 2)
-
-    expense = Spending.objects.filter(
-        spending_owner=request.user,
-        date__month=month,
-        spending_type=Spending_type.EXPENDITURE,
-    )
-
-    if (not expense):
-        monthly_expense = 0
-    else:
-        monthly_expense = round(expense.aggregate(nums=Sum('amount')).get('nums'), 2)
-
-    context = {'user': user, 'percentage': percentage,
+    monthly_revenue = get_monthly_spending(request, Spending_type.INCOME)
+    monthly_expense = get_monthly_spending(request, Spending_type.EXPENDITURE)
+    # Add additional context for the daily reward and spending calendar.
+    context = {'user': request.user, 'percentage': percentage,
                'revenue': monthly_revenue, 'expense': monthly_expense, 'month_in_number': month}
 
     daily_reward_context = {"pos": pos, "super_task_pos": super_task_pos, "week_list": week_list,
-                            "weekday_list": weekday_list, "current_datetime": current_day,
-                            "high_task_points": settings.HIGH_TASK_POINTS, "normal_task_points": settings.NORMAL_TASK_POINTS}
+                            "weekday_list": weekday_list,  "high_task_points": settings.HIGH_TASK_POINTS, "normal_task_points": settings.NORMAL_TASK_POINTS}
 
     calendar_context = get_spending_calendar_context(request)
-
     context.update(calendar_context)
     context.update(daily_reward_context)
-
     return render(request, 'home.html', context)
 
 
@@ -278,6 +268,7 @@ def visitor_introduction(request):
 
 
 @login_prohibited
+
 def log_in(request):
     if request.method == 'POST':
         next = request.POST.get('next') or ''
@@ -317,7 +308,8 @@ def log_out(request):
 # User can type in some quesiton, and by identifing key words in the question, chatbot can provide user with relevant answer
 @login_required
 def chat_bot(request):
-    chat_history = []  # this is use to store response from chatbot and print it out in the web
+    # this is use to store response from chatbot and print it out in the web
+    chat_history = []
     if request.method == 'POST':
         user_input = request.POST['user_input']
         chat_bot_response = respond(request, user_input)
@@ -444,6 +436,7 @@ def view_spendings(request):
     
 
 @login_required
+#  Allows logged-in users to delete a spending object with the given ID.
 def delete_spending(request, spending_id):
     delete_spending = get_object_or_404(Spending, id = spending_id)
     delete_spending.delete()
@@ -555,7 +548,7 @@ def update_spending_categories(request, category_id):
         form = CategoriesForm(instance=category)
     return redirect('view_spending_categories')
 
-
+#  Displays the user's profile page and how to edit it.
 @login_required
 def user_profile(request):
     user = request.user
@@ -580,7 +573,7 @@ def edit_profile(request):
         form = EditProfileForm(instance=user)
     return render(request, 'edit_profile.html', {'form': form})
 
-
+#A useful user-guideline which contains all the information they may want to know.
 @login_required
 def user_guideline(request):
     guide_list = [
@@ -740,6 +733,7 @@ def index(request):
     address = DeliveryAddress.objects.filter(user=request.user).last()
     form = AddressForm(instance=address)
 
+    # If there are no rewards, create some default rewards.
     if Reward.objects.count() == 0:
         Reward.objects.create(
             name='T-shirt', points_required=10, image='rewards/shirt.jpg')
@@ -750,7 +744,7 @@ def index(request):
         Reward.objects.create(name="AMZ £20 Gift Card",
                               points_required=200, image='rewards/amazon_gift_card.jpg')
 
-
+ # Get all the rewards and pass them to the template.
     rewards = Reward.objects.all()
     context = {
         'form': form,
@@ -955,6 +949,8 @@ def view_post_user(request, user_id, post_id):
 
 
 @login_required
+ # Displays the settings page, including a form for updating the user's total budget.
+
 def view_settings(request):
     form = TotalBudgetForm(request.user)
     return render(request, 'setting_page.html', {'form': form})
