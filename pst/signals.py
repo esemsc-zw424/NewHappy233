@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from .models import Categories, Spending_type
 
 @receiver(user_signed_up)
+
 def create_default_categories(sender, request, user, **kwargs):
     """
     Create default categories for new users who sign up.
@@ -32,6 +33,7 @@ def create_default_categories(sender, request, user, **kwargs):
             {'name': 'Other', 'type': Spending_type.INCOME, 'default_category': True},
         ]
 
+  # create Categories objects for each category
     for category in categories:
         Categories.objects.create(
             name=category['name'],
