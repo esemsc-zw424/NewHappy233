@@ -39,11 +39,6 @@ nltk.download('wordnet')
 
 current_datetime = timezone.now()
 
-@login_required
-def user_feed(request):
-    return render(request, 'user_feed.html')
-
-
 
 class SignUpView(LoginProhibitedMixin, FormView):
 
@@ -111,8 +106,6 @@ def get_spending_calendar_context(request, year=datetime.now().year, month=datet
     return context
 
 
-
-
 class EditSpendingView(LoginRequiredMixin, SpendingFileMixin, UpdateView):
     template_name = "view_spending.html"
     form_class = EditSpendingForm
@@ -140,8 +133,6 @@ class EditSpendingView(LoginRequiredMixin, SpendingFileMixin, UpdateView):
     
     def get_success_url(self):
         return reverse('view_spendings')
-
-
 
 
 class GetLoginTaskStatusView(View):
@@ -233,7 +224,6 @@ def add_consecutive_login_days(request):
     user.save()
 
 
-
 @login_required
 def home(request):
     week_list = [1,2,3,4,5]
@@ -287,14 +277,6 @@ def visitor_introduction(request):
     return render(request, 'visitor_introduction.html')
 
 
-
-
-
-
-
-
-
-
 @login_prohibited
 def log_in(request):
     if request.method == 'POST':
@@ -326,7 +308,6 @@ def log_in(request):
     return render(request, 'log_in.html', {'form': form})
 
 
-
 def log_out(request):
     logout(request)
     return redirect('visitor_introduction')
@@ -343,6 +324,7 @@ def chat_bot(request):
         chat_history.append((user_input, chat_bot_response))
         return render(request, 'chat_bot.html', {'chat_history': chat_history})
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
+
 
 # This function receives user input and responds with pre-defined messages based on identified keywords or phrases
 @login_required
@@ -419,6 +401,7 @@ def respond(request, user_input):
         messages.add_message(request, messages.ERROR,
                              "You can not submit empty space!!!")
 
+
 @login_required
 def view_spendings(request):
     start_date = request.GET.get('start_date')
@@ -460,8 +443,6 @@ def view_spendings(request):
         return render(request, 'view_spendings.html', context)
     
 
-
-
 @login_required
 def delete_spending(request, spending_id):
     delete_spending = get_object_or_404(Spending, id = spending_id)
@@ -490,6 +471,7 @@ def add_spending(request):
         form = AddSpendingForm()
     return render(request, 'view_spendings.html', {'form': form})
 
+
 # This view function allow user to add a new spending category to their list of categories
 @login_required
 def add_spending_categories(request):
@@ -507,6 +489,7 @@ def add_spending_categories(request):
     else:
         form = CategoriesForm()
     return render(request, 'view_spending_categories.html', {'form': form})
+
 
 # This function is a helper function user when add spending. It auto change the content of the dropdown menu for categories automatically when the content in spending_type change
 @login_required
@@ -536,6 +519,7 @@ def view_spending_categories(request):
                   {'categories_expenditure': categories_expenditure, 'categories_income': categories_income,
                    'form': form})
 
+
 # This function is for deleting an existing category
 @login_required
 def delete_spending_categories(request, category_id):
@@ -548,6 +532,7 @@ def delete_spending_categories(request, category_id):
         messages.add_message(request, messages.ERROR,
                              "You can not delete default category!")
     return redirect('view_spending_categories')
+
 
 # This function is for updating an existing category
 @login_required
@@ -765,7 +750,7 @@ def index(request):
         Reward.objects.create(name="AMZ £20 Gift Card",
                               points_required=200, image='rewards/amazon_gift_card.jpg')
 
-#
+
     rewards = Reward.objects.all()
     context = {
         'form': form,
@@ -783,21 +768,15 @@ def redeem(request, reward_id):
     total_task_points = user.total_task_points
     reward = Reward.objects.get(id=reward_id)
 
-    if total_task_points is None:
-
-        messages.add_message(
-            request, messages.INFO, "You don't have enough reward points to redeem this reward.")
-        return redirect('index')
-    elif total_task_points >= reward.points_required:
+    if total_task_points is not None and total_task_points >= reward.points_required:
         user.decrease_total_task_points(reward.points_required)
         messages.add_message(
             request, messages.INFO, 'Successfully redeemed, your item will be shipped to your address within 7 days.')
-        return redirect('index')
     else:
-
         messages.add_message(
             request, messages.INFO, "You don't have enough reward points to redeem this reward.")
-        return redirect('index')
+
+    return redirect('index')
 
 
 # This method is used to add delivery address in index page
@@ -816,6 +795,7 @@ def add_address(request):
         form = AddressForm()
     return render(request, "index.html", {'form': form})
 
+
 # This function retrieves all posts from the database and orders them by their creation date, from newest to oldest, and attach with one reply
 @login_required
 def forum(request):
@@ -827,6 +807,7 @@ def forum(request):
         post.replies = Reply.objects.filter(parent_post=post)
 
     return render(request, 'forum.html', {'page_obj': page_obj})
+
 
 # This view function displays a list of forum posts created by the current logged-in user
 @login_required
@@ -840,6 +821,7 @@ def personal_forum(request):
 
     return render(request, 'personal_forum.html', {'page_obj': page_obj})
 
+
 # This function displays a page that shows all the replies made by the user in the forum
 @login_required
 def personal_forum_reply(request):
@@ -849,6 +831,7 @@ def personal_forum_reply(request):
     reply_page_obj = reply_paginator.get_page(reply_page_number)
 
     return render(request, 'personal_forum_reply.html', {'reply_page_obj': reply_page_obj})
+
 
 # This view function allows users to add a new post to the forum
 @login_required
@@ -871,6 +854,7 @@ def add_post(request):
         form = PostForm()
     return render(request, 'add_post.html',  {'form': form})
 
+
 # This function allows users to delete their own posts
 @login_required
 def delete_post(request, post_id):
@@ -878,6 +862,7 @@ def delete_post(request, post_id):
     delete_post.delete()
     messages.warning(request, "post has been deleted")
     return redirect('personal_forum')
+
 
 # This function retrieves details of a specific post and its replies based on the post_id parameter
 @login_required
@@ -892,6 +877,7 @@ def post_detail(request, post_id):
     page_obj = paginator.get_page(page_number)
     context = {'post': post, 'replies': replies, 'page_obj': page_obj}
     return render(request, 'post_detail.html', context)
+
 
 # This function allows users to like or unlike a post or reply
 @login_required
@@ -924,6 +910,7 @@ def like(request, post_reply_id, post_id=None):
         'HTTP_REFERER', reverse('post_detail', args=[post_id])) if post_id else request.META.get('HTTP_REFERER', reverse('forum'))
     return redirect(redirect_url)
 
+
 # This function allows users to reply a post or a reply
 @login_required
 def add_reply(request, post_id, parent_reply_id=None):
@@ -948,6 +935,7 @@ def add_reply(request, post_id, parent_reply_id=None):
     template_name = 'add_reply_to_reply.html' if parent_reply else 'add_reply_to_post.html'
     return render(request, template_name, context)
 
+
 # This view function deletes a reply and redirects the user to their personal forum reply page
 @login_required
 def delete_reply(request, reply_id):
@@ -955,6 +943,7 @@ def delete_reply(request, reply_id):
     delete_reply.delete()
     messages.warning(request, "reply has been deleted")
     return redirect('personal_forum_reply')
+
 
 # This function displays the details of a post created by a particular user
 @login_required
