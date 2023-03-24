@@ -603,8 +603,7 @@ def user_guideline(request):
     "12. The calendar at the home page shows your spendings of each day in the current month, you can also click on the link on top of the calendar to get access to all "
     "the months' spending calendars.",
     "13. The \"Monthly Revenue\" and \"Monthly Expense\" sections in the home page shows your total amount of income and expenditure of the current month respectively. "
-    "And the \"My Plan\" section shows the total budget you set."
-
+    "And the \"My Plan\" section shows the total budget you set.",
     "14. If you wish to edit your personal information, then you can submit your information through \"My Profile\" section",
     "15. Remember you can always reset your password by clicking on the \"Edit Password\" option from the drop down list under your user icon image!"
     ]
