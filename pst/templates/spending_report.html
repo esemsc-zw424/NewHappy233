@@ -1,41 +1,6 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <head>
-    <style>
-        * {
-        margin: 0;
-        padding: 0;
-        font-family: sans-serif;
-        }
-        .chartMenu {
-        width: 100vw;
-        height: 40px;
-        background: #0c0909;
-        color: rgba(54, 162, 235, 1);
-        }
-        .chartMenu p {
-        padding: 10px;
-        font-size: 20px;
-        }
-        .chartCard {
-        width: 100vw;
-        height: calc(60vh - 40px);
-        background: rgba(206, 212, 216, 0.192);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        }
-        .chartBox {
-        width: 50%;
-        min-width: 200px;
-        min-height:50px;
-        padding: 20px;
-        border-radius: 20px;
-        border: solid 3px rgba(54, 162, 235, 1);
-        background: white;
-        }
-    </style>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.2/dist/chart.min.js"></script>
 
     <script>
@@ -108,12 +73,6 @@
 
 <body>
     <div class="container">
-        <!-- <div class="row">
-            <div class="col offset-md-11">
-                <p><a href='{% url 'home' %}'class="btn btn btn-primary">Return</a></p>
-            </div>
-        </div> -->
-
         <form method="GET" action="{% url 'spending_report' %}">
             <div class="row">
                 <div class="col col-lg-2">

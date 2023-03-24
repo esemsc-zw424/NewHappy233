@@ -1,6 +1,7 @@
 # this is seed file
 from django.core.management.base import BaseCommand, CommandError
 from faker import Faker
+import pytz
 from django.contrib.auth import models
 from pst.models import User, Spending, SpendingFile, Spending_type, Categories, Budget, Reward, Post, PostImage, Reply, Like, TotalBudget, DeliveryAddress
 from datetime import datetime, timedelta
@@ -24,8 +25,22 @@ class Command(BaseCommand):
         super().__init__()
         self.faker = Faker('en_GB')
 
+        # create an admin account
+        User.objects.create_superuser(
+            first_name="0",
+            last_name="0",
+            email='admin@example.org',
+            password="Admin123"
+        )
+
+        self.timezone = pytz.timezone('Europe/London')
         self.start_date = (datetime.today().replace(day=1) - timedelta(days=1)).replace(day=1)
-        self.end_date = datetime.now()
+        if not self.start_date.tzinfo:
+            self.start_date = self.timezone.localize(self.start_date)
+        
+
+     
+        self.end_date = self.timezone.localize(datetime.now())
         self.days_between = (self.end_date - self.start_date).days
         self.faker.unique.clear()
        
@@ -37,7 +52,7 @@ class Command(BaseCommand):
         self._create_alice_doe()
         self._create_specified_number_of_users()
         
-        self._create_spendings_for_all_users()
+        self._create_spending_for_all_users()
         
 
         self._create_posts_for_all_users()
@@ -53,7 +68,7 @@ class Command(BaseCommand):
         self._create_reply_for_alice_post()
         self._create_reply_for_a_reply()
         self._create_budget_for_alice_doe()
-        self._create_delievery_address_for_alice_doe()
+        self._create_delivery_address_for_alice_doe()
 
         
         print('Everything is done, enjoy the application :) ')
@@ -83,6 +98,15 @@ class Command(BaseCommand):
         first_name = self.faker.unique.first_name()
         last_name = self.faker.unique.last_name()
         email = self._email(first_name, last_name)
+        random_timedelta = timedelta(days=random.randint(0, self.days_between))
+        date_joined = self.start_date + random_timedelta
+        date_joined_naive = datetime(date_joined.year, date_joined.month, date_joined.day, 
+                             date_joined.hour, date_joined.minute, date_joined.second,
+                             date_joined.microsecond)
+
+        # localize the naive datetime object to the timezone
+        date_joined_localized = self.timezone.localize(date_joined_naive)
+
         user = User.objects.create_user(
             first_name=first_name,
             last_name=last_name,
@@ -93,7 +117,7 @@ class Command(BaseCommand):
             phone_number= f'{user_count}',
             total_task_points=0,
             password=Command.PASSWORD,
-            date_joined= self.start_date + timedelta(days=random.randint(0, self.days_between)),
+            date_joined = date_joined_localized
         )
 
     def _email(self, first_name, last_name):
@@ -101,7 +125,7 @@ class Command(BaseCommand):
         return email
 
 
-    def _create_spendings_for_all_users(self):
+    def _create_spending_for_all_users(self):
         
         # since all users all have same default categories, just exploit Alice Doe to get all common categories.
         self.default_expenditure_category_list = Categories.objects.filter(owner=self.alice_doe, categories_type=Spending_type.EXPENDITURE, default_category=True)
@@ -139,7 +163,6 @@ class Command(BaseCommand):
                             user=self.special_user,
                             title='Alice, Can you see my post?',
                             content="I am sure you can!",
-                            post_date=self.start_date,
                         )
          # create image for the post
         with open('static/seed_image/question_mark.png', 'rb') as f:
@@ -154,14 +177,14 @@ class Command(BaseCommand):
     
 
     def _create_posts_for_all_users(self):
-        POSSIBILITY_OF_POST = 0.9 #0.12
+        POSSIBILITY_OF_POST = 0.12
         for user in self.users:
             if random.random() <= POSSIBILITY_OF_POST:
                 Post.objects.create(
                 user=user,
                 title= f'post of {user.last_name}',
                 content= f'content writteb by {user.last_name}',
-                post_date=self.start_date + timedelta(days=random.randint(0, self.days_between)),
+
                 )
         print('finish creating posts for all user')
     
@@ -176,8 +199,7 @@ class Command(BaseCommand):
         print('finish createing total budget for all users')
     
     def _create_budget_for_all_users(self):
-        POSSIBILITY_OF_HAVING_CATEGORY_BUDGET= 0.5
-
+    
         for user in self.users:
             if random.random() <= 0.5:
                 if random.choice([Spending_type.EXPENDITURE, Spending_type.INCOME]) == Spending_type.EXPENDITURE:
@@ -199,6 +221,14 @@ class Command(BaseCommand):
     #  ----------------------helper method for the setup of Alice Doe----------------------
 
     def _create_alice_doe(self):
+        random_timedelta = timedelta(days=random.randint(0, self.days_between))
+        date_joined = self.start_date + random_timedelta
+        date_joined_naive = datetime(date_joined.year, date_joined.month, date_joined.day, 
+                             date_joined.hour, date_joined.minute, date_joined.second,
+                             date_joined.microsecond)
+
+        # localize the naive datetime object to the timezone
+        date_joined_localized = self.timezone.localize(date_joined_naive)
 
         self.alice_doe = User.objects.create_user(
             first_name="Alice",
@@ -210,7 +240,7 @@ class Command(BaseCommand):
             phone_number= "01111111111",
             total_task_points=0,
             password=Command.PASSWORD,
-            date_joined= datetime.now() - timedelta(days=7) # Calculate the date and time that is seven days before the current date and time
+            date_joined = date_joined_localized # Calculate the date and time that is seven days before the current date and time
         )
 
         print("finish creating account of Alice")
@@ -228,8 +258,8 @@ class Command(BaseCommand):
 
         POSSIBILITY_OF_HAVING_FILE = 0.1 
         
-        for i in range(1, 41):
-            is_expenditure = i <= 20
+        for i in range(1, 31):
+            is_expenditure = i <= 15
 
             # Determine spending type and file content based on expenditure/income
             if is_expenditure:
@@ -245,7 +275,7 @@ class Command(BaseCommand):
             spending = Spending.objects.create(
                     title=f"Spending {i}",
                     spending_owner=self.alice_doe,
-                    amount=random.random() * 100,
+                    amount=random.random() * 150,
                     descriptions=f"This is spending {i}",
                     date=self.start_date + timedelta(days=random.randint(0, self.days_between)),
                     spending_type=spending_type,
@@ -290,7 +320,6 @@ class Command(BaseCommand):
                             user=self.alice_doe,
                             title='Demonstration for forum post function',
                             content="This picture shows the home page of the application.",
-                            post_date=self.start_date,
                         )
 
         # create image for the post
@@ -318,7 +347,6 @@ class Command(BaseCommand):
             user=self.special_user,
             parent_post=self.alice_post,
             content='This is demo for reply function.',
-            reply_date=datetime.now()
         )
         like = Like.objects.create(
             user=self.alice_doe,
@@ -331,7 +359,6 @@ class Command(BaseCommand):
                             user=self.alice_doe,
                             parent_post=self.alice_post,
                             content='Received. This is demo for replying a reply function.',
-                            reply_date=datetime.now()
         )
         like = Like.objects.create(
             user=self.special_user,
@@ -361,7 +388,7 @@ class Command(BaseCommand):
         
         print("finish creating budgets")
     
-    def _create_delievery_address_for_alice_doe(self):
+    def _create_delivery_address_for_alice_doe(self):
         DeliveryAddress.objects.create(
             user=self.alice_doe,
             address=self.alice_doe.address,

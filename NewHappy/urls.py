@@ -67,15 +67,10 @@ urlpatterns = [
     path('delete_post/<int:post_id>/', views.delete_post, name = 'delete_post'),
     path('delete_reply/<int:reply_id>/', views.delete_reply, name = 'delete_reply'),
     path('post_detail/<int:post_id>/', views.post_detail, name='post_detail'),
-    path('like_post/<int:post_id>/', views.like_post, name='like_post'),
-    path('like_post_details/<int:post_id>/',
-         views.like_post_details, name='like_post_details'),
-    path('like_reply/<int:reply_id>/<int:post_id>/',
-         views.like_reply, name='like_reply'),
     path('add_reply_to_post/<int:post_id>/',
-         views.add_reply_to_post, name='add_reply_to_post'),
+         views.add_reply, name='add_reply_to_post'),
     path('add_reply_to_reply/<int:post_id>/<int:parent_reply_id>/',
-         views.add_reply_to_reply, name='add_reply_to_reply'),
+         views.add_reply, name='add_reply_to_reply'),
     path('personal_forum/', views.personal_forum, name='personal_forum'),
     path('personal_forum_reply/', views.personal_forum_reply, name='personal_forum_reply'),
     path('view_post_user/<user_id>/<post_id>/',
@@ -91,6 +86,12 @@ urlpatterns = [
     path('add_login_task_points/', views.add_login_task_points, name='add_login_task_points'),
     path('get_login_task_status/', GetLoginTaskStatusView.as_view(), name='get_login_task_status'),
 
+    path('like/<int:post_reply_id>/', views.like, name='like'),
+    path('like/<int:post_reply_id>/<int:post_id>/', views.like, name='like_reply'),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

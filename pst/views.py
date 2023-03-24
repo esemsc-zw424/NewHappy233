@@ -1,50 +1,33 @@
-from django.conf import settings
 from audioop import reverse
 import datetime
-from django.db.models import Sum
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 
 from django.urls import reverse
-from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 
-from pst.forms import CategoriesForm, AddSpendingForm, LoginForm, EditProfileForm, PostForm, ReplyForm
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Sum
-from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Max, Sum, Subquery, OuterRef
 from django.views.generic.edit import CreateView, FormView, UpdateView
 import calendar
-from datetime import date, datetime
+from datetime import datetime
 import datetime as dt
 
-from .models import User, Categories, Spending, SpendingFile, Reward, Budget, SpendingFile, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType, DeliveryAddress
+from .models import Reward, PostImage, Like, DailyTask, DailyTaskStatus, Day, TaskType
 
 from .forms import *
 from django.views import View
-from django.utils.decorators import method_decorator
 from pst.helpers.auth import login_prohibited
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from pst.utils import LoginProhibitedMixin, SpendingFileMixin
-import os
-from django.db.models.signals import pre_delete
-from django.dispatch import receiver
 from django.conf import settings
-from NewHappy.settings import MEDIA_ROOT
-from django.http import HttpResponse
 import random
 import nltk
 nltk.download('punkt')
@@ -349,9 +332,10 @@ def log_out(request):
 
 
 # Chatbot is a simple virtual help assistant that can answer user's question base on keywords
+# User can type in some quesiton, and by identifing key words in the question, chatbot can provide user with relevant answer
 @login_required
 def chat_bot(request):
-    chat_history = []  # this is use to store all the chat history between user and chatbot
+    chat_history = []  # this is use to store response from chatbot and print it out in the web
     if request.method == 'POST':
         user_input = request.POST['user_input']
         chat_bot_response = respond(request, user_input)
@@ -359,6 +343,13 @@ def chat_bot(request):
         return render(request, 'chat_bot.html', {'chat_history': chat_history})
     return render(request, 'chat_bot.html', {'chat_history': chat_history})
 
+# This function receives user input and responds with pre-defined messages based on identified keywords or phrases
+# The function first checks if the user input matches any pre-defined keywords or synonyms
+# If it does, the function returns a pre-defined response 
+# If not, the function attempts to match the input to possible keywords by lemmatizing the input and 
+# comparing it to the synonyms of each keyword. If the function finds a possible keyword, it returns a message asking if the user 
+# meant that keyword. If there are multiple possible keywords, the function selects the first one that has a pre-defined response and returns a random response from its list of responses
+# If the user input does not match any pre-defined keywords or possible keywords, the function returns a default error message
 @login_required
 def respond(request, user_input):
     lemmatizer = WordNetLemmatizer()
@@ -401,6 +392,8 @@ def respond(request, user_input):
         "hello": ["Hello! How may I help you?"],
         "bye": ["Goodbye! Have a great day!"],
     }
+
+    # The keyword can still be identify no matter it is in capital letter or lower letter
     if user_input:
         for keyword, synonyms in keywords.items():
             if user_input.lower() in [s.lower() for s in synonyms]:
@@ -437,6 +430,7 @@ def view_spendings(request):
     end_date = request.GET.get('end_date')
     selected_sort = request.GET.get('sorted')
 
+    # retrieve spending in given time interval if user specified start date and end date
     if start_date and end_date:
         start_date = dt.datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = dt.datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -446,6 +440,7 @@ def view_spendings(request):
         unsorted_spending = Spending.objects.filter(
             spending_owner=request.user).order_by('-date')
 
+    # retrieve spending by filtered type
     if selected_sort == 'Income':
         spending = unsorted_spending.filter(spending_type=Spending_type.INCOME)
     elif selected_sort == 'Expenditure':
@@ -453,7 +448,7 @@ def view_spendings(request):
     elif selected_sort:
         spending = unsorted_spending.order_by(selected_sort)
     else:
-        spending = unsorted_spending
+        spending = unsorted_spending.order_by('date')
 
     paginator = Paginator(spending, 10)
     page_number = request.GET.get('page')
@@ -462,6 +457,8 @@ def view_spendings(request):
     add_form = AddSpendingForm(user=request.user)
     edit_form = EditSpendingForm(user=request.user)
     context = {'add_form': add_form, 'edit_form': edit_form, 'spending': spending, 'page_obj': page_obj}
+
+    # if the request was sent by Ajax, render spending table html
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'spending_table.html', context)
     else:
@@ -472,7 +469,6 @@ def view_spendings(request):
 
 @login_required
 def delete_spending(request, spending_id):
-
     delete_spending = get_object_or_404(Spending, id = spending_id)
     delete_spending.delete()
     messages.warning(request, "spending has been deleted")
@@ -487,6 +483,7 @@ def add_spending(request):
             spending = form.save(commit=False)
             spending.spending_owner = request.user
             spending.save()
+            # create SpendingFile object to contain the file(s) the user
             for file in request.FILES.getlist('file'):
                 SpendingFile.objects.create(
                     spending=spending,
@@ -498,7 +495,7 @@ def add_spending(request):
         form = AddSpendingForm()
     return render(request, 'view_spendings.html', {'form': form})
 
-
+# This view function allow user to add a new spending category to their list of categories
 @login_required
 def add_spending_categories(request):
     if request.method == 'POST':
@@ -605,8 +602,36 @@ def edit_profile(request):
 
 @login_required
 def user_guideline(request):
-    return render(request, 'user_guideline.html')
+    guide_list = [
+    "1. We have a lot of exciting features waiting for you to discover in the Settings page. So why not take a look and explore all the possibilities?",
+    "2. If you want to get the daily point, simply click on the piggy image on the overview page.",
+    "3. Tracking your spending is easy! Just head over to the overview page and click on \"Bookkeeping\". Then, fill in the Title, amount, description, date, "
+    "Spending type, and Spending category for each spending you make and hit \"Add\".",
+    "4. If you want to see your history activities, just Go to the \"Report\" page to view a summary of your Expenditure and Income.",
+    "5. To set your budget limit, go to the \"My Plan\" page and click on \"Set Total Budget\". Then, simply enter the amount you want to spend, "
+    "choose how long you want the budget to last, and save your changes. After that, click on set specific budget Button to set your category budget.",
+    "6. Don't worry about having to manually refresh your budget, it'll automatically be reset to the same limit once the time period you chose is up.",
+    "7. If you really want to reset your budget manually, you can go to settings page and change your total budget limit in the \"Reset Total Budget\" section",
+    "8. Want to add a profile picture to your account? You can easily do so by visiting https://en.gravatar.com/ and following the instructions there.",
+    "9. If you'd like to share your daily accounting routine and inspire others, why not try using our forum feature? "
+    "It's a great way to connect with other users and exchange helpful tips and advice!",
+    "10. Need help navigating our app? Try using some keywords like \"hello\", \"budget\", \"expense\", \"track\", \"saving\", \"finance\", \"bye\", "
+    "or anything else you have questions about, to chat with our helpful chatbot.",
+    "11. Ready to cash in your daily points for some awesome rewards? Simply click on the 'Reward' button and choose from our selection of great prizes. It's that easy!",
+    "12. The calendar at the home page shows your spendings of each day in the current month, you can also click on the link on top of the calendar to get access to all "
+    "the months' spending calendars.",
+    "13. The \"Monthly Revenue\" and \"Monthly Expense\" sections in the home page shows your total amount of income and expenditure of the current month respectively. "
+    "And the \"My Plan\" section shows the total budget you set."
+    "14. If you wish to edit your personal information, then you can submit your information through \"My Profile\" section",
+    "15. Remember you can always reset your password by clicking on the \"Edit Password\" option from the drop down list under your user icon image!"
+    ]
+    sorted_guide_list = sorted(guide_list, key=lambda x: float(x.split()[0].replace('.', '')))
 
+    # Add a paginator so a single page only shows at most 5 user guide lines
+    paginator = Paginator(sorted_guide_list, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'user_guideline.html', {'page_obj': page_obj})
 
 
 @login_required
@@ -642,8 +667,9 @@ def spending_report(request):
     elif sorted == 'date':
         sorted_spendings = selected_spendings.order_by('date')
     else:
-        sorted_spendings = selected_spendings
+        sorted_spendings = selected_spendings.order_by('-date')
 
+    # Add paginator so every page contains only 10 rows of spending data
     paginator = Paginator(sorted_spendings, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -871,109 +897,40 @@ def post_detail(request, post_id):
 
 
 @login_required
-def like_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    user = request.user
-    content_type = ContentType.objects.get_for_model(Post)
-    try:
-        like = Like.objects.get(
-            content_type=content_type,
-            object_id=post_id,
-            user=user,
-        )
-        like.delete()
-        created = False
-    except Like.DoesNotExist:
-        like = Like.objects.create(
-            content_type=content_type,
-            object_id=post_id,
-            user=user,
-        )
-        created = True
-    like_count = post.likes.count()
-
-    return redirect(request.META.get('HTTP_REFERER', reverse('forum')))
-
-
-@login_required
-def like_post_details(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    user = request.user
-    content_type = ContentType.objects.get_for_model(Post)
-    try:
-        like = Like.objects.get(
-            content_type=content_type,
-            object_id=post_id,
-            user=user,
-        )
-        like.delete()
-        created = False
-    except Like.DoesNotExist:
-        like = Like.objects.create(
-            content_type=content_type,
-            object_id=post_id,
-            user=user,
-        )
-        created = True
-    like_count = post.likes.count()
-
-    redirect_url = request.META.get(
-        'HTTP_REFERER', reverse('post_detail', args=[post_id]))
-    return redirect(redirect_url)
-
-
-@login_required
-def like_reply(request, reply_id, post_id):
-    reply = get_object_or_404(Reply, id=reply_id)
-    post = get_object_or_404(Post, id=post_id)
-    user = request.user
-    content_type = ContentType.objects.get_for_model(Reply)
-    try:
-        like = Like.objects.get(
-            content_type=content_type,
-            object_id=reply_id,
-            user=user,
-        )
-        like.delete()
-        created = False
-    except Like.DoesNotExist:
-        like = Like.objects.create(
-            content_type=content_type,
-            object_id=reply_id,
-            user=user,
-        )
-        created = True
-    like_count = reply.likes.count()
-    redirect_url = request.META.get(
-        'HTTP_REFERER', reverse('post_detail', args=[post_id]))
-    return redirect(redirect_url)
-
-
-@login_required
-def add_reply_to_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-
-    if request.method == 'POST':
-        form = ReplyForm(request.POST)
-        if form.is_valid():
-            reply = form.save(commit=False)
-            reply.user = request.user
-            reply.parent_post = post
-            reply.save()
-            messages.add_message(request, messages.SUCCESS,
-                                 "reply has been successfully added!")
-            return redirect('post_detail', post_id=post.id)
+def like(request, post_reply_id, post_id=None):
+    obj = None
+    content_type = None
+    if post_id:
+        obj = get_object_or_404(Reply, id=post_reply_id)
+        content_type = ContentType.objects.get_for_model(Reply)
     else:
-        form = ReplyForm()
-
-    context = {'form': form, 'post': post}
-    return render(request, 'add_reply_to_post.html', context)
-
+        obj = get_object_or_404(Post, id=post_reply_id)
+        content_type = ContentType.objects.get_for_model(Post)
+    user = request.user
+    try:
+        like = Like.objects.get(
+            content_type=content_type,
+            object_id=post_reply_id,
+            user=user,
+        )
+        like.delete()
+        created = False
+    except Like.DoesNotExist:
+        like = Like.objects.create(
+            content_type=content_type,
+            object_id=post_reply_id,
+            user=user,
+        )
+        created = True
+    redirect_url = request.META.get(
+        'HTTP_REFERER', reverse('post_detail', args=[post_id])) if post_id else request.META.get('HTTP_REFERER', reverse('forum'))
+    return redirect(redirect_url)
 
 @login_required
-def add_reply_to_reply(request, post_id, parent_reply_id):
+def add_reply(request, post_id, parent_reply_id=None):
     post = get_object_or_404(Post, id=post_id)
-    parent_reply = get_object_or_404(Reply, id=parent_reply_id)
+    parent_reply = get_object_or_404(Reply, id=parent_reply_id) if parent_reply_id else None
+
     if request.method == 'POST':
         form = ReplyForm(request.POST)
         if form.is_valid():
@@ -983,13 +940,14 @@ def add_reply_to_reply(request, post_id, parent_reply_id):
             reply.parent_reply = parent_reply
             reply.save()
             messages.add_message(request, messages.SUCCESS,
-                                 "reply has been successfully added!")
+                                 "Reply has been successfully added!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = ReplyForm()
 
     context = {'form': form, 'post': post, 'parent_reply': parent_reply}
-    return render(request, 'add_reply_to_reply.html', context)
+    template_name = 'add_reply_to_reply.html' if parent_reply else 'add_reply_to_post.html'
+    return render(request, template_name, context)
 
 @login_required
 def delete_reply(request, reply_id):
@@ -1019,6 +977,8 @@ def spending_calendar(request, year=datetime.now().year, month=datetime.now().mo
     context = get_spending_calendar_context(request, year, month)
     return render(request, 'spending_calendar.html', context)
 
+
+# This method allows a logged-in user to set a specific budget for a spending category.
 @login_required
 def set_specific_budget(request):
     if request.method == 'POST':
@@ -1032,6 +992,11 @@ def set_specific_budget(request):
         form = BudgetForm(request.user)
     return render(request, 'specific_budget_set.html', {'form': form})
 
+
+# This method allows a user to change their password if they are already authenticated.
+# It checks if the current password entered is correct and validates the new password according to certain criteria.
+# If everything is valid, it updates the password and logs in the user with the new password.
+# Finally, a template with a password form will be rendered.
 @login_required
 def password(request):
     if request.user.is_authenticated:
@@ -1057,6 +1022,11 @@ def password(request):
         form = PasswordForm()
         return render(request, 'password.html', {'form': form})
 
+
+# This function creates a new budget for the user if their current budget has ended.
+# It checks if the user has a current budget and if the end date of the budget has passed.
+# If so, it creates a new budget for the user with the same limit, a start date of today's date,
+# an end date of 30 days from today's date, and assigns the budget to the user.
 @login_required
 def create_new_budget_if_needed(request):
     current_budget = TotalBudget.objects.filter(budget_owner=request.user).last()
@@ -1068,6 +1038,14 @@ def create_new_budget_if_needed(request):
             budget_owner=request.user,
         )
 
+
+# This function gets all expenditure categories belonging to the current user and returns a list of dictionaries
+# containing the category name, budget limit, spending amount, and percentage of spending (if applicable).
+# It calculates the spending amount by querying the Spending model for expenses
+# within the current total budget period and sums up the amounts for each category.
+# If the category has no budget set, the budget value is set to "Not set yet",
+# and the spending percentage is set to None.
+# If there is no total budget set, the spending value is set to "Please set a total budget first".
 @login_required
 def get_category_budgets(request, total_budget):
     categories = Categories.objects.filter(owner=request.user, categories_type=Spending_type.EXPENDITURE)
@@ -1075,24 +1053,19 @@ def get_category_budgets(request, total_budget):
     for category in categories:
         budget = Budget.objects.filter(spending_category=category).last()
         if budget:
-            # print(category.name + str(budget.limit))
             result = Spending.objects.filter(
                 spending_owner=request.user,
-                # date__month=current_month,
                 date__range=(total_budget.start_date, total_budget.end_date),
                 spending_type=Spending_type.EXPENDITURE,
                 spending_category=category,
             ).aggregate(nums=Sum('amount')).get('nums') or 0
 
             spending_sum = round(result, 2)
-            # print(budget.limit)
             category_budgets.append({
                 'name': category.name,
                 'budget': budget.limit,
                 'spending': spending_sum,
                 'percentage': int(spending_sum / budget.limit * 100) if budget.limit else None,
-                # 'start_date': total_budget.start_date,
-                # 'end_date': total_budget.end_date,
             })
         else:
             if total_budget:
@@ -1109,8 +1082,6 @@ def get_category_budgets(request, total_budget):
                     'budget': 'Not set yet',
                     'spending': spending_sum,
                     'percentage': None,
-                    # 'start_date': None,
-                    # 'end_date': None,
                 })
             else:
                 category_budgets.append(
@@ -1119,13 +1090,14 @@ def get_category_budgets(request, total_budget):
                      })
     return category_budgets
 
+
+# This function sorts the list of dictionaries based on the selected sorting option and returns the sorted list.
 @login_required
 def sort_category_budget(request, selected_sort, category_budgets):
     if selected_sort == '-budget':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
+            key=lambda k: (k['budget'] != 'Not set yet',
                 float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
             ),
             reverse=True
@@ -1133,26 +1105,21 @@ def sort_category_budget(request, selected_sort, category_budgets):
     elif selected_sort == 'budget':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['budget'] != 'Not set yet',
+            key=lambda k: (k['budget'] != 'Not set yet',
                 float(k['budget']) if isinstance(k['budget'], str) and k['budget'] != 'Not set yet' else k['budget']
             )
         )
     elif selected_sort == '-spending':
         sorted_category_budgets = sorted(
             category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
+            key=lambda k: (k['spending'] != 'Please set a total budget first',
                 float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
             ),
             reverse=True
         )
     elif selected_sort == 'spending':
-        sorted_category_budgets = sorted(
-            category_budgets,
-            key=lambda k: (
-                k['spending'] != 'Please set a total budget first',
-                float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
+        sorted_category_budgets = sorted(category_budgets, key=lambda k: (k['spending'] != 'Please set a total budget first',
+        float(k['spending']) if isinstance(k['spending'], str) and k['spending'] != 'Please set a total budget first' else k['spending']
             ),
         )
     elif selected_sort == '':

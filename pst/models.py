@@ -189,7 +189,7 @@ class DailyTaskStatus(models.Model):
 
 class Spending(models.Model):
     title = models.CharField(max_length=30, blank=False)
-    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') 
+    spending_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='spendingOwner') # specify who create the spending
     amount = models.DecimalField(  
         blank=False,
         max_digits=8,
@@ -205,10 +205,11 @@ class Spending(models.Model):
         choices=Spending_type.choices,
         default=Spending_type.EXPENDITURE,
         blank=False,
-    )
-    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  
+    ) # specify the type of the spending
+    spending_category = models.ForeignKey(Categories, on_delete=models.CASCADE, default='', related_name='category', blank=False)  # specify the category of the spending
     
 
+# SpendingFile replaces a single FileField in Spending in order to allow multiple files be uploaded to be more easily managed.
 class SpendingFile(models.Model):
     spending = models.ForeignKey(
         Spending, on_delete=models.CASCADE, related_name='files')
