@@ -18,7 +18,7 @@ This software is designed to help users track their spending and manage their bu
 ## Project structure
 The project is called `NewHappy`. It currently consists of a single app `pst`(Personal Spending Tracker) where all functionality resides.
 
-## Deployed version of the application
+## Deployed version of the application（Offline currently）
 The deployed version of the application can be found at *<[https://newhappy233.herokuapp.com/]>*.
 
 To login as an administrator, go to <[https://newhappy233.herokuapp.com/admin/]>. Administrator account and password are given in Seed Documentation.
