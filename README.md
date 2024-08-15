@@ -10,8 +10,7 @@ The members of the team are:
 - Bowen Zhu (bowen.zhu@kcl.ac.uk)
 - Tengyu Su (tengyu.sun@kcl.ac.uk)
 - Jingyi Wang (jingyi.5.wang@kcl.ac.uk)
-- Baiyu Liu (baiyu.liu@kcl.ac.uk)
-- Shijia Xu (shijia.xu@kcl.ac.uk)
+
 
 ## Short Description
 This software is designed to help users track their spending and manage their budget effectively. Set a limit for the budget, track the spending and see where the money is going.
