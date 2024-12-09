@@ -42,6 +42,11 @@ Migrate the database:
 ```
 $ python3 manage.py migrate
 ```
+Run the server with:
+
+```
+$ python3 manage.py runserver
+```
 
 Seed the development database with:
 
@@ -53,7 +58,7 @@ Run all tests with:
 ```
 $ python3 manage.py test
 ```
-
+hint: sometimes use python instead of python3 will solve some problems
 ## Sources
 The packages used by this application are specified in `requirements.txt`
 
